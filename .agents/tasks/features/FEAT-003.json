@@ -1,0 +1,27 @@
+{
+  "id": "FEAT-003",
+  "type": "feat",
+  "description": "Security and infrastructure modules: encryption.py, rbac.py, rate_limit.py, database.py. These are independent of FEAT-002 (no ML dependency) and must be written before FEAT-004 (agent_graph imports hitl; api/main imports all of them). No new tests needed — import verification suffices; these are utility/middleware modules tested implicitly by the API tests in FEAT-005.",
+  "status": "completed",
+  "steps": [
+    "Write src/encryption.py. Import guard: try: from cryptography.fernet import Fernet; HAS_FERNET=True; except ImportError: HAS_FERNET=False. Load ENCRYPTION_KEY from os.environ; if absent, check data/.encryption_key file (pathlib.Path); if absent, generate new Fernet key, save to data/.encryption_key. encrypt_field(value: str) -> str: if not HAS_FERNET return value (no-op). decrypt_field(encrypted: str) -> str: if not HAS_FERNET return encrypted. Both use the loaded Fernet instance. Key stored as bytes on disk (Fernet.generate_key()).",
+    "Write src/rbac.py. Define ROLES = ['admin', 'analyst', 'viewer']. Load API_KEYS from API_KEYS env var (json.loads) or use hardcoded demo dict {'demo-admin':'admin','demo-analyst':'analyst','demo-viewer':'viewer'}. get_role(api_key: str) -> Optional[str]: returns role or None. require_role(allowed_roles: list[str]) FastAPI dependency factory: returns an async function that reads X-API-Key header, calls get_role, raises HTTPException(403) if role not in allowed_roles or HTTPException(401) if key missing/unknown. RBACMiddleware: optional Starlette BaseHTTPMiddleware that logs the role on each request (can be a no-op pass-through; the require_role dependency is the primary enforcement mechanism).",
+    "Write src/rate_limit.py. RateLimiter class: __init__(max_requests=100, window_seconds=60). Internal dict: {key: deque of timestamps}. check_rate_limit(key: str) -> bool: remove timestamps older than window_seconds from deque; if len(deque) >= max_requests return False (rate limited); else append now and return True. rate_limit_dependency factory function: returns an async FastAPI dependency that calls check_rate_limit on the client IP (request.client.host) and raises HTTPException(429) if False.",
+    "Write src/database.py. DatabaseManager class. __init__: reads DATABASE_URL, SUPABASE_URL, SUPABASE_KEY from env. Import guards for asyncpg and supabase. get_claims(filters: dict = None) -> list[dict]: try asyncpg connection, execute SELECT; on failure try supabase client; on failure read data/sample_claims.csv with pandas and apply filters. get_policies(filters: dict = None) -> list[dict]: same chain for sample_policies.csv. save_decision(decision: dict): try asyncpg INSERT; on failure try supabase; on failure append JSON line to data/decisions.jsonl. All methods are async; CSV fallback uses asyncio.to_thread for the pandas read. No connection is kept open at module import time."
+  ],
+  "acceptance_criteria": [
+    "python -c \"from src.encryption import encrypt_field, decrypt_field; assert decrypt_field(encrypt_field('hello')) == 'hello'; print('OK')\" exits 0",
+    "python -c \"from src.rbac import require_role\" exits 0",
+    "python -c \"from src.rate_limit import RateLimiter; r=RateLimiter(); assert r.check_rate_limit('test')==True; print('OK')\" exits 0",
+    "python -c \"from src.database import DatabaseManager\" exits 0",
+    "All modules import cleanly if cryptography/asyncpg/supabase are absent"
+  ],
+  "verification": [
+    "python -c \"from src.encryption import encrypt_field, decrypt_field; assert decrypt_field(encrypt_field('hello')) == 'hello'; print('encryption OK')\"",
+    "python -c \"from src.rbac import require_role; print('rbac OK')\"",
+    "python -c \"from src.rate_limit import RateLimiter; r=RateLimiter(max_requests=5,window_seconds=60); [r.check_rate_limit('k') for _ in range(5)]; assert not r.check_rate_limit('k'); print('rate_limit OK')\"",
+    "python -c \"from src.database import DatabaseManager; print('database OK')\""
+  ],
+  "blocked_reason": null,
+  "findings": "All four modules implemented and verified. encryption.py: Fernet round-trip confirmed (key auto-generated to data/.encryption_key). rbac.py: require_role factory and RBACMiddleware (Starlette) import cleanly. rate_limit.py: sliding-window correctly blocks on 6th request after 5 are consumed. database.py: three-tier fallback chain (asyncpg -> supabase -> CSV/JSONL) imports cleanly with no deps present."
+}
