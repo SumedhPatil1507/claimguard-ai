@@ -1,0 +1,92 @@
+IRDAI REGULATORY GUIDELINES — SUMMARY FOR CLAIMGUARD AI TRAINING
+DEMO / TRAINING SUMMARY ONLY — NOT LEGAL ADVICE
+
+Source reference: Insurance Regulatory and Development Authority of India (IRDAI)
+Compiled for: ClaimGuard AI Platform (internal training corpus)
+
+────────────────────────────────────────────────────────────────────────────────
+1. CLAIM SETTLEMENT TIMELINES
+────────────────────────────────────────────────────────────────────────────────
+
+Under IRDAI (Protection of Policyholders' Interests) Regulations, insurers are
+required to settle all claims within 30 days of receipt of the last necessary
+document. Where the claim requires further investigation, the insurer must complete
+the investigation and settle the claim within 45 days of receiving the claim
+intimation. Any delay beyond these timelines attracts interest on the claim amount
+at 2% above the bank rate. Repudiation of claims must be communicated in writing
+with a detailed rationale citing the specific policy clause and regulation.
+
+────────────────────────────────────────────────────────────────────────────────
+2. GRIEVANCE REDRESSAL
+────────────────────────────────────────────────────────────────────────────────
+
+Every insurer must have a Grievance Redressal Officer (GRO) and acknowledge
+policyholder grievances within 3 working days. Final resolution must be communicated
+within 15 days of receipt. Policyholders dissatisfied with the insurer's resolution
+may escalate to the Insurance Ombudsman within their jurisdiction. IRDAI's Bima
+Bharosa portal serves as the centralised grievance registration mechanism. Insurers
+must maintain and submit monthly grievance data to IRDAI in the prescribed format.
+
+────────────────────────────────────────────────────────────────────────────────
+3. KYC AND AML REQUIREMENTS
+────────────────────────────────────────────────────────────────────────────────
+
+IRDAI mandates Know Your Customer (KYC) verification for all new policies where
+the annual premium exceeds INR 1,00,000 or the sum insured exceeds INR 10,00,000.
+Acceptable KYC documents include Aadhaar-linked verification, PAN card, Voter ID,
+or Passport. Insurers must conduct Customer Due Diligence (CDD) at onboarding and
+Enhanced Due Diligence (EDD) for high-value or politically exposed persons.
+Under Anti-Money Laundering (AML) obligations, insurers must file Suspicious
+Activity Reports (SAR) with the Financial Intelligence Unit — India (FIU-IND) for
+transactions exhibiting red flags, including structuring of premiums, unusual
+early-stage large claims, and frequent policy surrender for cash benefits.
+
+────────────────────────────────────────────────────────────────────────────────
+4. PORTABILITY RIGHTS
+────────────────────────────────────────────────────────────────────────────────
+
+Policyholders holding individual health insurance policies have the right to
+transfer their policy from one insurer to another while retaining credit for
+waiting periods already served. The portability request must be submitted at least
+45 days before the policy renewal date. The receiving insurer may underwrite the
+policy but cannot impose fresh waiting periods for conditions for which the
+policyholder has already completed the waiting period with the previous insurer.
+
+────────────────────────────────────────────────────────────────────────────────
+5. FREE-LOOK PERIOD
+────────────────────────────────────────────────────────────────────────────────
+
+Policyholders purchasing a new policy have the right to review the terms and
+conditions and return the policy within 15 days of receipt (30 days for policies
+sold through distance marketing channels, including online and tele-sales). If the
+policyholder exercises the free-look option, the insurer must refund the premium
+paid after deducting a proportionate risk premium for the coverage period and any
+medical examination costs incurred.
+
+────────────────────────────────────────────────────────────────────────────────
+6. FRAUD REPORTING OBLIGATIONS
+────────────────────────────────────────────────────────────────────────────────
+
+IRDAI's Insurance Fraud Monitoring Framework requires insurers to establish a
+dedicated fraud management unit, maintain a fraud repository, and report detected
+fraud cases to the IRDAI fraud reporting portal. Insurers must share fraud data
+with the Insurance Information Bureau of India (IIB) to facilitate industry-wide
+fraud intelligence. Collusive fraud involving agents, intermediaries, or repair
+networks must be reported within 7 working days of detection.
+
+────────────────────────────────────────────────────────────────────────────────
+7. DATA LOCALISATION AND PRIVACY
+────────────────────────────────────────────────────────────────────────────────
+
+IRDAI guidelines require that all policyholder data, including personal and health
+information, be stored on servers located within India. Cross-border data transfer
+is permitted only with explicit policyholder consent and must comply with applicable
+data protection legislation. Insurers must implement data encryption at rest and in
+transit, and conduct annual information security audits.
+
+────────────────────────────────────────────────────────────────────────────────
+DISCLAIMER: This document is a training and demonstration summary compiled for the
+ClaimGuard AI platform. It does not constitute legal advice or an authoritative
+interpretation of IRDAI regulations. Always refer to the official IRDAI circulars
+and gazette notifications for compliance purposes.
+────────────────────────────────────────────────────────────────────────────────

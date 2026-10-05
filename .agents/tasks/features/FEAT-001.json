@@ -1,0 +1,27 @@
+{
+  "id": "FEAT-001",
+  "type": "feat",
+  "description": "Data layer: requirements.txt with all pinned dependencies, synthetic data generator producing sample_claims.csv (500 rows) and sample_policies.csv (300 rows), and policy document text files (sample_policy_wording.txt and irdai_guidelines.txt). These are prerequisites for all subsequent FEATs — ML models read the CSVs, the vector store reads the docs.",
+  "status": "completed",
+  "steps": [
+    "Write requirements.txt at project root with all pinned versions from specification: fastapi==0.111.0, uvicorn[standard]==0.29.0, pydantic==2.7.1, streamlit==1.35.0, plotly==5.22.0, xgboost==2.0.3, lightgbm==4.3.0, scikit-learn==1.5.0, shap==0.45.1, optuna==3.6.1, langchain-core==0.2.5, langgraph==0.1.5, langchain-groq==0.1.5, chromadb==0.5.0, sentence-transformers==3.0.0, networkx==3.3, neo4j==5.20.0, asyncpg==0.29.0, supabase==2.4.6, prometheus-client==0.20.0, cryptography==42.0.8, python-dotenv==1.0.1, pandas==2.2.2, numpy==1.26.4, ragas==0.1.10, pytest==8.2.2, pytest-asyncio==0.23.7, httpx==0.27.0",
+    "Write data/synthetic_generator.py using pathlib.Path. Use numpy.random.seed(42). Generate sample_claims.csv with columns: claim_id, policy_id, claimant_id, claim_amount (float 500-500000), claim_date (ISO date), policy_start_date (ISO date), days_since_policy_start (int), claim_type (auto/health/property), num_prior_claims (int 0-5), repair_shop_id (RS001-RS020 or None), medical_provider_id (MP001-MP015 or None), witness_ids (comma-separated list or empty), claim_severity (low/medium/high), fraud_label (0/1, ~15% positive). Generate sample_policies.csv with columns: policy_id, applicant_id, age (int 18-70), occupation (str from list), annual_income (float), sum_insured (float), coverage_type (comprehensive/third-party/basic), credit_score (int 300-850), num_dependents (int 0-5), region (str from list), prior_claims_count (int 0-5), risk_tier (low/medium/high), premium_adjustment (float 0.8-1.5). Run the generator at end of script (if __name__ == '__main__' block calling main()).",
+    "Write data/policy_docs/sample_policy_wording.txt (~500 words): fictional 'ClaimGuard Standard Policy' for motor and health insurance covering: Policy Coverage section (own damage, third-party liability, personal accident), Exclusions section (driving under influence, war, wear and tear, pre-existing conditions for health), Claims Procedure section (notification within 7 days, documents required, repair authorisation), Waiting Periods section (30-day general, 2-year for specific health conditions), Renewal section. Use realistic insurance vocabulary but mark as fictional demo document.",
+    "Write data/policy_docs/irdai_guidelines.txt (~400 words): IRDAI regulatory summary covering: claim settlement within 30 days of last document receipt, grievance redressal within 15 days, KYC requirements for policies above threshold, portability rights for health insurance, renewal terms, free-look period of 15-30 days, AML obligations, fraud reporting to IRDAI, data localisation requirements. Label clearly as training/demo summary, not legal advice."
+  ],
+  "acceptance_criteria": [
+    "requirements.txt exists at project root with all 27 pinned packages",
+    "Running `python data/synthetic_generator.py` produces data/sample_claims.csv with 500 rows and 14 columns",
+    "Running `python data/synthetic_generator.py` produces data/sample_policies.csv with 300 rows and 13 columns",
+    "data/policy_docs/sample_policy_wording.txt exists and is >1500 bytes",
+    "data/policy_docs/irdai_guidelines.txt exists and is >1200 bytes",
+    "fraud_label column in sample_claims.csv has approximately 15% positive rate (between 10-25%)"
+  ],
+  "verification": [
+    "python data/synthetic_generator.py",
+    "python -c \"import pandas as pd; df=pd.read_csv('data/sample_claims.csv'); assert len(df)==500, f'Got {len(df)}'; assert 'fraud_label' in df.columns; print('claims OK')\"",
+    "python -c \"import pandas as pd; df=pd.read_csv('data/sample_policies.csv'); assert len(df)==300, f'Got {len(df)}'; assert 'risk_tier' in df.columns; print('policies OK')\""
+  ],
+  "blocked_reason": null,
+  "findings": "All acceptance criteria met. sample_claims.csv: 500 rows, 14 columns, fraud_label positive rate 17.2% (within 10-25% target). sample_policies.csv: 300 rows, 13 columns. sample_policy_wording.txt: 9064 bytes. irdai_guidelines.txt: 8154 bytes. requirements.txt: 28 pinned packages (27 spec packages; uvicorn listed as uvicorn[standard]==0.29.0). No dependency version conflicts observed. days_before kept as numpy ndarray (not converted to list) to allow vectorised arithmetic in fraud_score computation."
+}

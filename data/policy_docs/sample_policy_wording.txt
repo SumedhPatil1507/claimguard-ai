@@ -1,0 +1,127 @@
+CLAIMGUARD STANDARD POLICY — MOTOR AND HEALTH INSURANCE
+FICTIONAL DEMO DOCUMENT — FOR TRAINING AND DEMONSTRATION PURPOSES ONLY
+
+Policy Reference: CGS-2024-DEMO
+Insurer: ClaimGuard Insurance Limited (Fictional Entity)
+Regulator: Insurance Regulatory and Development Authority of India (IRDAI)
+
+────────────────────────────────────────────────────────────────────────────────
+SECTION 1 — POLICY COVERAGE
+────────────────────────────────────────────────────────────────────────────────
+
+1.1 Own Damage (Motor)
+The insurer agrees to indemnify the policyholder against loss or damage to the
+insured vehicle arising from accidental collision, fire, explosion, self-ignition,
+lightning, theft, burglary, housebreaking, riot, strike, malicious act, flood,
+cyclone, storm, tempest, inundation, hailstorm, frost, landslide, rockslide, or
+during transit by rail, road, inland waterway, lift, elevator, or air.
+
+1.2 Third-Party Liability (Motor)
+The insurer shall indemnify the policyholder against any liability incurred in
+respect of death or bodily injury to a third party or damage to third-party
+property arising out of the use of the insured vehicle on public roads, as
+mandated under the Motor Vehicles Act. The limit of indemnity for property damage
+is capped at INR 7,50,000 per accident unless an enhanced limit rider is endorsed.
+
+1.3 Personal Accident Cover
+A lump-sum benefit of INR 15,00,000 is payable to the named policyholder in the
+event of accidental death or permanent total disablement sustained while driving,
+mounting, or dismounting from the insured vehicle. Optional covers for unnamed
+passengers may be added by endorsement.
+
+1.4 Health Insurance Benefits
+Under the health floater option, the insurer reimburses or pays on a cashless
+basis the expenses of hospitalisation exceeding 24 consecutive hours for illness
+or accidental injury. Covered expenses include room and boarding (subject to
+room-rent limits as per sum insured slab), surgeon and anaesthetist fees,
+diagnostic tests, pharmacy expenses up to the sub-limit, and post-hospitalisation
+expenses for a period of 60 days after discharge.
+
+1.5 Day-Care Procedures
+Medical procedures that do not require 24-hour hospitalisation but are performed
+under general or local anaesthesia in a registered day-care centre are covered,
+subject to the list of approved procedures maintained by the insurer and updated
+annually.
+
+────────────────────────────────────────────────────────────────────────────────
+SECTION 2 — EXCLUSIONS
+────────────────────────────────────────────────────────────────────────────────
+
+2.1 Motor Exclusions
+The insurer shall not be liable for any loss or damage arising while the insured
+vehicle is driven by a person without a valid driving licence, or while the driver
+is under the influence of alcohol, drugs, or any psychoactive substance. Damage
+attributable to mechanical or electrical breakdown, gradual wear and tear, tyre
+burst unless accompanied by damage to the vehicle, and depreciation is not covered.
+Loss or damage arising out of war, invasion, act of foreign enemy, hostilities,
+civil war, rebellion, revolution, insurrection, or nuclear perils is excluded.
+
+2.2 Health Exclusions
+Expenses arising from pre-existing conditions are excluded for the first 36 months
+of continuous coverage unless specifically waived by endorsement after medical
+underwriting. Costs related to cosmetic surgery, dental treatment (unless arising
+from accidental injury), corrective eyewear, infertility treatment, experimental
+therapies, and self-inflicted injuries are excluded. Hospitalisation primarily for
+diagnostic purposes without active treatment is not covered.
+
+────────────────────────────────────────────────────────────────────────────────
+SECTION 3 — CLAIMS PROCEDURE
+────────────────────────────────────────────────────────────────────────────────
+
+3.1 Notification
+The policyholder must notify the insurer of any loss, damage, accident, or illness
+requiring a claim within 7 calendar days of the event. For theft, an FIR must be
+lodged with the nearest police station and a copy submitted along with the claim
+intimation.
+
+3.2 Documents Required
+Motor claim: duly completed claim form, copy of registration certificate, driving
+licence, insurance certificate, fitness certificate (commercial vehicles), FIR
+(theft or third-party cases), survey/repair estimate, original bills and receipts.
+Health claim: completed claim form, original hospital discharge summary, itemised
+hospital bills, all diagnostic reports, prescriptions, and pharmacy receipts,
+treating doctor's certificate confirming diagnosis and necessity of hospitalisation.
+
+3.3 Repair Authorisation
+For motor own-damage claims, the policyholder must obtain prior authorisation from
+the insurer's surveyor or the designated garage network before commencing repairs,
+except in cases where emergency repairs are necessary to ensure vehicle safety.
+Repairs at non-network garages may be subject to a higher depreciation schedule
+and require an independent surveyor's report at the policyholder's request.
+
+────────────────────────────────────────────────────────────────────────────────
+SECTION 4 — WAITING PERIODS
+────────────────────────────────────────────────────────────────────────────────
+
+4.1 General Waiting Period
+All health benefits are subject to a general waiting period of 30 days from the
+inception date of the policy. This waiting period does not apply to claims arising
+purely from accidents.
+
+4.2 Specific Disease Waiting Period
+Conditions including but not limited to cataract, hernia, joint replacement, and
+specified degenerative disorders are subject to a 2-year waiting period. The
+complete list is specified in Annexure A of the policy schedule.
+
+4.3 Pre-Existing Disease Waiting Period
+Pre-existing diseases as declared in the proposal form are covered after 36 months
+of continuous and uninterrupted renewal without a break in cover exceeding 30 days.
+
+────────────────────────────────────────────────────────────────────────────────
+SECTION 5 — RENEWAL TERMS
+────────────────────────────────────────────────────────────────────────────────
+
+The policy shall be renewed annually prior to the expiry date. A grace period of
+30 days is permitted for renewal without loss of continuity benefits; however, no
+claims for events occurring during the lapse period will be entertained. Premium
+revision, if any, shall be intimated at least 60 days before the renewal date.
+Policyholders who have been claim-free for three consecutive years are entitled to
+a No-Claim Bonus as specified in the premium schedule. The insurer reserves the
+right to decline renewal only on the grounds of confirmed fraud or material
+misrepresentation, subject to IRDAI guidelines.
+
+────────────────────────────────────────────────────────────────────────────────
+DISCLAIMER: This document is a fictional demonstration artifact created for the
+ClaimGuard AI training platform. It does not constitute a legally binding insurance
+contract. All names, policy numbers, and entities are fictitious.
+────────────────────────────────────────────────────────────────────────────────
