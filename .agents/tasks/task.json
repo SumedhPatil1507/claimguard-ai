@@ -1,0 +1,7 @@
+{
+  "task_id": "task-claimguard-ai-build",
+  "task_description": "Build ClaimGuard AI: agentic InsurTech platform for underwriting risk scoring and claims fraud detection. New Python project with FastAPI, Streamlit, XGBoost/LightGBM ensemble, SHAP, LangGraph Policy Copilot, ChromaDB RAG, Neo4j/NetworkX graph collusion, IRDAI compliance module, HITL queue, Prometheus observability, Docker Compose, GitHub Actions CI.",
+  "status": "pending",
+  "feature_order": ["FEAT-001", "FEAT-002", "FEAT-003", "FEAT-004", "FEAT-005"],
+  "blocked_reason": null
+}
