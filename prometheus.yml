@@ -1,0 +1,22 @@
+# Prometheus configuration for ClaimGuard AI
+#
+# Note (dev limitation): the /metrics endpoint on the API service requires an
+# X-API-Key header for authentication. Prometheus scrapes via HTTP and does not
+# natively support custom request headers in the static_configs block.
+# In this dev setup the scrape will return HTTP 401; the API and Grafana
+# dashboards still function normally. To enable authenticated scraping in
+# production, either:
+#   1. Expose a dedicated unauthenticated /metrics/public endpoint in api/main.py, or
+#   2. Place a Prometheus-compatible proxy (e.g. nginx with proxy_set_header) in front
+#      of the API service and scrape the proxy instead.
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'claimguard-api'
+    static_configs:
+      - targets: ['api:8000']
+    metrics_path: '/metrics'
+    scheme: 'http'
