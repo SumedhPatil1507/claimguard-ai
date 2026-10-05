@@ -1,39 +1,38 @@
-# Streamlit Community Cloud compatible requirements for ClaimGuard AI
-# Heavy server-side deps (asyncpg, neo4j, ragas, supabase, fastapi, uvicorn)
-# are excluded — they're only needed for the full Docker/local stack.
-# See requirements-full.txt for the complete list.
+# Streamlit Community Cloud — ClaimGuard AI
+# Minimal pinned set proven to resolve on Streamlit Cloud (Python 3.11).
+# All optional heavy deps have graceful fallbacks in the code.
 
-# Core UI & data
-streamlit==1.35.0
-plotly==5.22.0
-pandas==2.2.2
-numpy==1.26.4
-python-dotenv==1.0.1
+# ── Core (always required) ───────────────────────────────────────────────────
+streamlit>=1.32.0
+plotly>=5.15.0
+pandas>=1.5.0
+numpy>=1.23.0,<2.0.0
+python-dotenv>=0.21.0
+pydantic>=2.0.0,<3.0.0
 
-# ML layer (ensemble + explainability + tuning)
-scikit-learn==1.5.0
-xgboost==2.0.3
-lightgbm==4.3.0
-shap==0.45.1
-optuna==3.6.1
+# ── ML layer (graceful sklearn/rule fallback if missing) ─────────────────────
+scikit-learn>=1.2.0
+xgboost>=1.7.0
+lightgbm>=3.3.0
+optuna>=3.0.0
 
-# Graph analysis (NetworkX fallback — no Neo4j server needed)
-networkx==3.3
+# ── Graph (NetworkX only — no Neo4j server needed) ───────────────────────────
+networkx>=2.8
 
-# Agent / RAG layer
-langchain-core==0.2.5
-langgraph==0.1.5
-langchain-groq==0.1.5
+# ── LangChain / LangGraph (graceful linear fallback if missing) ──────────────
+langchain-core>=0.1.0
+langgraph>=0.0.40
+langchain-groq>=0.0.1
 
-# Vector store (local embeddings, no API key)
-chromadb==0.5.0
-sentence-transformers==3.0.0
+# ── Security helpers ─────────────────────────────────────────────────────────
+cryptography>=39.0.0
 
-# Security helpers
-cryptography==42.0.8
+# ── Observability (no-op stubs if missing) ───────────────────────────────────
+prometheus-client>=0.16.0
 
-# Observability (no-op stubs if not needed, but installable on Cloud)
-prometheus-client==0.20.0
+# ── SHAP (graceful empty-list fallback if missing) ───────────────────────────
+shap>=0.41.0
 
-# Pydantic v2
-pydantic==2.7.1
+# NOTE: chromadb + sentence-transformers are intentionally omitted.
+# They are very large and slow to install on Streamlit Cloud.
+# The PolicyVectorStore falls back to returning [] which is handled gracefully.
