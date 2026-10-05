@@ -1,20 +1,20 @@
 """
 streamlit_app.py — Streamlit Community Cloud entry point for ClaimGuard AI.
 
-This file simply re-exports the full app from app/app.py.
-Streamlit Cloud requires the main file to be at the repo root named streamlit_app.py.
+Streamlit Cloud requires the main file to be named streamlit_app.py at the
+repo root. This file adds the repo root to sys.path and then runs app/app.py
+via runpy so __file__ is set correctly and all relative imports resolve.
 """
 from __future__ import annotations
 
+import runpy
 import sys
 from pathlib import Path
 
-# Ensure the repo root is on sys.path so all src.* imports resolve
-_ROOT = Path(__file__).parent
+# Repo root (where this file lives) must be on sys.path so src.* resolves
+_ROOT = Path(__file__).resolve().parent
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
-# Run the actual app module — exec'ing it here makes Streamlit treat
-# all the st.* calls as if they came from this file directly.
-_app_path = _ROOT / "app" / "app.py"
-exec(compile(_app_path.read_text(encoding="utf-8"), str(_app_path), "exec"))
+# Run the actual app
+runpy.run_path(str(_ROOT / "app" / "app.py"), run_name="__main__")
