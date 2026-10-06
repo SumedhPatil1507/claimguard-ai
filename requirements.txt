@@ -52,6 +52,24 @@ shap>=0.41.0
 # torch>=2.1.0
 # torch_geometric>=2.4.0
 
+# ── MLflow — experiment tracking, model registry, artifact logging ────────────
+# Graceful: if absent, _log_to_mlflow() in underwriting.py/claims_fraud.py
+# is a complete no-op (HAS_MLFLOW guard). Set MLFLOW_TRACKING_URI env var
+# to point at a remote MLflow server; defaults to ./mlruns (local file store).
+mlflow>=2.12.0,<3.0.0
+
+# ── Evidently AI — data drift + concept drift detection ──────────────────────
+# Graceful: if absent, DriftMonitor falls back to scipy KS test / PSI.
+# scipy is used by the fallback path when evidently is absent.
+evidently>=0.4.30,<0.5.0
+scipy>=1.10.0
+
+# ── matplotlib — feature-importance plots logged to MLflow ───────────────────
+matplotlib>=3.7.0
+
+# ── pyarrow — required by Parquet baseline storage (data/baselines/) ─────────
+pyarrow>=14.0.0
+
 # ── Async task queue ─────────────────────────────────────────────────────────
 # celery[redis]: Celery broker/backend transport for Redis.
 celery[redis]>=5.3.0,<6.0.0

@@ -31,6 +31,7 @@
 
 | Version | Highlights |
 |---------|-----------|
+| **v1.5** | 📊 **MLflow + Evidently AI** — experiment tracking (ROC-AUC, F1, artifacts) + data/concept drift detection exposed via Prometheus |
 | **v1.4** | 🕸️ **Heterogeneous R-GCN GNN** — two-stage collusion detection; GNN score bar chart, ring colour-coding, severity upgrade rules |
 | **v1.3** | 🔄 **Celery+Redis** async task queue — `/underwrite` & `/claims/score` return instant `task_id`; poll `/tasks/{id}` |
 | **v1.2** | 🔍 **Hybrid vector search** — ChromaDB replaced with Qdrant + BM25 + Cross-Encoder re-ranking |
@@ -326,7 +327,7 @@ curl http://localhost:8000/metrics -H "X-API-Key: admin-key-demo"
 | **🤖 Policy Copilot** | LangGraph agent chat interface | Retrieved policy clauses, model evidence table |
 | **🕸️ Graph Intel** | Two-stage collusion detection: structural rings + R-GCN GNN re-scoring | GNN score bar chart with thresholds, network graph (node size ∝ GNN risk), severity filter toggle, per-ring mini bar charts |
 | **👤 HITL Review** | Analyst approve/reject/escalate queue | Queue depth metric, item cards with inline review |
-| **📈 Observability** | Live Prometheus metrics | Latency percentile bar, decisions time-series line |
+| **📈 Observability** | Prometheus metrics + Drift Monitoring + MLflow runs | Latency bar, decisions time-series, per-feature drift bar chart (🔴 drifted / 🟢 stable), MLflow run table |
 | **✅ Compliance** | IRDAI 10-control dashboard | Score gauge, compliant/partial/non_compliant pie, expandable control cards |
 
 ---
@@ -519,6 +520,78 @@ Grafana dashboard JSON available at `http://localhost:3000` after `docker compos
 
 ---
 
+## 📊 MLflow Experiment Tracking
+
+Every `_train()` call in `UnderwritingEngine` and `FraudDetectionEngine` logs to MLflow:
+
+| Artifact | Description |
+|---|---|
+| **Parameters** | `n_estimators`, `max_depth`, `learning_rate`, `n_samples`, `n_features`, `fallback_chain` |
+| **Metrics** | `roc_auc_cv` (3-fold cross-val), `f1_cv`, `fraud_pos_rate` (fraud model only) |
+| **Model artifact** | Pickled ensemble as `model/<name>.pkl` |
+| **Feature importance** | Bar chart PNG at `plots/feature_importance.png` |
+| **Tags** | `model_type`, `framework`, `model_version`, `fraud_threshold` |
+
+```bash
+# Start MLflow tracking server (optional — defaults to ./mlruns)
+mlflow server --host 0.0.0.0 --port 5000
+
+# Point the engines at it
+export MLFLOW_TRACKING_URI=http://localhost:5000
+
+# Trigger a training run
+python -c "from src.underwriting import UnderwritingEngine; UnderwritingEngine(force_retrain=True)"
+
+# Open the UI
+open http://localhost:5000
+```
+
+Experiments: `claimguard_underwriting` · `claimguard_fraud_detection`
+
+---
+
+## 🌊 Data & Concept Drift Monitoring
+
+`src/drift_monitor.py` implements two drift detection strategies:
+
+| Mode | Library | Numeric | Categorical | Concept Drift |
+|---|---|---|---|---|
+| Primary | Evidently AI | DataDriftPreset | DataDriftPreset | TargetDriftPreset |
+| Fallback | scipy / numpy | KS test | Chi-squared | PSI |
+
+```python
+from src.drift_monitor import DriftMonitor, save_baseline
+
+# 1. Save training distribution as baseline (called automatically in _train())
+save_baseline(train_df, model_name="fraud", prediction_col="fraud_label")
+
+# 2. Detect drift on incoming batch
+monitor = DriftMonitor("fraud")
+report  = monitor.detect(incoming_df, predictions=fraud_scores)
+
+print(report.data_drift_score)       # 0.0 – 1.0 share of drifted features
+print(report.drifted_features)       # ['claim_amount', ...]
+print(report.concept_drift_detected) # True / False
+print(report.concept_drift_score)    # PSI of prediction distribution
+```
+
+**Prometheus gauges** (updated after every `detect()` call):
+
+| Metric | Labels | Description |
+|---|---|---|
+| `claimguard_drift_data_score` | `model` | Share of drifted features |
+| `claimguard_drift_feature_score` | `model`, `feature` | Per-feature drift score |
+| `claimguard_drift_concept_score` | `model` | PSI of predictions |
+| `claimguard_drift_concept_detected` | `model` | 1.0 = drift detected |
+
+Configure thresholds via env vars:
+```bash
+CLAIMGUARD_DRIFT_DATA_THRESHOLD=0.10     # feature-level KS/chi2 threshold
+CLAIMGUARD_DRIFT_CONCEPT_THRESHOLD=0.25  # PSI threshold for concept drift
+```
+
+---
+
 ## ✅ IRDAI Compliance Module
 
 10 real IRDAI regulatory controls with evidence + remediation:
@@ -571,6 +644,7 @@ claimguard-ai/
 │   ├── compliance_irdai.py   IRDAI compliance reporting
 │   ├── copilot_metrics.py    Prometheus metrics helpers
 │   ├── database.py           DB manager + ProductionDatabaseManager (no fallback)
+│   ├── drift_monitor.py      Evidently AI + scipy drift detection, Prometheus export (NEW)
 │   ├── encryption.py         Fernet PII encryption
 │   ├── gnn_collusion.py      Heterogeneous R-GCN GNN for collusion scoring (NEW)
 │   ├── graph_collusion.py    Two-stage ring detector (structural + GNN)
@@ -604,7 +678,8 @@ claimguard-ai/
 
 | Layer | Technology |
 |---|---|
-| **API** | FastAPI 0.111 + Pydantic v2 + uvicorn |
+| **Experiment tracking** | MLflow 2.14 (params, metrics, artifacts, feature importance) |
+| **Drift monitoring** | Evidently AI 0.4 + scipy KS/chi² + PSI fallback |
 | **UI** | Streamlit 1.35 + Plotly 5 (dark theme, interactive) |
 | **Async tasks** | Celery 5.4 + Redis 7 |
 | **ML** | XGBoost 2.0 + LightGBM 4.3 + SHAP + Optuna |

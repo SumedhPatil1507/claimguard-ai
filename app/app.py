@@ -168,7 +168,7 @@ with st.sidebar:
     st.markdown("### 📋 IRDAI Compliance")
     st.success("✓ All decisions require human review")
     st.markdown("---")
-    st.caption("v1.4.0 | R-GCN GNN | Celery+Redis | MIT © 2024 ClaimGuard AI")
+    st.caption("v1.5.0 | MLflow + Evidently Drift | MIT © 2024 ClaimGuard AI")
 
 
 # ---------------------------------------------------------------------------
@@ -968,15 +968,33 @@ with tabs[5]:
 # Tab 7 — Observability
 # ============================================================
 with tabs[6]:
-    st.header("📈 Live Metrics — Prometheus Observability")
+    st.header("📈 Live Metrics — Prometheus · MLflow · Drift Monitoring")
 
-    try:
-        import prometheus_client  # noqa: F401
-        st.success("✅ prometheus_client installed — metrics are live")
-    except ImportError:
-        st.info("ℹ️ prometheus_client not installed — showing illustrative mock values")
+    # ── Status badges ────────────────────────────────────────────────────
+    sb1, sb2, sb3 = st.columns(3)
+    with sb1:
+        try:
+            import prometheus_client  # noqa: F401
+            st.success("✅ Prometheus: live")
+        except ImportError:
+            st.info("ℹ️ Prometheus: mock values")
+    with sb2:
+        try:
+            import mlflow as _mlf   # noqa: F401
+            st.success("✅ MLflow: installed")
+        except ImportError:
+            st.warning("⚠️ MLflow: not installed")
+    with sb3:
+        try:
+            from src.drift_monitor import DriftMonitor as _DM  # noqa: F401
+            st.success("✅ Drift Monitor: ready")
+        except Exception:
+            st.info("ℹ️ Drift Monitor: unavailable")
 
-    # Metric values (live if available, mock otherwise)
+    st.markdown("---")
+
+    # ── Prometheus copilot metrics ───────────────────────────────────────
+    st.subheader("🔭 Agent Pipeline Metrics")
     try:
         from prometheus_client import REGISTRY as _REG
         def _get_metric(name: str, default: int = 0) -> int:
@@ -987,9 +1005,9 @@ with tabs[6]:
             except Exception:
                 pass
             return default
-        agent_runs = _get_metric("claimguard_copilot_agent_runs_total", 12)
-        tool_calls = _get_metric("claimguard_copilot_tool_calls_total", 8)
-        ret_hits   = _get_metric("claimguard_copilot_retriever_hits_total", 15)
+        agent_runs = _get_metric("claimguard_copilot_agent_run_total", 12)
+        tool_calls = _get_metric("claimguard_copilot_tool_call_total", 8)
+        ret_hits   = _get_metric("claimguard_copilot_retriever_hit_total", 15)
         decisions  = _get_metric("claimguard_copilot_decisions_drafted_total", 7)
     except Exception:
         agent_runs, tool_calls, ret_hits, decisions = 12, 8, 15, 7
@@ -1003,10 +1021,9 @@ with tabs[6]:
     mc5.metric("HITL Queue Depth", queue_depth)
 
     if HAS_PLOTLY:
-        st.markdown("---")
         rng = np.random.default_rng(seed=42)
         percentiles = ["p50", "p75", "p90", "p95", "p99"]
-        low_b = np.array([0.05, 0.08, 0.12, 0.18, 0.35])
+        low_b  = np.array([0.05, 0.08, 0.12, 0.18, 0.35])
         high_b = np.array([0.10, 0.15, 0.22, 0.30, 0.60])
         latencies = [rng.uniform(low_b[k], high_b[k], size=3).mean() for k in range(5)]
 
@@ -1015,10 +1032,8 @@ with tabs[6]:
             text=[f"{v:.3f}s" for v in latencies], textposition="outside",
             hovertemplate="<b>%{x}</b><br>Latency: %{y:.3f}s<extra></extra>",
         ))
-        fig.update_layout(
-            title="Agent Latency Percentiles (seconds)", template="plotly_dark",
-            yaxis_title="Latency (s)", xaxis_title="Percentile", height=350,
-        )
+        fig.update_layout(title="Agent Latency Percentiles", template="plotly_dark",
+                          yaxis_title="Latency (s)", height=320)
         _show_chart(fig, key="obs_latency")
 
         rng2 = np.random.default_rng(seed=99)
@@ -1030,13 +1045,191 @@ with tabs[6]:
             fill="tozeroy", fillcolor="rgba(0,200,150,0.1)", name="Decisions",
             hovertemplate="<b>Hour:</b> %{x}<br><b>Cumulative:</b> %{y}<extra></extra>",
         ))
-        fig2.update_layout(
-            title="Decisions Drafted — Last 24 Hours", template="plotly_dark",
-            xaxis_title="Hours Ago", yaxis_title="Cumulative Decisions", height=300,
-        )
+        fig2.update_layout(title="Decisions Drafted — Last 24 Hours",
+                            template="plotly_dark", height=280)
         _show_chart(fig2, key="obs_decisions")
 
     st.info("📊 Grafana dashboard: http://localhost:3000 (requires Docker Compose)")
+
+    # ── Drift Monitoring ─────────────────────────────────────────────────
+    st.markdown("---")
+    st.subheader("🌊 Data & Concept Drift Monitoring")
+    st.markdown(
+        "Run drift detection on a sample of incoming features against the "
+        "training-time baseline. Scores exported to Prometheus `claimguard_drift_*` gauges."
+    )
+
+    drift_model = st.selectbox(
+        "Select model",
+        ["fraud", "underwriting"],
+        key="drift_model_select",
+    )
+    drift_n = st.slider("Batch size (random sample from claims data)", 10, 200, 50, key="drift_n")
+    run_drift_btn = st.button("🔍 Run Drift Detection", key="drift_run", use_container_width=True)
+
+    if run_drift_btn:
+        with st.spinner("Running drift detection…"):
+            try:
+                from src.drift_monitor import DriftMonitor, DriftReport
+
+                claims_for_drift = load_claims_data()
+                if claims_for_drift.empty:
+                    st.warning("No claims data available for drift detection.")
+                else:
+                    sample_df = claims_for_drift.sample(
+                        min(drift_n, len(claims_for_drift)),
+                        random_state=42,
+                    ).reset_index(drop=True)
+
+                    monitor = DriftMonitor(model_name=drift_model, push_prometheus=True)
+                    report  = monitor.detect(sample_df)
+
+                    # ── Summary metrics ──────────────────────────────────
+                    d1, d2, d3, d4 = st.columns(4)
+                    d1.metric("Data Drift Score",
+                              f"{report.data_drift_score:.3f}",
+                              delta=None,
+                              help="Share of features with detected drift (0–1)")
+                    d2.metric("Drifted Features",
+                              f"{len(report.drifted_features)} / {len(report.feature_drift_details)}")
+                    d3.metric("Concept Drift",
+                              "🚨 YES" if report.concept_drift_detected else "✅ NO")
+                    d4.metric("Concept PSI",
+                              f"{report.concept_drift_score:.3f}" if report.concept_drift_score else "—")
+
+                    # ── Alert ────────────────────────────────────────────
+                    if report.data_drift_score > 0.3:
+                        st.error(f"⚠️ Significant data drift detected (score: {report.data_drift_score:.2%}). Consider retraining.")
+                    elif report.data_drift_score > 0.1:
+                        st.warning(f"⚠️ Moderate drift detected (score: {report.data_drift_score:.2%}).")
+                    else:
+                        st.success(f"✅ No significant drift detected (score: {report.data_drift_score:.2%}).")
+
+                    if report.concept_drift_detected:
+                        st.error(f"🎯 Concept drift detected! PSI = {report.concept_drift_score:.3f}")
+
+                    if report.warning:
+                        st.info(f"ℹ️ {report.warning}")
+
+                    # ── Per-feature drift chart ───────────────────────────
+                    if report.feature_drift_details and HAS_PLOTLY:
+                        feat_names  = list(report.feature_drift_details.keys())
+                        feat_scores = [
+                            report.feature_drift_details[f].get("drift_score", 0.0)
+                            for f in feat_names
+                        ]
+                        feat_flags  = [
+                            report.feature_drift_details[f].get("drifted", False)
+                            for f in feat_names
+                        ]
+                        bar_colors  = ["#FF6B6B" if d else "#00C896" for d in feat_flags]
+                        methods     = [
+                            report.feature_drift_details[f].get("method", "—")
+                            for f in feat_names
+                        ]
+
+                        fig_drift = go.Figure(go.Bar(
+                            x=feat_scores,
+                            y=feat_names,
+                            orientation="h",
+                            marker_color=bar_colors,
+                            text=[f"{s:.3f} ({m})" for s, m in zip(feat_scores, methods)],
+                            textposition="outside",
+                            hovertemplate=(
+                                "<b>%{y}</b><br>"
+                                "Score: %{x:.4f}<br>"
+                                "<extra></extra>"
+                            ),
+                        ))
+                        fig_drift.add_vline(
+                            x=0.10, line_dash="dot", line_color="#FFD700",
+                            annotation_text="Drift threshold (0.10)",
+                            annotation_position="top right",
+                        )
+                        fig_drift.update_layout(
+                            title=f"Per-Feature Drift Scores — {drift_model.title()} Model",
+                            template="plotly_dark",
+                            height=max(300, 40 * len(feat_names)),
+                            xaxis_title="Drift Score (KS / chi² / PSI)",
+                            xaxis=dict(range=[0, max(feat_scores + [0.15]) * 1.15]),
+                            margin=dict(l=150, r=40, t=50, b=40),
+                        )
+                        _show_chart(fig_drift, key="drift_feature_bar")
+
+                    # ── Drift report JSON expander ────────────────────────
+                    with st.expander("📋 Full Drift Report JSON"):
+                        st.json(report.to_dict())
+
+            except Exception as exc:
+                st.error(f"Drift detection error: {exc}")
+
+    # ── MLflow Experiments ────────────────────────────────────────────────
+    st.markdown("---")
+    st.subheader("🧪 MLflow Experiment Tracking")
+
+    mlf_col1, mlf_col2 = st.columns([2, 1])
+    with mlf_col1:
+        st.markdown(
+            "Training runs for both the **Underwriting** and **Fraud** models "
+            "are logged to MLflow with hyperparameters, cross-val ROC-AUC, F1, "
+            "pickled model artifacts, and feature-importance plots."
+        )
+        mlflow_uri = os.environ.get("MLFLOW_TRACKING_URI", "./mlruns")
+        st.code(f"MLFLOW_TRACKING_URI={mlflow_uri}", language="bash")
+        st.markdown(
+            "```bash\n"
+            "# Launch MLflow UI\n"
+            "mlflow ui --host 0.0.0.0 --port 5000\n"
+            "# Then open http://localhost:5000\n"
+            "```"
+        )
+
+    with mlf_col2:
+        st.markdown("**Logged per run:**")
+        st.markdown("""
+- `n_estimators`, `max_depth`, `learning_rate`
+- `roc_auc_cv` (cross-val ROC-AUC)
+- `f1_cv` (cross-val F1)
+- `n_samples`, `n_features`
+- Model pickle artifact
+- Feature importance PNG
+        """)
+
+    # Show recent MLflow runs if available
+    try:
+        import mlflow as _mf  # noqa: F401
+        with st.expander("📂 Recent MLflow Runs"):
+            try:
+                runs_uw = _mf.search_runs(
+                    experiment_names=["claimguard_underwriting"],
+                    max_results=5,
+                    order_by=["start_time DESC"],
+                )
+                runs_fd = _mf.search_runs(
+                    experiment_names=["claimguard_fraud_detection"],
+                    max_results=5,
+                    order_by=["start_time DESC"],
+                )
+                if not runs_uw.empty or not runs_fd.empty:
+                    combined = pd.concat([runs_uw, runs_fd], ignore_index=True)
+                    display_cols = [c for c in [
+                        "tags.mlflow.runName", "metrics.roc_auc_cv",
+                        "metrics.f1_cv", "metrics.n_samples",
+                        "params.fallback_chain", "start_time",
+                    ] if c in combined.columns]
+                    if display_cols:
+                        st.dataframe(
+                            combined[display_cols].head(10),
+                            use_container_width=True,
+                        )
+                    else:
+                        st.dataframe(combined.head(10), use_container_width=True)
+                else:
+                    st.info("No runs logged yet. Train a model to see runs here.")
+            except Exception as exc:
+                st.info(f"No MLflow experiments found yet. Train a model first. ({exc})")
+    except ImportError:
+        st.info("Install MLflow to see experiment runs: `pip install mlflow`")
 
 # ============================================================
 # Tab 8 — Compliance
