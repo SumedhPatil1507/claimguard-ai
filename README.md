@@ -1,353 +1,550 @@
+<div align="center">
+
 # 🛡️ ClaimGuard AI
 
-> Agentic InsurTech Platform for Underwriting Risk Scoring & Claims Fraud Detection
+### Agentic InsurTech Platform · Underwriting Risk Scoring · Claims Fraud Detection
 
-![Python](https://img.shields.io/badge/Python-3.11-blue?logo=python)
-![FastAPI](https://img.shields.io/badge/FastAPI-0.111-009688?logo=fastapi)
-![Streamlit](https://img.shields.io/badge/Streamlit-1.35-FF4B4B?logo=streamlit)
-![LangGraph](https://img.shields.io/badge/LangGraph-0.1.5-green)
-![XGBoost](https://img.shields.io/badge/XGBoost-2.0-orange)
-![License](https://img.shields.io/badge/License-MIT-lightgrey)
+[![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.111-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
+[![Streamlit](https://img.shields.io/badge/Streamlit-1.35-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)](https://streamlit.io)
+[![Celery](https://img.shields.io/badge/Celery-5.4-37814A?style=for-the-badge&logo=celery&logoColor=white)](https://docs.celeryq.dev)
+[![Redis](https://img.shields.io/badge/Redis-7-DC382D?style=for-the-badge&logo=redis&logoColor=white)](https://redis.io)
+[![XGBoost](https://img.shields.io/badge/XGBoost-2.0-FF6600?style=for-the-badge&logo=xgboost)](https://xgboost.ai)
+[![LangGraph](https://img.shields.io/badge/LangGraph-0.1-00A67E?style=for-the-badge)](https://langchain-ai.github.io/langgraph/)
+[![Qdrant](https://img.shields.io/badge/Qdrant-1.9-DB4437?style=for-the-badge&logo=qdrant)](https://qdrant.tech)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
+[![Tests](https://img.shields.io/badge/Tests-149%20passing-brightgreen?style=for-the-badge&logo=pytest)](tests/)
+
+<br/>
+
+> **ClaimGuard AI** combines ensemble ML, agentic RAG, and graph analytics to automate and explain the two most critical insurance workflows: **underwriting risk scoring** at policy-issuance time and **claims fraud detection** at filing time — all behind a mandatory Human-in-the-Loop review gate.
+
+<br/>
+
+[🚀 Quick Start](#-quick-start) · [🏗️ Architecture](#️-architecture) · [📡 API Reference](#-api-reference) · [🖥️ UI Tabs](#️-streamlit-ui-tabs) · [⚙️ Configuration](#️-configuration) · [🧪 Testing](#-testing)
+
+</div>
 
 ---
 
-## Overview
+## ✨ What's New
 
-ClaimGuard AI is an end-to-end agentic InsurTech platform that combines ensemble machine learning (XGBoost + LightGBM) with a LangGraph-powered Policy Copilot to automate and explain two critical insurance workflows: underwriting risk scoring at policy-issuance time and fraud scoring at claim-filing time. The platform indexes policy wording and IRDAI regulatory text into a ChromaDB vector store for retrieval-augmented generation, runs graph-based collusion ring detection over shared claimant entities via Neo4j or NetworkX, enforces a human-in-the-loop (HITL) review queue so no AI decision is ever auto-approved or auto-denied, and exposes everything through a FastAPI backend with RBAC and a Streamlit UI with eight interactive tabs — all observable via Prometheus and Grafana.
+| Version | Highlights |
+|---------|-----------|
+| **v1.3** | 🔄 **Celery+Redis** async task queue — `/underwrite` & `/claims/score` return instant `task_id`; poll `/tasks/{id}` |
+| **v1.2** | 🔍 **Hybrid vector search** — ChromaDB replaced with Qdrant + BM25 + Cross-Encoder re-ranking |
+| **v1.1** | 🌐 Streamlit Cloud deployment; graceful degradation for all optional deps |
+| **v1.0** | Full platform: ML ensemble, LangGraph copilot, HITL queue, IRDAI compliance, Prometheus |
 
 ---
 
-## Architecture
+## 🏗️ Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│                         ClaimGuard AI                               │
-│                                                                      │
-│  Policy Docs / IRDAI Text                                           │
-│         │                                                            │
-│         ▼                                                            │
-│  ┌─────────────┐    ┌──────────────────────────────────────────┐   │
-│  │  ChromaDB   │    │          LangGraph Pipeline               │   │
-│  │  VectorStore│◄───│  RetrieverAgent → ToolAgent → WriterAgent │   │
-│  └─────────────┘    │          → HITLRouter                    │   │
-│                      └──────────────────────────────────────────┘   │
-│  Claims CSV / Policies CSV                                          │
-│         │                                                            │
-│         ▼                                                            │
-│  ┌────────────────┐   ┌──────────────────┐   ┌───────────────┐     │
-│  │ Underwriting   │   │  Fraud Detection │   │ Graph Collusion│    │
-│  │ Engine (XGB+   │   │  Engine (XGB+    │   │ Detector       │    │
-│  │  LGBM+SHAP)   │   │  LGBM+SHAP)      │   │ (Neo4j/NX)    │    │
-│  └────────────────┘   └──────────────────┘   └───────────────┘     │
-│         │                      │                      │              │
-│         └──────────────────────┴──────────────────────┘              │
-│                               │                                      │
-│                        ┌──────▼──────┐                              │
-│                        │  FastAPI    │◄── X-API-Key RBAC            │
-│                        └──────┬──────┘                              │
-│                               │                                      │
-│                      ┌────────▼────────┐                           │
-│                      │  Streamlit UI   │  8 interactive tabs        │
-│                      └─────────────────┘                           │
-│                                                                      │
-│  Prometheus/Grafana                 HITL Queue (PostgreSQL/JSON)   │
-└─────────────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                              ClaimGuard AI  v1.3                             │
+│                                                                              │
+│   ┌─────────────────────────────────────────────────────────────────────┐   │
+│   │                        Streamlit UI  (8 tabs)                        │   │
+│   │  Explorer │ Underwrite │ Claims │ Copilot │ Graph │ HITL │ Obs │ ✅  │   │
+│   └─────────────────────────────┬───────────────────────────────────────┘   │
+│                                 │  HTTP                                      │
+│   ┌─────────────────────────────▼───────────────────────────────────────┐   │
+│   │                   FastAPI  (X-API-Key RBAC + Rate Limit)             │   │
+│   │  POST /underwrite → 202    POST /claims/score → 202                  │   │
+│   │  GET  /tasks/{id}          POST /copilot/decide                      │   │
+│   │  GET  /graph/collusion-rings   GET /compliance   GET /metrics        │   │
+│   └───┬─────────────────┬───────────────────────────────────────────────┘   │
+│       │  enqueue        │  inline                                           │
+│   ┌───▼──────────┐  ┌───▼──────────────────────────────────────────────┐   │
+│   │ Redis  +     │  │               Domain Modules                      │   │
+│   │ Celery Worker│  │  UnderwritingEngine  │  FraudDetectionEngine       │   │
+│   │              │  │  (XGBoost+LightGBM  │  (XGBoost+LightGBM          │   │
+│   │  ┌─────────┐ │  │   + SHAP + Optuna)  │   + SHAP + Optuna)          │   │
+│   │  │ score_  │ │  ├───────────────────────────────────────────────────┤   │
+│   │  │ uw_task │ │  │  GraphCollusionDetector (Neo4j / NetworkX)         │   │
+│   │  │ score_  │ │  ├───────────────────────────────────────────────────┤   │
+│   │  │ cl_task │ │  │  PolicyCopilot (LangGraph)                         │   │
+│   │  └─────────┘ │  │   RetrieverAgent → ToolAgent → WriterAgent → HITL  │   │
+│   └──────────────┘  └──────────┬───────────────────────────────────────┘   │
+│                                 │                                            │
+│   ┌─────────────────────────────▼───────────────────────────────────────┐   │
+│   │                      Data / Storage Layer                            │   │
+│   │  PostgreSQL  │  Qdrant (hybrid BM25+dense)  │  Neo4j  │  Redis      │   │
+│   │  HITL JSON   │  Prometheus / Grafana          │  CSV fallback (UI)   │   │
+│   └─────────────────────────────────────────────────────────────────────┘   │
+└──────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Async Inference Flow
+
+```
+Client
+  │
+  │  POST /underwrite  {features}
+  ▼
+FastAPI  ──► assert_redis_reachable()  ──►  503 if Redis down (no silent fallback)
+  │
+  │  apply_async(score_underwriting_task, task_id=<uuid>)
+  ▼
+Redis Broker
+  │
+  │  pick up
+  ▼
+Celery Worker
+  ├─ assert_redis_reachable()    ──► RuntimeError (no retry)
+  ├─ assert_postgres_reachable() ──► RuntimeError (no retry)
+  └─ UnderwritingEngine().predict()  ──► retry ×3 on transient error
+  │
+  │  store result
+  ▼
+Redis Backend  ◄──── GET /tasks/{task_id}  ◄──── Client polls
 ```
 
 ---
 
-## Quick Start
+## 🚀 Quick Start
 
-### Docker Compose (Recommended)
+### Option A — Docker Compose (full stack, recommended)
 
 ```bash
+# 1. Clone
 git clone https://github.com/SumedhPatil1507/claimguard-ai.git
 cd claimguard-ai
-cp .env.example .env  # Edit with your API keys
+
+# 2. Configure
+cp .env.example .env
+# Edit .env — set GROQ_API_KEY (optional), leave others for local dev
+
+# 3. Launch (Redis, Celery worker, API, Streamlit, Postgres, Neo4j, Prometheus, Grafana)
 docker compose up --build
-# API:     http://localhost:8000
-# UI:      http://localhost:8501
-# Grafana: http://localhost:3000
+
+# Services
+#   Streamlit UI   → http://localhost:8501
+#   FastAPI docs   → http://localhost:8000/docs
+#   Grafana        → http://localhost:3000  (admin/admin)
+#   Prometheus     → http://localhost:9090
 ```
 
-### Local Development
+### Option B — Local development
 
 ```bash
-git clone https://github.com/SumedhPatil1507/claimguard-ai.git
-cd claimguard-ai
-python -m venv venv && source venv/bin/activate  # Windows: venv\Scripts\activate
+# Python 3.11+
 pip install -r requirements.txt
-python data/synthetic_generator.py   # Generate synthetic training data
-uvicorn api.main:app --port 8000 &   # Start API server
-streamlit run app/app.py             # Start UI (opens browser automatically)
+
+# Generate synthetic data
+python data/synthetic_generator.py
+
+# Terminal 1 — Redis (Docker)
+docker run -d -p 6379:6379 redis:7-alpine
+
+# Terminal 2 — Celery worker
+celery -A src.worker worker --loglevel=info --concurrency=4
+
+# Terminal 3 — FastAPI
+uvicorn api.main:app --reload --port 8000
+
+# Terminal 4 — Streamlit
+streamlit run app/app.py
 ```
 
-> **Note:** All ML models and RAG components degrade gracefully — the app runs without any API keys set. See the fallback behavior table in the Environment Variables section below.
+### Option C — Streamlit Cloud (UI only, no Redis/Celery needed)
+
+The app runs at **https://claimguard-ai-fdiafhzaeme9gr2lndxmv3.streamlit.app**
+All ML engines, HITL queue, and compliance dashboard work without any services.
+Celery-dependent features show graceful 503 messages.
 
 ---
 
-## Environment Variables
+## ⚙️ Configuration
 
-| Name | Description | Required | Default / Fallback |
+| Variable | Required | Default | Description |
 |---|---|---|---|
-| `GROQ_API_KEY` | Groq LLM API key (llama3-8b-8192) | No | Rule-based narrative template |
-| `DATABASE_URL` | PostgreSQL async connection string | No | CSV file fallback |
-| `SUPABASE_URL` | Supabase project URL | No | CSV file fallback |
-| `SUPABASE_KEY` | Supabase anon/service key | No | CSV file fallback |
-| `NEO4J_URI` | Neo4j bolt connection URI | No | NetworkX in-memory fallback |
-| `NEO4J_USER` | Neo4j username | No | NetworkX in-memory fallback |
-| `NEO4J_PASSWORD` | Neo4j password | No | NetworkX in-memory fallback |
-| `ENCRYPTION_KEY` | Fernet symmetric encryption key | No | Auto-generated on startup |
-| `API_KEYS` | JSON dict mapping API key → role | No | Demo keys (see API Reference) |
+| `GROQ_API_KEY` | No | — | Groq `llama3-8b-8192` for Policy Copilot writer; rule-based fallback if unset |
+| `REDIS_URL` | Yes (API/worker) | `redis://localhost:6379/0` | Celery broker + result backend |
+| `DATABASE_URL` | Yes (production) | — | asyncpg PostgreSQL DSN |
+| `SUPABASE_URL` | No | — | Supabase REST endpoint (tier-2 fallback) |
+| `SUPABASE_KEY` | No | — | Supabase anon/service key |
+| `NEO4J_URI` | No | — | Bolt URI for graph collusion (NetworkX fallback) |
+| `NEO4J_USER` | No | `neo4j` | Neo4j username |
+| `NEO4J_PASSWORD` | No | — | Neo4j password |
+| `ENCRYPTION_KEY` | No | auto-generated | Fernet key for PII encryption |
+| `API_KEYS` | No | demo keys | JSON `{"key":"role"}` map for RBAC |
+| `CELERY_TASK_TIMEOUT` | No | `300` | Hard time limit per Celery task (seconds) |
+| `CLAIMGUARD_VS_QDRANT_MODE` | No | `local` | `memory` / `local` / `remote` |
+| `CLAIMGUARD_VS_RERANKER_BACKEND` | No | `cross_encoder` | `none` / `cross_encoder` / `cohere` |
+| `CLAIMGUARD_VS_COHERE_API_KEY` | No | — | Cohere API key for rerank backend |
 
 ---
 
-## API Reference
-
-All endpoints except `/health` and `/metrics` require an `X-API-Key` header.
-
-| Method | Path | Required Role | Description |
-|---|---|---|---|
-| `GET` | `/health` | None | Liveness/readiness check |
-| `POST` | `/underwrite` | analyst, admin | Score underwriting risk for a new policy applicant |
-| `POST` | `/claims/score` | analyst, admin | Score a filed claim for fraud probability |
-| `POST` | `/copilot/decide` | analyst, admin | Run the full LangGraph Policy Copilot pipeline |
-| `GET` | `/graph/collusion-rings` | analyst, admin | Detect collusion rings in the claims graph |
-| `GET` | `/compliance` | viewer, analyst, admin | Generate the IRDAI compliance JSON report |
-| `GET` | `/metrics` | admin | Prometheus metrics scrape endpoint |
+## 📡 API Reference
 
 ### Demo API Keys
 
-| Key | Role |
-|---|---|
-| `admin-key-demo` | admin |
-| `analyst-key-demo` | analyst |
-| `viewer-key-demo` | viewer |
+| Key | Role | Permissions |
+|---|---|---|
+| `admin-key-demo` | admin | All endpoints |
+| `analyst-key-demo` | analyst | All except `/metrics` |
+| `viewer-key-demo` | viewer | `/compliance`, `/health` |
 
-### Example: Score a Claim
+### Endpoints
+
+<details>
+<summary><b>GET /health</b> — Liveness probe (no auth)</summary>
+
+```bash
+curl http://localhost:8000/health
+```
+```json
+{ "status": "ok", "version": "1.0.0", "timestamp": "2026-10-05T10:00:00+00:00" }
+```
+</details>
+
+<details>
+<summary><b>POST /underwrite</b> — Enqueue underwriting job → HTTP 202</summary>
+
+```bash
+curl -X POST http://localhost:8000/underwrite \
+  -H "X-API-Key: analyst-key-demo" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "age": 35, "annual_income": 800000, "credit_score": 720,
+    "sum_insured": 1000000, "coverage_type": "motor",
+    "num_dependents": 2, "prior_claims_count": 0,
+    "region": "north", "occupation": "salaried"
+  }'
+```
+```json
+{
+  "task_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+  "status": "PENDING",
+  "status_url": "http://localhost:8000/tasks/f47ac10b-58cc-4372-a567-0e02b2c3d479",
+  "message": "Underwriting job enqueued. Poll status_url for the result."
+}
+```
+</details>
+
+<details>
+<summary><b>POST /claims/score</b> — Enqueue fraud-scoring job → HTTP 202</summary>
 
 ```bash
 curl -X POST http://localhost:8000/claims/score \
   -H "X-API-Key: analyst-key-demo" \
   -H "Content-Type: application/json" \
   -d '{
-    "claim_id": "CLM-2024-001",
-    "claim_amount": 85000,
-    "days_since_policy_start": 45,
-    "prior_claims_count": 2,
-    "claimant_age": 34,
-    "policy_type": "health",
-    "garage_id": "GRG-077"
+    "claim_id": "CLM-001", "claimant_id": "CLT-001", "policy_id": "POL-001",
+    "claim_amount": 75000, "days_since_policy_start": 45,
+    "num_prior_claims": 2, "claim_type": "motor", "claim_severity": "high",
+    "repair_shop_id": "SHOP-001"
   }'
 ```
+```json
+{
+  "task_id": "a1b2c3d4-...",
+  "status": "PENDING",
+  "status_url": "http://localhost:8000/tasks/a1b2c3d4-..."
+}
+```
+</details>
 
-### Example: Run Policy Copilot
+<details>
+<summary><b>GET /tasks/{task_id}</b> — Poll task status</summary>
+
+```bash
+curl http://localhost:8000/tasks/f47ac10b-... \
+  -H "X-API-Key: analyst-key-demo"
+```
+
+| `status` | Meaning |
+|---|---|
+| `PENDING` | Queued, worker has not started |
+| `STARTED` | Worker is running inference |
+| `SUCCESS` | Complete — `result` key has payload |
+| `FAILURE` | Failed — `error` and `error_type` explain why |
+| `RETRY` | Retrying after transient error |
+
+```json
+{
+  "task_id": "f47ac10b-...",
+  "status": "SUCCESS",
+  "result": {
+    "risk_tier": "low", "risk_score": 0.22,
+    "premium_adjustment": 0.95, "shap_drivers": [...],
+    "model_version": "xgb-lgbm-v1"
+  }
+}
+```
+</details>
+
+<details>
+<summary><b>POST /copilot/decide</b> — Run Policy Copilot inline</summary>
 
 ```bash
 curl -X POST http://localhost:8000/copilot/decide \
   -H "X-API-Key: analyst-key-demo" \
   -H "Content-Type: application/json" \
-  -d '{
-    "query": "Is this health claim eligible under the cashless hospitalization clause?",
-    "claim_id": "CLM-2024-001",
-    "context": {}
-  }'
+  -d '{"query": "Assess risk for motor policy applicant", "context_type": "underwriting", "features": {...}}'
 ```
+</details>
 
----
-
-## Streamlit UI Tabs
-
-| Tab | Description |
-|---|---|
-| **Explorer** | Interactive EDA on claims and policy datasets — histograms, correlation heatmaps, and distribution plots. |
-| **Underwrite** | Enter applicant/policy features and receive an instant risk tier (Low / Medium / High) with premium adjustment recommendation and SHAP waterfall chart. |
-| **Claims** | Submit a claim and receive a fraud probability score with SHAP feature importance and a confidence band. |
-| **Policy Copilot** | Chat interface for the LangGraph agent — ask natural language questions about policy coverage and receive structured decisions citing retrieved clauses and model evidence. |
-| **Graph Intel** | Interactive NetworkX / Neo4j collusion ring visualization — nodes are claimants, garages, and medical providers; edges encode shared-claim relationships. |
-| **HITL** | Human-in-the-loop analyst review queue — approve, reject, or escalate AI-drafted decisions before any action is taken. |
-| **Observability** | Live Prometheus metrics displayed as Plotly charts — agent latency percentiles, tool call counts, retriever hit rates, and HITL queue depth. |
-| **Compliance** | IRDAI regulatory dashboard with a compliance score gauge and per-control status cards showing evidence and remediation guidance. |
-
----
-
-## Policy Copilot — LangGraph Pipeline
-
-The Policy Copilot is a four-node LangGraph pipeline that runs for every underwriting or claims decision:
-
-```
-RetrieverAgent
-    │  Semantic search over ChromaDB (policy docs + IRDAI text)
-    ▼
-ToolAgent
-    │  Calls underwriting / fraud-scoring models + SHAP explainer
-    ▼
-WriterAgent
-    │  Synthesizes a structured decision citing retrieved clause + model evidence
-    ▼
-HITLRouter
-    └─ Enqueues draft decision for human analyst review
-```
-
-**Graceful degradation:**
-- LangGraph not installed → identical linear pipeline without the graph runtime
-- ChromaDB / sentence-transformers not installed → retriever returns empty list, pipeline continues
-- `GROQ_API_KEY` not set → WriterAgent uses a rule-based narrative template
-- Model or SHAP unavailable → those fields are null, nothing raises an exception
-
----
-
-## ML Models
-
-### Underwriting Engine (`src/underwriting.py`)
-
-- **Input:** Applicant demographics, policy type, coverage amount, claims history, credit proxy features
-- **Model:** XGBoost + LightGBM ensemble (soft-vote averaging), tuned with Optuna
-- **Output:** Risk tier (Low / Medium / High / Very High), risk score 0–1, premium adjustment factor, SHAP top drivers
-- **Training data:** Synthetic policy dataset generated by `data/synthetic_generator.py`
-
-### Claims Fraud Detector (`src/claims_fraud.py`)
-
-- **Input:** Claim amount, days since policy start, prior claims count, claimant age, garage/provider ID, policy type
-- **Model:** XGBoost + LightGBM ensemble, tuned with Optuna
-- **Output:** Fraud probability 0–1, fraud tier, SHAP explanation, recommended action (auto-pass / review / escalate)
-- **Training data:** Synthetic claims dataset with injected fraud patterns
-
-### Graph Collusion Detector (`src/graph_collusion.py`)
-
-Analyzes shared entities (claimants, repair garages, medical providers, witnesses) across claims using degree centrality, betweenness centrality, and connected-component analysis. A garage or provider appearing across many high-severity claims within a short window is flagged as a potential collusion hub.
-
-### SHAP Explainability (`src/shap_utils.py`)
-
-Provides TreeExplainer-based SHAP values for both models, exposed as waterfall charts in the UI and included in every API response and copilot decision narrative.
-
----
-
-## Compliance — IRDAI Controls
-
-`src/compliance_irdai.py` tracks **10 IRDAI regulatory controls** including:
-
-1. Claim settlement within 30-day turnaround (IRDAI Circular 2015/Claims)
-2. Mandatory cashless facility for network hospitals
-3. Policy wordings in plain vernacular language
-4. Grievance redressal mechanism (IGMS compliance)
-5. Anti-fraud policy and fraud monitoring unit
-6. KYC norms for policyholder onboarding
-7. Data localization and privacy standards
-8. Solvency margin maintenance reporting
-9. Renewal notice timelines
-10. HITL review gate — no automated claim denial without human sign-off
-
-Each control exposes `status`, `evidence`, `remediation`, and `last_checked` fields. The Compliance tab renders a score gauge (0–100) and per-control cards.
-
----
-
-## Evaluation
-
-Run the RAGAS evaluation to score retrieval precision/recall and answer faithfulness of the Policy Copilot against source policy and IRDAI documents:
+<details>
+<summary><b>GET /graph/collusion-rings</b> — Detect claim-ring collusion</summary>
 
 ```bash
-python eval/ragas_eval.py
+curl http://localhost:8000/graph/collusion-rings \
+  -H "X-API-Key: analyst-key-demo"
 ```
+> ⚠️ Requires PostgreSQL — returns 503 if `DATABASE_URL` is unset.
+</details>
 
-Outputs a JSON report to `eval/results/ragas_report_<timestamp>.json` with:
-- **Context Precision** — fraction of retrieved chunks that are relevant
-- **Context Recall** — fraction of relevant chunks that were retrieved
-- **Answer Faithfulness** — degree to which the WriterAgent's decision is grounded in retrieved text
-- **Answer Relevancy** — how directly the answer addresses the query
+<details>
+<summary><b>GET /compliance</b> — IRDAI compliance report</summary>
+
+```bash
+curl http://localhost:8000/compliance -H "X-API-Key: viewer-key-demo"
+```
+</details>
+
+<details>
+<summary><b>GET /metrics</b> — Prometheus metrics (admin only)</summary>
+
+```bash
+curl http://localhost:8000/metrics -H "X-API-Key: admin-key-demo"
+```
+</details>
 
 ---
 
-## Project Structure
+## 🖥️ Streamlit UI Tabs
+
+| Tab | Description | Key Charts |
+|---|---|---|
+| **📊 Explorer** | EDA on 500 synthetic claims + 300 policies | Fraud distribution histogram, scatter plot, correlation heatmap, risk tier bar |
+| **🏦 Underwrite** | Real-time risk scoring form | Risk score gauge (Plotly Indicator), SHAP waterfall horizontal bar |
+| **🔍 Claims** | Fraud scoring form | Fraud score gauge, SHAP feature importance bar |
+| **🤖 Policy Copilot** | LangGraph agent chat interface | Retrieved policy clauses, model evidence table |
+| **🕸️ Graph Intel** | Collusion ring network | Interactive Plotly network graph (claimant nodes + entity diamonds) |
+| **👤 HITL Review** | Analyst approve/reject/escalate queue | Queue depth metric, item cards with inline review |
+| **📈 Observability** | Live Prometheus metrics | Latency percentile bar, decisions time-series line |
+| **✅ Compliance** | IRDAI 10-control dashboard | Score gauge, compliant/partial/non_compliant pie, expandable control cards |
+
+---
+
+## 🧠 ML Layer
+
+### Ensemble Architecture
+
+```
+Input Features
+     │
+     ├──► XGBoost Classifier ──►┐
+     │                          ├──► Soft-vote average ──► Risk/Fraud Score
+     └──► LightGBM Classifier ──►┘
+                    │
+                    ▼
+               SHAP TreeExplainer
+                    │
+                    ▼
+           Top-5 feature drivers
+    [{feature, shap_value, direction}, ...]
+```
+
+### Underwriting Features
+
+`age` · `annual_income` · `credit_score` · `sum_insured` · `coverage_type` · `num_dependents` · `prior_claims_count` · `region` · `occupation`
+
+### Claims Features
+
+`claim_amount` · `days_since_policy_start` · `num_prior_claims` · `claim_type` · `claim_severity` · `repair_shop_id` · `medical_provider_id`
+
+### Fallback chain
+
+```
+XGBoost+LightGBM → scikit-learn RandomForest → Rule-based heuristic
+```
+
+---
+
+## 🔍 Hybrid Vector Search (Qdrant)
+
+```
+Query
+  │
+  ├──► Dense: sentence-transformers/all-MiniLM-L6-v2
+  │         └──► Qdrant cosine similarity search  (top-10)
+  │
+  └──► Sparse: BM25Okapi (rank-bm25)               (top-10)
+                        │
+                        ▼
+              Reciprocal Rank Fusion (RRF, k=60)
+                        │
+                        ▼
+              CrossEncoder re-ranking
+              (cross-encoder/ms-marco-MiniLM-L-6-v2)
+                        │
+                        ▼
+               Final top-3 results
+    [{content, source, score}, ...]
+```
+
+Configure via `CLAIMGUARD_VS_*` env vars — see [Configuration](#️-configuration).
+
+---
+
+## 🕸️ Graph Collusion Detection
+
+The `GraphCollusionDetector` builds a **bipartite graph** linking claimants to shared entities (repair shops, medical providers, witnesses). Suspicious rings are clusters where ≥ 3 claims share ≥ 2 entities.
+
+```
+Claimant A ──── SHOP-001 ──── Claimant B
+    │                              │
+    └──── SHOP-001, DR-042 ────────┘
+                                 ▲
+                            Colluding ring (severity: high)
+```
+
+Metrics: degree centrality, betweenness centrality. Primary: Neo4j. Fallback: NetworkX in-process.
+
+---
+
+## 🔒 Security
+
+| Layer | Implementation |
+|---|---|
+| Authentication | `X-API-Key` header → role resolution (`admin` / `analyst` / `viewer`) |
+| Authorization | `require_roles([...])` FastAPI dependency per endpoint |
+| Rate limiting | Sliding-window `RateLimiter` (100 req/60 s per IP) |
+| PII encryption | Fernet symmetric encryption (`src/encryption.py`) |
+| Production routes | Hard infra checks — 503 if Redis/Postgres unreachable (no CSV fallback) |
+
+---
+
+## 📈 Observability
+
+Prometheus metrics under `claimguard_copilot_*` namespace:
+
+| Metric | Type | Labels |
+|---|---|---|
+| `claimguard_copilot_agent_runs_total` | Counter | `agent_name` |
+| `claimguard_copilot_agent_latency_seconds` | Histogram | `agent_name` |
+| `claimguard_copilot_tool_calls_total` | Counter | `tool_name` |
+| `claimguard_copilot_retriever_hits_total` | Counter | — |
+| `claimguard_copilot_decisions_drafted_total` | Counter | — |
+| `claimguard_copilot_hitl_queue_depth` | Gauge | — |
+| `claimguard_copilot_graph_queries_total` | Counter | — |
+
+Grafana dashboard JSON available at `http://localhost:3000` after `docker compose up`.
+
+---
+
+## ✅ IRDAI Compliance Module
+
+10 real IRDAI regulatory controls with evidence + remediation:
+
+| Control | Category | Default Status |
+|---|---|---|
+| IRDAI-001 · Claim settlement within 30 days | Claims Management | ⚠️ Partial |
+| IRDAI-002 · KYC verification | Customer Due Diligence | ✅ Compliant |
+| IRDAI-003 · Grievance redressal within 15 days | Customer Service | ⚠️ Partial |
+| IRDAI-004 · Policy issuance SLA | Operations | ✅ Compliant |
+| IRDAI-005 · Premium refund on cancellation | Financial | ✅ Compliant |
+| IRDAI-006 · Free-look period enforcement | Customer Rights | ✅ Compliant |
+| IRDAI-007 · Portability rights | Customer Rights | ⚠️ Partial |
+| IRDAI-008 · Anti-money-laundering checks | Fraud Prevention | ❌ Non-compliant |
+| IRDAI-009 · Fraud reporting to IRDAI | Regulatory Reporting | ⚠️ Partial |
+| IRDAI-010 · Data localization | Data Governance | ❌ Non-compliant |
+
+---
+
+## 🧪 Testing
+
+```bash
+# Run full suite (149 tests, ~20 s)
+pytest tests/ -v
+
+# Run specific groups
+pytest tests/test_underwriting.py    # ML engine
+pytest tests/test_claims_fraud.py    # Fraud engine
+pytest tests/test_vector_store.py    # Qdrant hybrid search
+pytest tests/test_worker.py          # Celery tasks + API endpoints
+pytest tests/test_compliance.py      # IRDAI compliance
+pytest tests/test_agent_graph.py     # LangGraph copilot
+```
+
+Current status: **149 passed · 6 skipped (sentence-transformers not installed locally) · 0 failed**
+
+---
+
+## 📁 Project Structure
 
 ```
 claimguard-ai/
-├── src/
-│   ├── underwriting.py        # Risk scoring engine (XGB + LGBM + SHAP)
-│   ├── claims_fraud.py        # Claims fraud scoring engine
-│   ├── graph_collusion.py     # Collusion ring detector (Neo4j / NetworkX)
-│   ├── shap_utils.py          # SHAP explainability utilities
-│   ├── vector_store.py        # ChromaDB vector store + embedding
-│   ├── agent_graph.py         # LangGraph Policy Copilot pipeline
-│   ├── copilot_metrics.py     # Prometheus metrics (claimguard_copilot_*)
-│   ├── compliance_irdai.py    # IRDAI compliance module
-│   ├── hitl.py                # HITL review queue logic
-│   ├── database.py            # asyncpg / Supabase / CSV fallback
-│   ├── encryption.py          # Fernet encryption helpers
-│   ├── rbac.py                # Role-based access control
-│   └── rate_limit.py          # Rate limiting middleware
 ├── api/
-│   └── main.py                # FastAPI application
+│   └── main.py              FastAPI app (async Celery enqueue, RBAC, rate-limit)
 ├── app/
-│   └── app.py                 # Streamlit UI (8 tabs)
+│   └── app.py               Streamlit UI (8 tabs, Plotly dark theme)
+├── src/
+│   ├── agent_graph.py        LangGraph Policy Copilot pipeline
+│   ├── claims_fraud.py       Fraud detection ML engine
+│   ├── compliance_irdai.py   IRDAI compliance reporting
+│   ├── copilot_metrics.py    Prometheus metrics helpers
+│   ├── database.py           DB manager (asyncpg → Supabase → CSV)
+│   │                         + ProductionDatabaseManager (no fallback)
+│   ├── encryption.py         Fernet PII encryption
+│   ├── graph_collusion.py    Neo4j / NetworkX collusion detection
+│   ├── hitl.py               Human-in-the-loop review queue
+│   ├── rate_limit.py         Sliding-window rate limiter
+│   ├── rbac.py               Role-based access control
+│   ├── shap_utils.py         SHAP explainability
+│   ├── underwriting.py       Underwriting risk-scoring engine
+│   ├── vector_store.py       Qdrant hybrid BM25+dense+rerank store
+│   ├── vector_store_settings.py  Pydantic settings (CLAIMGUARD_VS_*)
+│   └── worker.py             Celery app + background tasks
 ├── data/
-│   └── synthetic_generator.py # Synthetic claims + policy dataset generator
+│   ├── synthetic_generator.py  Generate sample_claims.csv + sample_policies.csv
+│   ├── policy_docs/            Sample policy wording + IRDAI guidelines
+│   └── models/                 Persisted ML model artefacts
+├── tests/                    pytest test suite (149 tests)
 ├── eval/
-│   └── ragas_eval.py          # RAGAS evaluation script
-├── tests/
-│   ├── test_underwriting.py
-│   ├── test_claims_fraud.py
-│   ├── test_graph_collusion.py
-│   ├── test_agent_graph.py
-│   └── test_api.py
-├── grafana/
-│   └── dashboards/            # Grafana dashboard JSON exports
-├── .github/
-│   └── workflows/
-│       └── ci.yml             # GitHub Actions CI pipeline
-├── docker-compose.yml
+│   └── ragas_eval.py         RAGAS retrieval quality evaluation
+├── docker-compose.yml        Full stack (Redis, Celery, API, Streamlit, PG, Neo4j, Prom, Grafana)
 ├── Dockerfile
-├── requirements.txt
-├── .env.example
-└── README.md
+├── requirements.txt          Streamlit Cloud compatible
+├── requirements-full.txt     Full local / Docker stack
+└── .env.example
 ```
 
 ---
 
-## Tech Stack
+## 🛠️ Tech Stack
 
-| Component | Technology |
+| Layer | Technology |
 |---|---|
-| ML | XGBoost, LightGBM, Scikit-learn, SHAP, Optuna |
-| Agent | LangGraph, LangChain Core, Groq llama3-8b-8192 |
-| RAG | ChromaDB, sentence-transformers (all-MiniLM-L6-v2) |
-| API | FastAPI, Pydantic v2, uvicorn |
-| UI | Streamlit, Plotly |
-| Database | PostgreSQL (asyncpg), Supabase, CSV fallback |
-| Graph | Neo4j, NetworkX |
-| Observability | Prometheus, Grafana |
-| Security | Fernet encryption, RBAC, rate limiting |
-| Infrastructure | Docker, Docker Compose, GitHub Actions |
+| **API** | FastAPI 0.111 + Pydantic v2 + uvicorn |
+| **UI** | Streamlit 1.35 + Plotly 5 (dark theme, interactive) |
+| **Async tasks** | Celery 5.4 + Redis 7 |
+| **ML** | XGBoost 2.0 + LightGBM 4.3 + SHAP + Optuna |
+| **Agent / RAG** | LangGraph 0.1 + LangChain Core + Groq llama3-8b-8192 |
+| **Vector store** | Qdrant 1.9 (hybrid: dense + BM25 + CrossEncoder) |
+| **Graph** | Neo4j 5 / NetworkX 3.3 |
+| **Database** | PostgreSQL 15 via asyncpg |
+| **Security** | Fernet encryption + RBAC + rate limiting |
+| **Observability** | Prometheus + Grafana |
+| **Infra** | Docker Compose + GitHub Actions CI |
+| **Tests** | pytest 8 + httpx |
 
 ---
 
-## CI / CD
+## 📄 License
 
-GitHub Actions runs on every push and pull request to `main`:
-
-```yaml
-# .github/workflows/ci.yml
-- Lint with ruff
-- Type-check with mypy
-- Run pytest (tests/)
-- Build Docker image
-```
+MIT © 2024 ClaimGuard AI — [Sumedh Patil](https://github.com/SumedhPatil1507)
 
 ---
 
-## Contributing
+<div align="center">
 
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feat/my-feature`
-3. Commit with conventional messages: `feat:`, `fix:`, `docs:`, `refactor:`
-4. Open a pull request against `main`
+**[⬆ Back to top](#️-claimguard-ai)**
 
----
+Made with ☕ and 🛡️ for the InsurTech community
 
-## License
-
-MIT License — see [LICENSE](LICENSE) for details.
-
----
-
-*ClaimGuard AI is a research and demonstration platform. All decisions produced by the AI pipeline are enqueued for mandatory human review and must not be used as the sole basis for any insurance underwriting or claims adjudication decision.*
+</div>

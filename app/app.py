@@ -168,7 +168,7 @@ with st.sidebar:
     st.markdown("### 📋 IRDAI Compliance")
     st.success("✓ All decisions require human review")
     st.markdown("---")
-    st.caption("v1.0.0 | MIT License | © 2024 ClaimGuard AI")
+    st.caption("v1.3.0 | Celery+Redis async | MIT © 2024 ClaimGuard AI")
 
 
 # ---------------------------------------------------------------------------
@@ -197,11 +197,44 @@ def load_policies_data() -> pd.DataFrame:
 
 
 # ---------------------------------------------------------------------------
-# Helper: render a Plotly figure or a plain st.table fallback
+# Helper: render a Plotly figure with full interactivity
 # ---------------------------------------------------------------------------
+
+_PLOTLY_CONFIG = {
+    "displayModeBar": True,
+    "scrollZoom": True,
+    "modeBarButtonsToAdd": ["drawline", "eraseshape"],
+    "displaylogo": False,
+    "toImageButtonOptions": {"format": "svg", "filename": "claimguard_chart"},
+}
+
+_HOVER_LABEL = dict(bgcolor="#1B2A3B", font_size=13, font_family="monospace")
+
+_LAYOUT_DEFAULTS = dict(
+    template="plotly_dark",
+    paper_bgcolor="rgba(0,0,0,0)",
+    plot_bgcolor="rgba(13,27,42,0.7)",
+    font=dict(family="Inter, sans-serif", color="#E0E0E0"),
+    hoverlabel=_HOVER_LABEL,
+    hovermode="closest",
+    margin=dict(l=40, r=20, t=45, b=40),
+)
+
+
+def _apply_layout(fig) -> None:
+    """Apply consistent dark interactive layout to any Plotly figure."""
+    if fig is None:
+        return
+    fig.update_layout(**_LAYOUT_DEFAULTS)
+    fig.update_xaxes(gridcolor="rgba(255,255,255,0.08)", zeroline=False)
+    fig.update_yaxes(gridcolor="rgba(255,255,255,0.08)", zeroline=False)
+
+
 def _show_chart(fig, key: str = "") -> None:
     if HAS_PLOTLY and fig is not None:
-        st.plotly_chart(fig, use_container_width=True, key=key or None)
+        _apply_layout(fig)
+        st.plotly_chart(fig, use_container_width=True,
+                        config=_PLOTLY_CONFIG, key=key or None)
     else:
         st.info("Install plotly to see interactive charts.")
 
@@ -262,7 +295,10 @@ with tabs[0]:
                         color_discrete_map={0: "#00C896", 1: "#FF6B6B"},
                         template="plotly_dark",
                     )
-                    st.plotly_chart(fig, use_container_width=True)
+                    fig.update_traces(
+                        hovertemplate="<b>Amount:</b> ₹%{x:,.0f}<br><b>Count:</b> %{y}<extra></extra>"
+                    )
+                    _show_chart(fig)
 
             with col2:
                 if "fraud_label" in claims_df.columns:
@@ -274,7 +310,11 @@ with tabs[0]:
                         color_discrete_sequence=["#00C896", "#FF6B6B"],
                         hole=0.4, template="plotly_dark",
                     )
-                    st.plotly_chart(fig, use_container_width=True)
+                    fig.update_traces(
+                        hovertemplate="<b>%{label}</b><br>Count: %{value}<br>Share: %{percent}<extra></extra>",
+                        textinfo="label+percent",
+                    )
+                    _show_chart(fig)
 
             col3, col4 = st.columns(2)
             with col3:
@@ -285,7 +325,10 @@ with tabs[0]:
                         ct, x="claim_type", y="count", title="Claims by Type",
                         color="count", color_continuous_scale="Teal", template="plotly_dark",
                     )
-                    st.plotly_chart(fig, use_container_width=True)
+                    fig.update_traces(
+                        hovertemplate="<b>Type:</b> %{x}<br><b>Count:</b> %{y}<extra></extra>"
+                    )
+                    _show_chart(fig)
 
             with col4:
                 if "days_since_policy_start" in claims_df.columns and "claim_amount" in claims_df.columns:
@@ -294,9 +337,14 @@ with tabs[0]:
                         color="fraud_label" if "fraud_label" in claims_df.columns else None,
                         title="Days Since Policy Start vs Claim Amount",
                         color_discrete_map={0: "#00C896", 1: "#FF6B6B"},
-                        opacity=0.6, template="plotly_dark",
+                        opacity=0.65, template="plotly_dark",
                     )
-                    st.plotly_chart(fig, use_container_width=True)
+                    fig.update_traces(
+                        hovertemplate=(
+                            "<b>Days:</b> %{x}<br><b>Amount:</b> ₹%{y:,.0f}<extra></extra>"
+                        )
+                    )
+                    _show_chart(fig)
 
             num_cols = claims_df.select_dtypes(include=[np.number]).columns.tolist()
             if len(num_cols) > 2:
@@ -305,7 +353,10 @@ with tabs[0]:
                     corr, title="Correlation Heatmap — Claims",
                     color_continuous_scale="RdBu_r", text_auto=".2f", template="plotly_dark",
                 )
-                st.plotly_chart(fig, use_container_width=True)
+                fig.update_traces(
+                    hovertemplate="<b>%{x}</b> ↔ <b>%{y}</b><br>r = %{z:.3f}<extra></extra>"
+                )
+                _show_chart(fig)
 
             if not policies_df.empty and "risk_tier" in policies_df.columns:
                 rt = policies_df["risk_tier"].value_counts().reset_index()
@@ -316,7 +367,10 @@ with tabs[0]:
                     color_discrete_map={"low": "#00C896", "medium": "#FFD700", "high": "#FF6B6B"},
                     template="plotly_dark",
                 )
-                st.plotly_chart(fig, use_container_width=True)
+                fig.update_traces(
+                    hovertemplate="<b>Tier:</b> %{x}<br><b>Policies:</b> %{y}<extra></extra>"
+                )
+                _show_chart(fig)
         else:
             st.info("Install plotly (`pip install plotly`) for interactive charts.")
             st.dataframe(claims_df.head(20), use_container_width=True)
@@ -373,20 +427,24 @@ with tabs[1]:
                             "#FF6B6B" if risk_score > 0.6 else "#FFD700" if risk_score > 0.3 else "#00C896"
                         )
                         fig = go.Figure(go.Indicator(
-                            mode="gauge+number", value=risk_score,
-                            title={"text": "Risk Score", "font": {"size": 20}},
+                            mode="gauge+number+delta", value=risk_score,
+                            title={"text": "Risk Score", "font": {"size": 18, "color": "#E0E0E0"}},
+                            delta={"reference": 0.5, "increasing": {"color": "#FF6B6B"}, "decreasing": {"color": "#00C896"}},
                             gauge={
-                                "axis": {"range": [0, 1]},
-                                "bar": {"color": gauge_color},
+                                "axis": {"range": [0, 1], "tickcolor": "#E0E0E0"},
+                                "bar": {"color": gauge_color, "thickness": 0.3},
+                                "bgcolor": "rgba(0,0,0,0)",
+                                "bordercolor": "#444",
                                 "steps": [
-                                    {"range": [0, 0.3], "color": "rgba(0,200,150,0.15)"},
-                                    {"range": [0.3, 0.6], "color": "rgba(255,215,0,0.15)"},
-                                    {"range": [0.6, 1], "color": "rgba(255,107,107,0.15)"},
+                                    {"range": [0, 0.3], "color": "rgba(0,200,150,0.12)"},
+                                    {"range": [0.3, 0.6], "color": "rgba(255,215,0,0.12)"},
+                                    {"range": [0.6, 1], "color": "rgba(255,107,107,0.12)"},
                                 ],
+                                "threshold": {"line": {"color": "white", "width": 2}, "thickness": 0.8, "value": risk_score},
                             },
+                            number={"font": {"color": gauge_color, "size": 36}},
                         ))
-                        fig.update_layout(template="plotly_dark", height=300)
-                        st.plotly_chart(fig, use_container_width=True)
+                        _show_chart(fig, key="uw_gauge")
 
                         shap_drivers = getattr(result, "shap_drivers", [])
                         if shap_drivers:
@@ -397,14 +455,17 @@ with tabs[1]:
                                 fig2 = go.Figure(go.Bar(
                                     x=df_shap["shap_value"], y=df_shap["feature"],
                                     orientation="h", marker_color=colors,
+                                    hovertemplate="<b>%{y}</b><br>SHAP: %{x:.4f}<extra></extra>",
+                                    text=[f"{v:+.3f}" for v in df_shap["shap_value"]],
+                                    textposition="outside",
                                 ))
                                 fig2.update_layout(
                                     title="Top SHAP Feature Drivers",
                                     template="plotly_dark",
-                                    xaxis_title="SHAP Value",
-                                    height=350,
+                                    xaxis_title="SHAP Value (impact on risk score)",
+                                    height=380,
                                 )
-                                st.plotly_chart(fig2, use_container_width=True)
+                                _show_chart(fig2, key="uw_shap")
 
                     with st.expander("📄 Raw Result JSON"):
                         st.json(result.model_dump() if hasattr(result, "model_dump") else vars(result))
@@ -464,36 +525,45 @@ with tabs[2]:
                     m3.metric("Confidence Tier", getattr(result, "confidence_tier", "N/A"))
 
                     if HAS_PLOTLY:
+                        fraud_color = "#FF6B6B" if fraud_score > 0.5 else "#00C896"
                         fig = go.Figure(go.Indicator(
-                            mode="gauge+number", value=fraud_score,
-                            title={"text": "Fraud Score"},
+                            mode="gauge+number+delta", value=fraud_score,
+                            title={"text": "Fraud Probability", "font": {"size": 18, "color": "#E0E0E0"}},
+                            delta={"reference": 0.5, "increasing": {"color": "#FF6B6B"}, "decreasing": {"color": "#00C896"}},
                             gauge={
-                                "axis": {"range": [0, 1]},
-                                "bar": {"color": "#FF6B6B" if fraud_score > 0.5 else "#00C896"},
+                                "axis": {"range": [0, 1], "tickcolor": "#E0E0E0"},
+                                "bar": {"color": fraud_color, "thickness": 0.3},
+                                "bgcolor": "rgba(0,0,0,0)",
+                                "bordercolor": "#444",
                                 "steps": [
-                                    {"range": [0, 0.3], "color": "rgba(0,200,150,0.15)"},
-                                    {"range": [0.3, 0.6], "color": "rgba(255,215,0,0.15)"},
-                                    {"range": [0.6, 1], "color": "rgba(255,107,107,0.15)"},
+                                    {"range": [0, 0.3], "color": "rgba(0,200,150,0.12)"},
+                                    {"range": [0.3, 0.6], "color": "rgba(255,215,0,0.12)"},
+                                    {"range": [0.6, 1], "color": "rgba(255,107,107,0.12)"},
                                 ],
+                                "threshold": {"line": {"color": "white", "width": 2}, "thickness": 0.8, "value": 0.5},
                             },
+                            number={"font": {"color": fraud_color, "size": 36}},
                         ))
-                        fig.update_layout(template="plotly_dark", height=300)
-                        st.plotly_chart(fig, use_container_width=True)
+                        _show_chart(fig, key="fraud_gauge")
 
                         shap_drivers = getattr(result, "shap_drivers", [])
                         if shap_drivers:
                             df_shap = pd.DataFrame(shap_drivers)
                             if "feature" in df_shap.columns and "shap_value" in df_shap.columns:
                                 df_shap = df_shap.sort_values("shap_value")
+                                colors = ["#00C896" if v < 0 else "#FF6B6B" for v in df_shap["shap_value"]]
                                 fig2 = go.Figure(go.Bar(
                                     x=df_shap["shap_value"], y=df_shap["feature"],
-                                    orientation="h",
-                                    marker_color=["#00C896" if v < 0 else "#FF6B6B" for v in df_shap["shap_value"]],
+                                    orientation="h", marker_color=colors,
+                                    hovertemplate="<b>%{y}</b><br>SHAP: %{x:.4f}<extra></extra>",
+                                    text=[f"{v:+.3f}" for v in df_shap["shap_value"]],
+                                    textposition="outside",
                                 ))
                                 fig2.update_layout(
-                                    title="SHAP Feature Drivers", template="plotly_dark", height=300,
+                                    title="SHAP Feature Drivers",
+                                    template="plotly_dark", height=320,
                                 )
-                                st.plotly_chart(fig2, use_container_width=True)
+                                _show_chart(fig2, key="fraud_shap")
 
                     with st.expander("📄 Raw Result"):
                         st.json(result.model_dump() if hasattr(result, "model_dump") else vars(result))
@@ -650,11 +720,12 @@ with tabs[4]:
                                     ))
                                 fig.update_layout(
                                     title="Collusion Network Graph", template="plotly_dark",
-                                    showlegend=True, hovermode="closest", height=500,
+                                    showlegend=True, hovermode="closest", height=520,
                                     xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
                                     yaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+                                    legend=dict(bgcolor="rgba(0,0,0,0.4)", bordercolor="#444", borderwidth=1),
                                 )
-                                st.plotly_chart(fig, use_container_width=True)
+                                _show_chart(fig, key="graph_network")
                         except Exception:
                             pass
 
@@ -795,12 +866,13 @@ with tabs[6]:
         fig = go.Figure(go.Bar(
             x=percentiles, y=latencies, marker_color="#00C896",
             text=[f"{v:.3f}s" for v in latencies], textposition="outside",
+            hovertemplate="<b>%{x}</b><br>Latency: %{y:.3f}s<extra></extra>",
         ))
         fig.update_layout(
             title="Agent Latency Percentiles (seconds)", template="plotly_dark",
             yaxis_title="Latency (s)", xaxis_title="Percentile", height=350,
         )
-        st.plotly_chart(fig, use_container_width=True)
+        _show_chart(fig, key="obs_latency")
 
         rng2 = np.random.default_rng(seed=99)
         hours = list(range(24))
@@ -809,12 +881,13 @@ with tabs[6]:
             x=hours, y=decisions_ts, mode="lines+markers",
             line=dict(color="#00C896", width=2),
             fill="tozeroy", fillcolor="rgba(0,200,150,0.1)", name="Decisions",
+            hovertemplate="<b>Hour:</b> %{x}<br><b>Cumulative:</b> %{y}<extra></extra>",
         ))
         fig2.update_layout(
             title="Decisions Drafted — Last 24 Hours", template="plotly_dark",
             xaxis_title="Hours Ago", yaxis_title="Cumulative Decisions", height=300,
         )
-        st.plotly_chart(fig2, use_container_width=True)
+        _show_chart(fig2, key="obs_decisions")
 
     st.info("📊 Grafana dashboard: http://localhost:3000 (requires Docker Compose)")
 
@@ -836,24 +909,26 @@ with tabs[7]:
                 if HAS_PLOTLY:
                     fig = go.Figure(go.Indicator(
                         mode="gauge+number+delta", value=score,
-                        title={"text": "IRDAI Compliance Score"},
+                        title={"text": "IRDAI Compliance Score", "font": {"size": 18, "color": "#E0E0E0"}},
                         delta={"reference": 80, "increasing": {"color": "#00C896"}, "decreasing": {"color": "#FF6B6B"}},
                         gauge={
-                            "axis": {"range": [0, 100]},
-                            "bar": {"color": gauge_color},
+                            "axis": {"range": [0, 100], "tickcolor": "#E0E0E0"},
+                            "bar": {"color": gauge_color, "thickness": 0.3},
+                            "bgcolor": "rgba(0,0,0,0)",
+                            "bordercolor": "#444",
                             "steps": [
-                                {"range": [0, 60], "color": "rgba(255,107,107,0.15)"},
-                                {"range": [60, 80], "color": "rgba(255,215,0,0.15)"},
-                                {"range": [80, 100], "color": "rgba(0,200,150,0.15)"},
+                                {"range": [0, 60], "color": "rgba(255,107,107,0.12)"},
+                                {"range": [60, 80], "color": "rgba(255,215,0,0.12)"},
+                                {"range": [80, 100], "color": "rgba(0,200,150,0.12)"},
                             ],
                             "threshold": {"line": {"color": "white", "width": 3}, "thickness": 0.75, "value": 80},
                         },
+                        number={"font": {"color": gauge_color, "size": 40}, "suffix": "/100"},
                     ))
-                    fig.update_layout(template="plotly_dark", height=350)
 
                     cg1, cg2 = st.columns(2)
                     with cg1:
-                        st.plotly_chart(fig, use_container_width=True)
+                        _show_chart(fig, key="compliance_gauge")
                     with cg2:
                         st.metric("Compliance Score", f"{score:.1f}/100")
                         st.markdown(f"**Summary:** {report.summary}")
@@ -863,9 +938,13 @@ with tabs[7]:
                             names=["compliant", "partial", "non_compliant"],
                             title="Controls Breakdown",
                             color_discrete_map={"compliant": "#00C896", "partial": "#FFD700", "non_compliant": "#FF6B6B"},
-                            hole=0.4, template="plotly_dark",
+                            hole=0.45, template="plotly_dark",
                         )
-                        st.plotly_chart(fig2, use_container_width=True)
+                        fig2.update_traces(
+                            hovertemplate="<b>%{label}</b><br>Count: %{value}<br>%{percent}<extra></extra>",
+                            textinfo="label+percent",
+                        )
+                        _show_chart(fig2, key="compliance_pie")
                 else:
                     st.metric("Compliance Score", f"{score:.1f}/100")
                     st.markdown(f"**Summary:** {report.summary}")
