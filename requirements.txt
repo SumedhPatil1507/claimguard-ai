@@ -33,6 +33,17 @@ prometheus-client>=0.16.0
 # ── SHAP (graceful empty-list fallback if missing) ───────────────────────────
 shap>=0.41.0
 
-# NOTE: chromadb + sentence-transformers are intentionally omitted.
-# They are very large and slow to install on Streamlit Cloud.
-# The PolicyVectorStore falls back to returning [] which is handled gracefully.
+# ── Vector store — hybrid search (Qdrant + BM25 + cross-encoder) ─────────────
+# All three are optional: graceful fallbacks fire if any are absent.
+# qdrant-client: pure-Python, no server required in memory/local modes.
+qdrant-client>=1.9.0
+# rank-bm25: lightweight BM25 sparse retrieval (no native extensions).
+rank-bm25>=0.2.2
+# sentence-transformers: dense embeddings (all-MiniLM-L6-v2) +
+#   cross-encoder re-ranking (cross-encoder/ms-marco-MiniLM-L-6-v2).
+sentence-transformers>=2.7.0
+# pydantic-settings: required by VectorStoreSettings (BaseSettings).
+pydantic-settings>=2.0.0
+# cohere: optional Cohere Rerank API backend (only needed if
+#   CLAIMGUARD_VS_RERANKER_BACKEND=cohere is set).
+# cohere>=5.0.0

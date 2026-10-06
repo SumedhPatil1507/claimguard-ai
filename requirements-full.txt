@@ -1,6 +1,7 @@
 fastapi==0.111.0
 uvicorn[standard]==0.29.0
 pydantic==2.7.1
+pydantic-settings==2.3.4
 streamlit==1.35.0
 plotly==5.22.0
 xgboost==2.0.3
@@ -11,8 +12,11 @@ optuna==3.6.1
 langchain-core==0.2.5
 langgraph==0.1.5
 langchain-groq==0.1.5
-chromadb==0.5.0
+# ChromaDB replaced by Qdrant hybrid search stack
+qdrant-client==1.9.1
 sentence-transformers==3.0.0
+rank-bm25==0.2.2
+# cohere==5.5.0  # uncomment to enable Cohere Rerank API backend
 networkx==3.3
 neo4j==5.20.0
 asyncpg==0.29.0
