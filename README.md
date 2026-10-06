@@ -13,7 +13,7 @@
 [![LangGraph](https://img.shields.io/badge/LangGraph-0.1-00A67E?style=for-the-badge)](https://langchain-ai.github.io/langgraph/)
 [![Qdrant](https://img.shields.io/badge/Qdrant-1.9-DB4437?style=for-the-badge&logo=qdrant)](https://qdrant.tech)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
-[![Tests](https://img.shields.io/badge/Tests-149%20passing-brightgreen?style=for-the-badge&logo=pytest)](tests/)
+[![Tests](https://img.shields.io/badge/Tests-208%20passing-brightgreen?style=for-the-badge&logo=pytest)](tests/)
 
 <br/>
 
@@ -553,7 +553,7 @@ pytest tests/test_compliance.py      # IRDAI compliance
 pytest tests/test_agent_graph.py     # LangGraph copilot
 ```
 
-Current status: **149 passed · 6 skipped (sentence-transformers not installed locally) · 0 failed**
+Current status: **208 passed · 24 skipped (torch DLL broken locally / sentence-transformers not installed) · 0 failed**
 
 ---
 
@@ -564,16 +564,16 @@ claimguard-ai/
 ├── api/
 │   └── main.py              FastAPI app (async Celery enqueue, RBAC, rate-limit)
 ├── app/
-│   └── app.py               Streamlit UI (8 tabs, Plotly dark theme)
+│   └── app.py               Streamlit UI (8 tabs, Plotly dark theme, interactive charts)
 ├── src/
 │   ├── agent_graph.py        LangGraph Policy Copilot pipeline
 │   ├── claims_fraud.py       Fraud detection ML engine
 │   ├── compliance_irdai.py   IRDAI compliance reporting
 │   ├── copilot_metrics.py    Prometheus metrics helpers
-│   ├── database.py           DB manager (asyncpg → Supabase → CSV)
-│   │                         + ProductionDatabaseManager (no fallback)
+│   ├── database.py           DB manager + ProductionDatabaseManager (no fallback)
 │   ├── encryption.py         Fernet PII encryption
-│   ├── graph_collusion.py    Neo4j / NetworkX collusion detection
+│   ├── gnn_collusion.py      Heterogeneous R-GCN GNN for collusion scoring (NEW)
+│   ├── graph_collusion.py    Two-stage ring detector (structural + GNN)
 │   ├── hitl.py               Human-in-the-loop review queue
 │   ├── rate_limit.py         Sliding-window rate limiter
 │   ├── rbac.py               Role-based access control
@@ -582,11 +582,13 @@ claimguard-ai/
 │   ├── vector_store.py       Qdrant hybrid BM25+dense+rerank store
 │   ├── vector_store_settings.py  Pydantic settings (CLAIMGUARD_VS_*)
 │   └── worker.py             Celery app + background tasks
+├── scripts/
+│   └── train_gnn_collusion.py  R-GCN training pipeline (CLI)
 ├── data/
 │   ├── synthetic_generator.py  Generate sample_claims.csv + sample_policies.csv
 │   ├── policy_docs/            Sample policy wording + IRDAI guidelines
 │   └── models/                 Persisted ML model artefacts
-├── tests/                    pytest test suite (149 tests)
+├── tests/                    pytest test suite (208 tests)
 ├── eval/
 │   └── ragas_eval.py         RAGAS retrieval quality evaluation
 ├── docker-compose.yml        Full stack (Redis, Celery, API, Streamlit, PG, Neo4j, Prom, Grafana)
