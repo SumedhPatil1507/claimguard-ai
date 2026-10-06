@@ -31,6 +31,7 @@
 
 | Version | Highlights |
 |---------|-----------|
+| **v1.4** | 🕸️ **Heterogeneous R-GCN GNN** — two-stage collusion detection; GNN score bar chart, ring colour-coding, severity upgrade rules |
 | **v1.3** | 🔄 **Celery+Redis** async task queue — `/underwrite` & `/claims/score` return instant `task_id`; poll `/tasks/{id}` |
 | **v1.2** | 🔍 **Hybrid vector search** — ChromaDB replaced with Qdrant + BM25 + Cross-Encoder re-ranking |
 | **v1.1** | 🌐 Streamlit Cloud deployment; graceful degradation for all optional deps |
@@ -323,7 +324,7 @@ curl http://localhost:8000/metrics -H "X-API-Key: admin-key-demo"
 | **🏦 Underwrite** | Real-time risk scoring form | Risk score gauge (Plotly Indicator), SHAP waterfall horizontal bar |
 | **🔍 Claims** | Fraud scoring form | Fraud score gauge, SHAP feature importance bar |
 | **🤖 Policy Copilot** | LangGraph agent chat interface | Retrieved policy clauses, model evidence table |
-| **🕸️ Graph Intel** | Collusion ring network | Interactive Plotly network graph (claimant nodes + entity diamonds) |
+| **🕸️ Graph Intel** | Two-stage collusion detection: structural rings + R-GCN GNN re-scoring | GNN score bar chart with thresholds, network graph (node size ∝ GNN risk), severity filter toggle, per-ring mini bar charts |
 | **👤 HITL Review** | Analyst approve/reject/escalate queue | Queue depth metric, item cards with inline review |
 | **📈 Observability** | Live Prometheus metrics | Latency percentile bar, decisions time-series line |
 | **✅ Compliance** | IRDAI 10-control dashboard | Score gauge, compliant/partial/non_compliant pie, expandable control cards |
@@ -393,17 +394,98 @@ Configure via `CLAIMGUARD_VS_*` env vars — see [Configuration](#️-configurat
 
 ## 🕸️ Graph Collusion Detection
 
-The `GraphCollusionDetector` builds a **bipartite graph** linking claimants to shared entities (repair shops, medical providers, witnesses). Suspicious rings are clusters where ≥ 3 claims share ≥ 2 entities.
+ClaimGuard AI uses a **two-stage pipeline** to detect claim-ring collusion:
+
+### Stage 1 — Structural ring detection (always runs)
+
+Builds a bipartite graph linking claimants to shared entities (repair shops, medical providers, witnesses). Suspicious rings are clusters where ≥ 3 claims share ≥ 2 entities.
 
 ```
 Claimant A ──── SHOP-001 ──── Claimant B
     │                              │
     └──── SHOP-001, DR-042 ────────┘
                                  ▲
-                            Colluding ring (severity: high)
+                            Ring detected (severity based on size)
 ```
 
-Metrics: degree centrality, betweenness centrality. Primary: Neo4j. Fallback: NetworkX in-process.
+Primary backend: **Neo4j**. Fallback: **NetworkX** (in-process, no server).
+
+### Stage 2 — R-GCN GNN re-scoring (optional)
+
+A **Relational Graph Convolutional Network** trained on the heterogeneous claims graph upgrades ring severity based on learned collusion signals.
+
+```
+Graph schema:
+
+  Node types          Features (dim)
+  ──────────          ──────────────────────────────────────────────
+  claimant            claim_amount, days_since_policy, prior_claims,
+                      claim_type, claim_severity, fraud_label   (6)
+  garage              avg_amount, claim_count, fraud_rate,
+                      severity_high_rate                        (4)
+  medical             same as garage                            (4)
+
+  Edge types (8 total, 4 + 4 reverse)
+  ─────────────────────────────────────────────
+  claimant ──filed_at_garage──► garage
+  claimant ──treated_by──────► medical
+  garage   ──co_used_by──────► garage
+  medical  ──co_used_by──────► medical
+```
+
+```
+R-GCN architecture:
+
+  Input projections (per node type → hidden_dim)
+       │
+  HeteroConv(SAGEConv per relation) → ReLU + Dropout
+       │
+  HeteroConv(SAGEConv per relation) → ReLU
+       │
+  claimant embeddings
+       │
+  Linear(hidden → hidden/2) → ReLU → Dropout → Linear(hidden/2 → 1)
+       │
+  sigmoid → collusion_score ∈ (0, 1)
+```
+
+**Severity upgrade rules** after GNN scoring:
+- `max_gnn_score ≥ 0.80` → ring severity forced to **high**
+- `max_gnn_score ≥ 0.60` + current severity `low` → upgraded to **medium**
+
+### Training the GNN
+
+```bash
+# Quick start (uses data/sample_claims.csv)
+python scripts/train_gnn_collusion.py
+
+# Full run with Neo4j export
+python scripts/train_gnn_collusion.py \
+  --claims-csv data/sample_claims.csv \
+  --epochs 100 --hidden-dim 64 --lr 1e-3 \
+  --write-neo4j \
+  --scores-out data/gnn_scores.json
+
+# Install PyG first (CPU)
+pip install torch --index-url https://download.pytorch.org/whl/cpu
+pip install torch_geometric
+```
+
+| Flag | Default | Description |
+|---|---|---|
+| `--claims-csv` | `data/sample_claims.csv` | Input data path |
+| `--db-url` | — | PostgreSQL DSN (overrides CSV) |
+| `--epochs` | 100 | Max training epochs |
+| `--hidden-dim` | 64 | GNN hidden dimension |
+| `--lr` | 1e-3 | Adam learning rate |
+| `--patience` | 15 | Early-stopping patience |
+| `--write-neo4j` | off | Write scores to Neo4j |
+| `--scores-out` | — | Export JSON score file |
+| `--resume` | off | Resume from checkpoint |
+
+**Exit codes**: `0` = success · `1` = data/model error · `2` = PyG absent (soft, not a CI blocker)
+
+
 
 ---
 

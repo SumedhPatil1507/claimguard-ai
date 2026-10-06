@@ -168,7 +168,7 @@ with st.sidebar:
     st.markdown("### 📋 IRDAI Compliance")
     st.success("✓ All decisions require human review")
     st.markdown("---")
-    st.caption("v1.3.0 | Celery+Redis async | MIT © 2024 ClaimGuard AI")
+    st.caption("v1.4.0 | R-GCN GNN | Celery+Redis | MIT © 2024 ClaimGuard AI")
 
 
 # ---------------------------------------------------------------------------
@@ -654,108 +654,255 @@ with tabs[3]:
 # ============================================================
 with tabs[4]:
     st.header("🕸️ Collusion Ring Detection")
-    st.markdown("Graph-based detection of claim-ring collusion using shared entities.")
+    st.markdown(
+        "Two-stage detection: **structural ring analysis** (NetworkX/Neo4j) "
+        "plus optional **R-GCN GNN re-scoring** for severity upgrade."
+    )
 
     if not HAS_GRAPH:
-        st.error("Graph collusion module not available.")
+        st.error("Graph collusion module not available. Install networkx.")
     else:
-        with st.spinner("Analysing collusion rings..."):
-            try:
-                claims_df2 = load_claims_data()
-                if claims_df2.empty:
-                    st.warning("No claims data available.")
-                else:
-                    detector = GraphCollusionDetector()
-                    rings = detector.analyze(claims_df2)
+        # ── Controls row ─────────────────────────────────────────────────
+        gcol1, gcol2, gcol3 = st.columns([2, 2, 1])
+        with gcol1:
+            use_gnn = st.toggle(
+                "🤖 Enable GNN re-scoring",
+                value=False,
+                help="Runs the R-GCN model to upgrade ring severity. Requires torch + torch_geometric.",
+            )
+        with gcol2:
+            sev_filter = st.multiselect(
+                "Filter by severity",
+                options=["high", "medium", "low"],
+                default=["high", "medium", "low"],
+                key="graph_sev_filter",
+            )
+        with gcol3:
+            st.markdown("&nbsp;", unsafe_allow_html=True)
+            run_btn = st.button("🔍 Analyse", use_container_width=True, key="graph_run")
 
-                    m1, m2, m3 = st.columns(3)
-                    m1.metric("Rings Detected", len(rings))
-                    m2.metric("High Severity", sum(1 for r in rings if getattr(r, "severity", "") == "high"))
-                    m3.metric("Claimants in Rings", sum(len(getattr(r, "claimant_ids", [])) for r in rings))
-
-                    if rings and HAS_PLOTLY:
-                        try:
-                            import networkx as nx
-                            G = nx.Graph()
-                            for ring in rings:
-                                for cid in getattr(ring, "claimant_ids", []):
-                                    G.add_node(cid, node_type="claimant")
-                                for eid in getattr(ring, "shared_entities", []):
-                                    G.add_node(eid, node_type="entity")
-                                    for cid in getattr(ring, "claimant_ids", []):
-                                        G.add_edge(cid, eid)
-
-                            if len(G.nodes) > 0:
-                                pos = nx.spring_layout(G, seed=42)
-                                edge_x, edge_y = [], []
-                                for e0, e1 in G.edges():
-                                    x0, y0 = pos[e0]; x1, y1 = pos[e1]
-                                    edge_x += [x0, x1, None]; edge_y += [y0, y1, None]
-
-                                claimant_nodes = [n for n, d in G.nodes(data=True) if d.get("node_type") == "claimant"]
-                                entity_nodes = [n for n, d in G.nodes(data=True) if d.get("node_type") == "entity"]
-
-                                fig = go.Figure()
-                                fig.add_trace(go.Scatter(
-                                    x=edge_x, y=edge_y, mode="lines",
-                                    line=dict(width=1, color="#444"), hoverinfo="none", name="Connections",
-                                ))
-                                if claimant_nodes:
-                                    fig.add_trace(go.Scatter(
-                                        x=[pos[n][0] for n in claimant_nodes],
-                                        y=[pos[n][1] for n in claimant_nodes],
-                                        mode="markers+text",
-                                        marker=dict(size=18, color="#5B9BD5", symbol="circle", line=dict(width=2, color="white")),
-                                        text=claimant_nodes, textposition="top center",
-                                        hoverinfo="text", name="Claimants",
-                                    ))
-                                if entity_nodes:
-                                    fig.add_trace(go.Scatter(
-                                        x=[pos[n][0] for n in entity_nodes],
-                                        y=[pos[n][1] for n in entity_nodes],
-                                        mode="markers+text",
-                                        marker=dict(size=14, color="#FF9F43", symbol="diamond", line=dict(width=2, color="white")),
-                                        text=entity_nodes, textposition="top center",
-                                        hoverinfo="text", name="Shared Entities",
-                                    ))
-                                fig.update_layout(
-                                    title="Collusion Network Graph", template="plotly_dark",
-                                    showlegend=True, hovermode="closest", height=520,
-                                    xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
-                                    yaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
-                                    legend=dict(bgcolor="rgba(0,0,0,0.4)", bordercolor="#444", borderwidth=1),
-                                )
-                                _show_chart(fig, key="graph_network")
-                        except Exception:
-                            pass
-
-                    if rings:
-                        st.markdown("### Ring Summary")
-                        ring_data = []
-                        for ring in rings:
-                            sev = getattr(ring, "severity", "medium")
-                            ring_data.append({
-                                "Ring ID": getattr(ring, "ring_id", "N/A"),
-                                "Severity": f"{'🔴' if sev=='high' else '🟡' if sev=='medium' else '🟢'} {sev}",
-                                "Claimants": len(getattr(ring, "claimant_ids", [])),
-                                "Shared Entities": len(getattr(ring, "shared_entities", [])),
-                                "Centrality Score": f"{getattr(ring, 'centrality_score', 0):.3f}",
-                            })
-                        st.dataframe(pd.DataFrame(ring_data), use_container_width=True)
-
-                        for ring in rings[:5]:
-                            with st.expander(f"Ring {getattr(ring, 'ring_id', 'N/A')} — Details"):
-                                ec1, ec2 = st.columns(2)
-                                ec1.markdown("**Claimants:**")
-                                for cid in getattr(ring, "claimant_ids", []):
-                                    ec1.markdown(f"• `{cid}`")
-                                ec2.markdown("**Shared Entities:**")
-                                for eid in getattr(ring, "shared_entities", []):
-                                    ec2.markdown(f"• `{eid}`")
+        if run_btn or "graph_rings" not in st.session_state:
+            with st.spinner("Analysing collusion rings…"):
+                try:
+                    from src.graph_collusion import GraphCollusionDetector as _GCD
+                    claims_df2 = load_claims_data()
+                    if claims_df2.empty:
+                        st.warning("No claims data available. Run data/synthetic_generator.py first.")
+                        st.session_state["graph_rings"] = []
                     else:
-                        st.success("✅ No suspicious collusion rings detected in the current dataset.")
-            except Exception as exc:
-                st.error(f"Graph analysis failed: {exc}")
+                        detector = _GCD(use_gnn=use_gnn)
+                        rings = detector.analyze(claims_df2)
+                        st.session_state["graph_rings"] = rings
+                        st.session_state["graph_claims_df"] = claims_df2
+                except Exception as exc:
+                    st.error(f"Graph analysis failed: {exc}")
+                    st.session_state["graph_rings"] = []
+
+        rings = st.session_state.get("graph_rings", [])
+        claims_df2 = st.session_state.get("graph_claims_df", pd.DataFrame())
+
+        # ── Summary metrics ───────────────────────────────────────────────
+        gnn_scored = any(getattr(r, "max_gnn_score", 0.0) > 0 for r in rings)
+        m1, m2, m3, m4 = st.columns(4)
+        m1.metric("Rings Detected", len(rings))
+        m2.metric("High Severity", sum(1 for r in rings if getattr(r, "severity", "") == "high"))
+        m3.metric("Claimants in Rings", sum(len(getattr(r, "claimant_ids", [])) for r in rings))
+        m4.metric("GNN Scored", "✅ Yes" if gnn_scored else "⬜ No")
+
+        # Apply severity filter
+        filtered_rings = [r for r in rings if getattr(r, "severity", "low") in sev_filter]
+
+        if not filtered_rings:
+            st.success("✅ No rings match the selected severity filter.")
+        else:
+            # ── GNN Score Bar Chart ───────────────────────────────────────
+            if gnn_scored and HAS_PLOTLY:
+                st.markdown("#### 📊 GNN Collusion Score by Ring")
+                ring_ids   = [getattr(r, "ring_id", f"ring-{i}")[:12] for i, r in enumerate(filtered_rings)]
+                gnn_scores = [round(getattr(r, "max_gnn_score", 0.0), 3) for r in filtered_rings]
+                sev_colors = {
+                    "high":   "#FF6B6B",
+                    "medium": "#FFD700",
+                    "low":    "#00C896",
+                }
+                bar_colors = [sev_colors.get(getattr(r, "severity", "low"), "#888") for r in filtered_rings]
+
+                fig_gnn = go.Figure(go.Bar(
+                    x=ring_ids, y=gnn_scores,
+                    marker_color=bar_colors,
+                    text=[f"{s:.3f}" for s in gnn_scores],
+                    textposition="outside",
+                    hovertemplate="<b>Ring:</b> %{x}<br><b>Max GNN Score:</b> %{y:.3f}<extra></extra>",
+                ))
+                fig_gnn.add_hline(
+                    y=0.60, line_dash="dot", line_color="#FFD700",
+                    annotation_text="Severity upgrade threshold (0.60)",
+                    annotation_position="top right",
+                )
+                fig_gnn.add_hline(
+                    y=0.80, line_dash="dot", line_color="#FF6B6B",
+                    annotation_text="High-risk threshold (0.80)",
+                    annotation_position="top right",
+                )
+                fig_gnn.update_layout(
+                    template="plotly_dark", height=340,
+                    xaxis_title="Ring ID", yaxis_title="Max GNN Collusion Score",
+                    yaxis=dict(range=[0, 1.05]),
+                )
+                _show_chart(fig_gnn, key="gnn_bar")
+
+            # ── Network Graph ─────────────────────────────────────────────
+            if HAS_PLOTLY:
+                st.markdown("#### 🌐 Collusion Network")
+                try:
+                    import networkx as nx
+                    G = nx.Graph()
+                    # Assign each ring a colour for node grouping
+                    ring_palette = [
+                        "#FF6B6B", "#FFD700", "#5B9BD5",
+                        "#00C896", "#FF9F43", "#A29BFE", "#FD79A8",
+                    ]
+                    ring_color_map: dict = {}
+                    for ri, ring in enumerate(filtered_rings):
+                        col = ring_palette[ri % len(ring_palette)]
+                        for cid in getattr(ring, "claimant_ids", []):
+                            G.add_node(cid, node_type="claimant", ring_color=col,
+                                       gnn_score=getattr(ring, "gnn_scores", {}).get(cid, 0.0))
+                            ring_color_map[cid] = col
+                        for eid in getattr(ring, "shared_entities", []):
+                            G.add_node(eid, node_type="entity", ring_color=col, gnn_score=0.0)
+                            for cid in getattr(ring, "claimant_ids", []):
+                                G.add_edge(cid, eid)
+
+                    if len(G.nodes) > 0:
+                        pos = nx.spring_layout(G, seed=42)
+                        edge_x, edge_y = [], []
+                        for e0, e1 in G.edges():
+                            x0, y0 = pos[e0]; x1, y1 = pos[e1]
+                            edge_x += [x0, x1, None]; edge_y += [y0, y1, None]
+
+                        claimant_nodes = [(n, d) for n, d in G.nodes(data=True) if d.get("node_type") == "claimant"]
+                        entity_nodes   = [(n, d) for n, d in G.nodes(data=True) if d.get("node_type") == "entity"]
+
+                        fig_net = go.Figure()
+                        fig_net.add_trace(go.Scatter(
+                            x=edge_x, y=edge_y, mode="lines",
+                            line=dict(width=0.8, color="rgba(255,255,255,0.15)"),
+                            hoverinfo="none", name="Connections",
+                        ))
+
+                        if claimant_nodes:
+                            # Size nodes by GNN score (larger = higher risk)
+                            sizes  = [14 + 20 * d.get("gnn_score", 0.0) for _, d in claimant_nodes]
+                            colors = [d.get("ring_color", "#5B9BD5") for _, d in claimant_nodes]
+                            hover  = [
+                                f"<b>{n}</b><br>GNN score: {d.get('gnn_score', 0.0):.3f}"
+                                for n, d in claimant_nodes
+                            ]
+                            fig_net.add_trace(go.Scatter(
+                                x=[pos[n][0] for n, _ in claimant_nodes],
+                                y=[pos[n][1] for n, _ in claimant_nodes],
+                                mode="markers+text",
+                                marker=dict(size=sizes, color=colors, symbol="circle",
+                                            line=dict(width=1.5, color="white"),
+                                            opacity=0.9),
+                                text=[n for n, _ in claimant_nodes],
+                                textposition="top center",
+                                textfont=dict(size=9, color="white"),
+                                hovertemplate="%{customdata}<extra></extra>",
+                                customdata=hover,
+                                name="Claimants",
+                            ))
+
+                        if entity_nodes:
+                            fig_net.add_trace(go.Scatter(
+                                x=[pos[n][0] for n, _ in entity_nodes],
+                                y=[pos[n][1] for n, _ in entity_nodes],
+                                mode="markers+text",
+                                marker=dict(size=12, color="#FF9F43", symbol="diamond",
+                                            line=dict(width=1.5, color="white"), opacity=0.85),
+                                text=[n for n, _ in entity_nodes],
+                                textposition="top center",
+                                textfont=dict(size=8, color="#FFD700"),
+                                hovertemplate="<b>%{text}</b><extra>Shared Entity</extra>",
+                                name="Shared Entities",
+                            ))
+
+                        fig_net.update_layout(
+                            title="Collusion Network — node size ∝ GNN risk score",
+                            template="plotly_dark",
+                            paper_bgcolor="rgba(0,0,0,0)",
+                            plot_bgcolor="rgba(13,27,42,0.8)",
+                            showlegend=True, hovermode="closest", height=560,
+                            xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+                            yaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+                            legend=dict(bgcolor="rgba(0,0,0,0.45)", bordercolor="#444",
+                                        borderwidth=1, font=dict(color="#E0E0E0")),
+                            margin=dict(l=10, r=10, t=45, b=10),
+                        )
+                        _show_chart(fig_net, key="graph_network")
+                except Exception as exc:
+                    st.warning(f"Network graph unavailable: {exc}")
+
+            # ── Ring Summary Table ────────────────────────────────────────
+            st.markdown("#### 📋 Ring Summary")
+            ring_rows = []
+            for ring in filtered_rings:
+                sev = getattr(ring, "severity", "medium")
+                sev_badge = "🔴 high" if sev == "high" else "🟡 medium" if sev == "medium" else "🟢 low"
+                gnn_max   = getattr(ring, "max_gnn_score", 0.0)
+                ring_rows.append({
+                    "Ring ID":         getattr(ring, "ring_id", "N/A"),
+                    "Severity":        sev_badge,
+                    "Claimants":       len(getattr(ring, "claimant_ids", [])),
+                    "Shared Entities": len(getattr(ring, "shared_entities", [])),
+                    "Centrality":      f"{getattr(ring, 'centrality_score', 0):.3f}",
+                    "Max GNN Score":   f"{gnn_max:.3f}" if gnn_max > 0 else "—",
+                })
+            st.dataframe(pd.DataFrame(ring_rows), use_container_width=True,
+                         column_config={"Severity": st.column_config.TextColumn(width="small")})
+
+            # ── Ring Detail Expanders ─────────────────────────────────────
+            for ring in filtered_rings[:8]:
+                rid  = getattr(ring, "ring_id", "N/A")
+                sev  = getattr(ring, "severity", "medium")
+                icon = "🔴" if sev == "high" else "🟡" if sev == "medium" else "🟢"
+                with st.expander(f"{icon} Ring `{rid}` — {sev.upper()}"):
+                    d1, d2, d3 = st.columns(3)
+                    d1.metric("Claimants",      len(getattr(ring, "claimant_ids", [])))
+                    d2.metric("Shared Entities", len(getattr(ring, "shared_entities", [])))
+                    d3.metric("Max GNN Score",  f"{getattr(ring, 'max_gnn_score', 0.0):.3f}")
+
+                    ec1, ec2 = st.columns(2)
+                    ec1.markdown("**Claimants:**")
+                    gnn_scores_map = getattr(ring, "gnn_scores", {})
+                    for cid in getattr(ring, "claimant_ids", []):
+                        gnn_val = gnn_scores_map.get(cid, None)
+                        suffix  = f" — GNN: `{gnn_val:.3f}`" if gnn_val is not None else ""
+                        flag    = " 🚨" if gnn_val is not None and gnn_val >= 0.5 else ""
+                        ec1.markdown(f"• `{cid}`{suffix}{flag}")
+                    ec2.markdown("**Shared Entities:**")
+                    for eid in getattr(ring, "shared_entities", []):
+                        ec2.markdown(f"• `{eid}`")
+
+                    # Mini GNN score bar for this ring
+                    if gnn_scores_map and HAS_PLOTLY:
+                        cids = list(gnn_scores_map.keys())
+                        vals = [gnn_scores_map[c] for c in cids]
+                        mini_fig = go.Figure(go.Bar(
+                            x=cids, y=vals,
+                            marker_color=["#FF6B6B" if v >= 0.5 else "#00C896" for v in vals],
+                            hovertemplate="<b>%{x}</b><br>Score: %{y:.3f}<extra></extra>",
+                        ))
+                        mini_fig.update_layout(
+                            template="plotly_dark", height=220,
+                            margin=dict(l=10, r=10, t=10, b=40),
+                            yaxis=dict(range=[0, 1]),
+                            xaxis_title="Claimant", yaxis_title="GNN Score",
+                        )
+                        _show_chart(mini_fig, key=f"ring_mini_{rid}")
+
+
 
 # ============================================================
 # Tab 6 — HITL Review
