@@ -33,7 +33,7 @@ _QUEUE_FILE = _DATA_DIR / "hitl_queue.json"
 class HITLItem(BaseModel):
     """A single decision item awaiting human analyst review."""
 
-    model_config = ConfigDict(str_strip_whitespace=True)
+    model_config = ConfigDict(str_strip_whitespace=True, protected_namespaces=())
 
     item_id: str = Field(default_factory=lambda: uuid4().hex)
     session_id: str

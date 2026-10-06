@@ -1,15 +1,36 @@
 """
-ClaimGuard AI — FastAPI application entry-point.
+ClaimGuard AI — FastAPI application
+====================================
 
-Endpoints
----------
-GET  /health                  – liveness probe (no auth)
-POST /underwrite              – underwriting risk scoring  (analyst|admin)
-POST /claims/score            – claims fraud scoring       (analyst|admin)
-POST /copilot/decide          – Policy Copilot pipeline    (analyst|admin)
-GET  /graph/collusion-rings   – collusion ring detection   (analyst|admin)
-GET  /compliance              – IRDAI compliance report    (viewer|analyst|admin)
-GET  /metrics                 – Prometheus metrics         (admin)
+Endpoint summary
+----------------
+GET  /health                     Liveness probe (no auth)
+POST /underwrite                 Enqueue underwriting job → {task_id, status_url}
+POST /claims/score               Enqueue fraud-scoring job → {task_id, status_url}
+GET  /tasks/{task_id}            Poll Celery task status
+POST /copilot/decide             Run Policy Copilot pipeline inline
+GET  /graph/collusion-rings      Detect collusion rings (PostgreSQL required)
+GET  /compliance                 IRDAI compliance report
+GET  /metrics                    Prometheus metrics (admin only)
+
+Async execution model
+---------------------
+/underwrite and /claims/score are **non-blocking**: they validate the request
+body, check Redis reachability, enqueue a Celery task, and immediately return
+HTTP 202 with a ``task_id`` and a ``status_url`` the caller can poll.
+
+/tasks/{task_id} returns the current state:
+  PENDING  — queued, worker has not started yet
+  STARTED  — worker is running the inference
+  SUCCESS  — complete; ``result`` key contains the payload
+  FAILURE  — failed; ``error`` and ``error_type`` keys explain why
+  RETRY    — worker retrying after a transient error
+
+Infrastructure errors
+---------------------
+When Redis or PostgreSQL is unreachable, affected endpoints return
+503 Service Unavailable immediately — there is no silent CSV fallback in
+production routes.
 """
 
 from __future__ import annotations
@@ -19,32 +40,32 @@ import logging
 import os
 import sys
 import time
+import uuid
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any, Dict
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from dotenv import load_dotenv
-
-load_dotenv()
+# Load .env before anything else so env vars are available to all imports
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
 
 # ---------------------------------------------------------------------------
-# JSON logging
+# JSON structured logging
 # ---------------------------------------------------------------------------
-
 
 class _JsonFormatter(logging.Formatter):
-    """Emit each log record as a single-line JSON object."""
-
     def format(self, record: logging.LogRecord) -> str:  # noqa: A003
-        return _json.dumps(
-            {
-                "time": datetime.fromtimestamp(record.created, tz=timezone.utc).isoformat(),
-                "level": record.levelname,
-                "message": record.getMessage(),
-            }
-        )
-
+        return _json.dumps({
+            "time":    datetime.fromtimestamp(record.created, tz=timezone.utc).isoformat(),
+            "level":   record.levelname,
+            "logger":  record.name,
+            "message": record.getMessage(),
+        })
 
 _handler = logging.StreamHandler()
 _handler.setFormatter(_JsonFormatter())
@@ -52,132 +73,239 @@ logging.basicConfig(level=logging.INFO, handlers=[_handler])
 logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
-# Core FastAPI imports (always available — listed in requirements.txt)
+# FastAPI core (always available)
 # ---------------------------------------------------------------------------
 from fastapi import Depends, FastAPI, Header, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, PlainTextResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 import uvicorn
-import pandas as pd
+from contextlib import asynccontextmanager
 
 # ---------------------------------------------------------------------------
-# src imports — each wrapped so the API starts even with missing packages
+# Infrastructure: Celery worker + database checks
+# ---------------------------------------------------------------------------
+try:
+    from src.worker import (
+        HAS_CELERY,
+        celery_app,
+        get_task_result,
+        score_claim_task,
+        score_underwriting_task,
+    )
+except Exception as _e:
+    logger.warning("worker import failed: %s", _e)
+    HAS_CELERY = False
+    celery_app = None
+    get_task_result = None          # type: ignore[assignment]
+    score_underwriting_task = None  # type: ignore[assignment]
+    score_claim_task = None         # type: ignore[assignment]
+
+try:
+    from src.database import (
+        InfrastructureError,
+        assert_postgres_reachable,
+        assert_redis_reachable,
+    )
+except Exception as _e:
+    logger.warning("database import failed: %s", _e)
+
+    class InfrastructureError(RuntimeError):  # type: ignore[no-redef]
+        pass
+
+    def assert_postgres_reachable(*_a, **_kw) -> None:   # type: ignore[misc]
+        pass
+
+    def assert_redis_reachable(*_a, **_kw) -> None:      # type: ignore[misc]
+        pass
+
+# ---------------------------------------------------------------------------
+# Domain module imports — graceful on missing deps
 # ---------------------------------------------------------------------------
 
 try:
-    from src.underwriting import UnderwritingEngine, UnderwritingFeatures, UnderwritingResult
-
-    _uw_engine = UnderwritingEngine()
+    from src.underwriting import UnderwritingFeatures, UnderwritingResult
+    _HAS_UW_SCHEMA = True
 except Exception as _e:
-    logger.warning(f"underwriting unavailable: {_e}")
-    _uw_engine = None
+    logger.warning("underwriting schema unavailable: %s", _e)
+    _HAS_UW_SCHEMA = False
     UnderwritingFeatures = None  # type: ignore[assignment,misc]
-    UnderwritingResult = None  # type: ignore[assignment,misc]
 
 try:
-    from src.claims_fraud import FraudDetectionEngine, ClaimFeatures, FraudScoringResult
-
-    _fraud_engine = FraudDetectionEngine()
+    from src.claims_fraud import ClaimFeatures, FraudScoringResult
+    _HAS_CLAIM_SCHEMA = True
 except Exception as _e:
-    logger.warning(f"claims_fraud unavailable: {_e}")
-    _fraud_engine = None
-    ClaimFeatures = None  # type: ignore[assignment,misc]
-    FraudScoringResult = None  # type: ignore[assignment,misc]
+    logger.warning("claims_fraud schema unavailable: %s", _e)
+    _HAS_CLAIM_SCHEMA = False
+    ClaimFeatures = None         # type: ignore[assignment,misc]
 
 try:
     from src.agent_graph import run_copilot
+    _HAS_COPILOT = True
 except Exception as _e:
-    logger.warning(f"agent_graph unavailable: {_e}")
-    run_copilot = None  # type: ignore[assignment]
+    logger.warning("agent_graph unavailable: %s", _e)
+    _HAS_COPILOT = False
+    run_copilot = None           # type: ignore[assignment]
 
 try:
     from src.graph_collusion import GraphCollusionDetector
+    _HAS_GRAPH = True
 except Exception as _e:
-    logger.warning(f"graph_collusion unavailable: {_e}")
+    logger.warning("graph_collusion unavailable: %s", _e)
+    _HAS_GRAPH = False
     GraphCollusionDetector = None  # type: ignore[assignment,misc]
 
 try:
     from src.compliance_irdai import generate_compliance_report
+    _HAS_COMPLIANCE = True
 except Exception as _e:
-    logger.warning(f"compliance_irdai unavailable: {_e}")
+    logger.warning("compliance_irdai unavailable: %s", _e)
+    _HAS_COMPLIANCE = False
     generate_compliance_report = None  # type: ignore[assignment]
-
-# Optional: src.rbac / src.rate_limit (graceful — we define our own inline)
-try:
-    from src.rbac import require_role as _src_require_role
-except Exception:
-    _src_require_role = None  # type: ignore[assignment]
-
-try:
-    from src.rate_limit import rate_limit_dependency
-except Exception:
-    rate_limit_dependency = None  # type: ignore[assignment]
 
 # ---------------------------------------------------------------------------
 # Demo API key → role mapping
+# (also picks up keys from the API_KEYS env-var JSON object)
 # ---------------------------------------------------------------------------
-
-_DEMO_KEYS: dict[str, str] = {
-    "admin-key-demo": "admin",
+_DEMO_KEYS: Dict[str, str] = {
+    "admin-key-demo":   "admin",
     "analyst-key-demo": "analyst",
-    "viewer-key-demo": "viewer",
+    "viewer-key-demo":  "viewer",
 }
+
 
 # ---------------------------------------------------------------------------
 # Auth dependency
 # ---------------------------------------------------------------------------
 
-
 async def get_api_key(
     x_api_key: str = Header(None, alias="X-API-Key"),
 ) -> str:
-    """Resolve the X-API-Key header to a role string or raise 401/403."""
     if not x_api_key:
-        raise HTTPException(status_code=401, detail="X-API-Key header required")
-
+        raise HTTPException(status_code=401, detail="X-API-Key header required.")
     role = _DEMO_KEYS.get(x_api_key)
-
     if not role:
-        # Also accept keys injected via the API_KEYS environment variable
-        # (a JSON object mapping key → role).
         try:
             env_keys: dict = _json.loads(os.environ.get("API_KEYS", "{}"))
             role = env_keys.get(x_api_key)
         except Exception:
             pass
-
     if not role:
-        raise HTTPException(status_code=403, detail="Invalid API key")
-
+        raise HTTPException(status_code=403, detail="Invalid API key.")
     return role
 
 
 def require_roles(allowed: list[str]):
-    """Return a FastAPI dependency that enforces a role allowlist."""
-
+    """Dependency factory: enforce role membership."""
     async def _check(role: str = Depends(get_api_key)) -> str:
         if role not in allowed:
             raise HTTPException(
                 status_code=403,
-                detail=f"Role {role!r} is not permitted for this endpoint",
+                detail=f"Role {role!r} is not permitted. Required: {allowed}.",
             )
         return role
-
     return _check
 
 
 # ---------------------------------------------------------------------------
-# FastAPI app
+# Pydantic request/response schemas
+# ---------------------------------------------------------------------------
+
+class _FallbackUnderwritingFeatures(BaseModel):
+    age: int = 35
+    annual_income: float = 500_000.0
+    credit_score: int = 700
+    sum_insured: float = 1_000_000.0
+    coverage_type: str = "motor"
+    num_dependents: int = 2
+    prior_claims_count: int = 0
+    region: str = "north"
+    occupation: str = "salaried"
+
+
+class _FallbackClaimFeatures(BaseModel):
+    claim_id: str = "CLM-000"
+    claimant_id: str = "CLT-000"
+    policy_id: str = "POL-000"
+    claim_amount: float = 50_000.0
+    days_since_policy_start: int = 180
+    num_prior_claims: int = 0
+    claim_type: str = "motor"
+    claim_severity: str = "medium"
+    repair_shop_id: str | None = None
+    medical_provider_id: str | None = None
+
+
+class TaskEnqueueResponse(BaseModel):
+    """Returned by /underwrite and /claims/score (HTTP 202)."""
+    task_id: str = Field(..., description="UUID of the enqueued Celery task.")
+    status:  str = Field("PENDING", description="Initial task state.")
+    status_url: str = Field(..., description="URL to poll for task result.")
+    message: str = Field(..., description="Human-readable confirmation.")
+
+
+class TaskStatusResponse(BaseModel):
+    """Returned by GET /tasks/{task_id}."""
+    task_id:    str
+    status:     str
+    result:     Any = None
+    error:      str | None = None
+    error_type: str | None = None
+    progress:   dict | None = None
+
+
+class CopilotRequest(BaseModel):
+    query:        str
+    context_type: str  = "underwriting"
+    features:     dict = {}
+    session_id:   str  = ""
+
+
+# Resolve which schema classes to advertise in OpenAPI
+_UwFeaturesModel    = UnderwritingFeatures  if _HAS_UW_SCHEMA    else _FallbackUnderwritingFeatures
+_ClaimFeaturesModel = ClaimFeatures         if _HAS_CLAIM_SCHEMA  else _FallbackClaimFeatures
+
+
+# ---------------------------------------------------------------------------
+# Lifespan: warm up ML engines in a background thread
+# ---------------------------------------------------------------------------
+
+@asynccontextmanager
+async def _lifespan(application: FastAPI):
+    """Warm-up on startup; clean up on shutdown."""
+    logger.info("ClaimGuard AI API starting — version 1.0.0")
+    import threading
+
+    def _warmup() -> None:
+        try:
+            from src.underwriting import UnderwritingEngine
+            UnderwritingEngine()
+        except Exception:
+            pass
+        try:
+            from src.claims_fraud import FraudDetectionEngine
+            FraudDetectionEngine()
+        except Exception:
+            pass
+
+    threading.Thread(target=_warmup, daemon=True).start()
+    yield
+    logger.info("ClaimGuard AI API shutting down")
+
+
+# ---------------------------------------------------------------------------
+# FastAPI application
 # ---------------------------------------------------------------------------
 
 app = FastAPI(
     title="ClaimGuard AI",
     version="1.0.0",
     description=(
-        "Agentic InsurTech Platform for Underwriting Risk Scoring "
-        "and Claims Fraud Detection"
+        "Agentic InsurTech Platform — async inference via Celery + Redis. "
+        "POST to /underwrite or /claims/score to enqueue; "
+        "GET /tasks/{task_id} to poll."
     ),
+    lifespan=_lifespan,
 )
 
 app.add_middleware(
@@ -192,124 +320,243 @@ app.add_middleware(
 # Request-logging middleware
 # ---------------------------------------------------------------------------
 
-
 @app.middleware("http")
 async def _log_requests(request: Request, call_next):
     t0 = time.monotonic()
     response = await call_next(request)
-    duration_ms = round((time.monotonic() - t0) * 1000, 2)
-    logger.info(
-        _json.dumps(
-            {
-                "method": request.method,
-                "path": request.url.path,
-                "status_code": response.status_code,
-                "duration_ms": duration_ms,
-            }
-        )
-    )
+    logger.info(_json.dumps({
+        "method":      request.method,
+        "path":        request.url.path,
+        "status_code": response.status_code,
+        "duration_ms": round((time.monotonic() - t0) * 1000, 2),
+    }))
     return response
 
 
 # ---------------------------------------------------------------------------
-# Fallback Pydantic models (used when src schemas could not be imported)
+# Helper: build a status URL
 # ---------------------------------------------------------------------------
 
-
-class _FallbackUnderwritingFeatures(BaseModel):
-    age: int = 35
-    annual_income: float = 500000.0
-    credit_score: int = 700
-    sum_insured: float = 1000000.0
-    coverage_type: str = "comprehensive"
-    num_dependents: int = 2
-    prior_claims_count: int = 0
-    region: str = "urban"
-    occupation: str = "salaried"
-
-
-class _FallbackClaimFeatures(BaseModel):
-    claim_id: str = "CLM-000"
-    claim_amount: float = 50000.0
-    days_since_policy_start: int = 180
-    num_prior_claims: int = 0
-    claim_type: str = "motor"
-    claim_severity: str = "medium"
-    repair_shop_id: str | None = None
-    medical_provider_id: str | None = None
-    claimant_id: str = "CLT-000"
-
-
-# Resolve which schema classes to advertise in the OpenAPI docs.
-_UwFeaturesModel = UnderwritingFeatures if UnderwritingFeatures is not None else _FallbackUnderwritingFeatures
-_ClaimFeaturesModel = ClaimFeatures if ClaimFeatures is not None else _FallbackClaimFeatures
+def _status_url(request: Request, task_id: str) -> str:
+    """Build an absolute URL to GET /tasks/{task_id}."""
+    base = str(request.base_url).rstrip("/")
+    return f"{base}/tasks/{task_id}"
 
 
 # ---------------------------------------------------------------------------
-# Copilot request schema
+# Helper: map InfrastructureError → 503
 # ---------------------------------------------------------------------------
 
-
-class CopilotRequest(BaseModel):
-    query: str
-    context_type: str = "underwriting"
-    features: dict = {}
-    session_id: str = ""
+def _infra_503(exc: Exception) -> HTTPException:
+    return HTTPException(status_code=503, detail=str(exc))
 
 
-# ---------------------------------------------------------------------------
+# ===========================================================================
 # Endpoints
-# ---------------------------------------------------------------------------
+# ===========================================================================
 
+# ── /health ─────────────────────────────────────────────────────────────────
 
 @app.get("/health", tags=["System"])
 async def health():
     """Liveness probe — no authentication required."""
     return {
-        "status": "ok",
-        "version": "1.0.0",
+        "status":    "ok",
+        "version":   "1.0.0",
         "timestamp": datetime.now(timezone.utc).isoformat(),
     }
 
 
-@app.post("/underwrite", tags=["Underwriting"])
+# ── POST /underwrite (async, enqueue) ───────────────────────────────────────
+
+@app.post(
+    "/underwrite",
+    status_code=202,
+    response_model=TaskEnqueueResponse,
+    tags=["Underwriting"],
+    summary="Enqueue an underwriting risk-scoring job",
+)
 async def underwrite(
-    features: _UwFeaturesModel,  # type: ignore[valid-type]
+    features: _UwFeaturesModel,      # type: ignore[valid-type]
+    request: Request,
     role: str = Depends(require_roles(["analyst", "admin"])),
 ):
-    """Score an applicant at policy-issuance time and return a risk tier."""
-    if _uw_engine is None:
+    """
+    Validate the underwriting feature payload, check Redis reachability, and
+    enqueue a Celery task.
+
+    Returns HTTP **202 Accepted** immediately with a ``task_id``.
+    Poll ``status_url`` (``GET /tasks/{task_id}``) until ``status`` is
+    ``SUCCESS`` or ``FAILURE``.
+
+    Raises **503** if Redis is unreachable.
+    Raises **503** if the Celery worker package is not installed.
+    """
+    if not HAS_CELERY or score_underwriting_task is None:
         raise HTTPException(
             status_code=503,
-            detail="Underwriting engine is unavailable (missing dependencies or training data).",
+            detail=(
+                "Celery worker is not available.  "
+                "Install it with: pip install 'celery[redis]' "
+                "and ensure a Redis broker is running."
+            ),
         )
+
+    # Hard Redis check — fail fast before touching the queue
     try:
-        result = _uw_engine.predict(features)
-        # Pydantic v2 — use model_dump(); fall back to dict() for older objects.
-        return result.model_dump() if hasattr(result, "model_dump") else dict(result)
+        assert_redis_reachable()
+    except InfrastructureError as exc:
+        raise _infra_503(exc)
+
+    task_id = str(uuid.uuid4())
+    features_dict = (
+        features.model_dump() if hasattr(features, "model_dump") else dict(features)
+    )
+
+    try:
+        score_underwriting_task.apply_async(
+            kwargs={"features": features_dict},
+            task_id=task_id,
+        )
     except Exception as exc:
-        logger.warning(f"underwrite: prediction failed — {exc}")
-        raise HTTPException(status_code=500, detail=f"Underwriting prediction error: {exc}")
+        logger.error("underwrite: failed to enqueue task — %s", exc)
+        raise HTTPException(
+            status_code=503,
+            detail=f"Failed to enqueue underwriting task: {exc}",
+        )
+
+    logger.info("underwrite: enqueued task_id=%s role=%s", task_id, role)
+    return TaskEnqueueResponse(
+        task_id=task_id,
+        status="PENDING",
+        status_url=_status_url(request, task_id),
+        message=(
+            f"Underwriting job enqueued.  "
+            f"Poll {_status_url(request, task_id)} for the result."
+        ),
+    )
 
 
-@app.post("/claims/score", tags=["Claims"])
+# ── POST /claims/score (async, enqueue) ─────────────────────────────────────
+
+@app.post(
+    "/claims/score",
+    status_code=202,
+    response_model=TaskEnqueueResponse,
+    tags=["Claims"],
+    summary="Enqueue a claims fraud-scoring job",
+)
 async def claims_score(
-    features: _ClaimFeaturesModel,  # type: ignore[valid-type]
+    features: _ClaimFeaturesModel,   # type: ignore[valid-type]
+    request: Request,
     role: str = Depends(require_roles(["analyst", "admin"])),
 ):
-    """Score a claim at filing time and return a fraud probability."""
-    if _fraud_engine is None:
+    """
+    Validate the claim feature payload, check Redis reachability, and enqueue
+    a Celery task.
+
+    Returns HTTP **202 Accepted** immediately with a ``task_id``.
+    Poll ``status_url`` (``GET /tasks/{task_id}``) until ``status`` is
+    ``SUCCESS`` or ``FAILURE``.
+
+    Raises **503** if Redis is unreachable.
+    Raises **503** if the Celery worker package is not installed.
+    """
+    if not HAS_CELERY or score_claim_task is None:
         raise HTTPException(
             status_code=503,
-            detail="Fraud detection engine is unavailable (missing dependencies or training data).",
+            detail=(
+                "Celery worker is not available.  "
+                "Install it with: pip install 'celery[redis]' "
+                "and ensure a Redis broker is running."
+            ),
         )
-    try:
-        result = _fraud_engine.predict(features)
-        return result.model_dump() if hasattr(result, "model_dump") else dict(result)
-    except Exception as exc:
-        logger.warning(f"claims/score: prediction failed — {exc}")
-        raise HTTPException(status_code=500, detail=f"Fraud scoring error: {exc}")
 
+    try:
+        assert_redis_reachable()
+    except InfrastructureError as exc:
+        raise _infra_503(exc)
+
+    task_id = str(uuid.uuid4())
+    features_dict = (
+        features.model_dump() if hasattr(features, "model_dump") else dict(features)
+    )
+
+    try:
+        score_claim_task.apply_async(
+            kwargs={"features": features_dict},
+            task_id=task_id,
+        )
+    except Exception as exc:
+        logger.error("claims/score: failed to enqueue task — %s", exc)
+        raise HTTPException(
+            status_code=503,
+            detail=f"Failed to enqueue claims scoring task: {exc}",
+        )
+
+    logger.info("claims/score: enqueued task_id=%s role=%s", task_id, role)
+    return TaskEnqueueResponse(
+        task_id=task_id,
+        status="PENDING",
+        status_url=_status_url(request, task_id),
+        message=(
+            f"Claims scoring job enqueued.  "
+            f"Poll {_status_url(request, task_id)} for the result."
+        ),
+    )
+
+
+# ── GET /tasks/{task_id} (poll) ─────────────────────────────────────────────
+
+@app.get(
+    "/tasks/{task_id}",
+    response_model=TaskStatusResponse,
+    tags=["Tasks"],
+    summary="Poll the status of an enqueued task",
+)
+async def task_status(
+    task_id: str,
+    role: str = Depends(require_roles(["analyst", "admin"])),
+):
+    """
+    Return the current state of the Celery task identified by *task_id*.
+
+    Possible ``status`` values
+    --------------------------
+    * ``PENDING``  — queued; worker has not started yet
+    * ``STARTED``  — worker is running the inference
+    * ``SUCCESS``  — complete; ``result`` contains the payload
+    * ``FAILURE``  — failed; ``error`` and ``error_type`` explain why
+    * ``RETRY``    — worker is retrying after a transient error
+
+    Raises **503** if Celery is not installed.
+    Raises **503** if Redis is unreachable.
+    Raises **404** if *task_id* is unknown (PENDING in Celery terms — the
+    caller can distinguish by checking whether they themselves enqueued it).
+    """
+    if not HAS_CELERY or get_task_result is None:
+        raise HTTPException(
+            status_code=503,
+            detail="Celery is not installed; task status polling is unavailable.",
+        )
+
+    try:
+        payload = get_task_result(task_id)
+    except InfrastructureError as exc:
+        raise _infra_503(exc)
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc))
+    except Exception as exc:
+        logger.error("tasks/%s: status retrieval failed — %s", task_id, exc)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Could not retrieve task status: {exc}",
+        )
+
+    return TaskStatusResponse(**payload)
+
+
+# ── POST /copilot/decide ─────────────────────────────────────────────────────
 
 @app.post("/copilot/decide", tags=["Policy Copilot"])
 async def copilot_decide(
@@ -317,12 +564,15 @@ async def copilot_decide(
     role: str = Depends(require_roles(["analyst", "admin"])),
 ):
     """
-    Run the Policy Copilot LangGraph pipeline and return the full state dict.
+    Run the Policy Copilot LangGraph pipeline **inline** (synchronous).
 
-    The pipeline always enqueues the draft for human analyst review (HITL).
-    It never auto-approves or auto-denies a claim or policy.
+    The pipeline always enqueues its draft for human analyst review (HITL).
+    It never auto-approves or auto-denies.
+
+    Note: for very large feature sets this call may be slow.  A future
+    version will support async enqueue like the ML endpoints.
     """
-    if run_copilot is None:
+    if not _HAS_COPILOT or run_copilot is None:
         raise HTTPException(
             status_code=503,
             detail="Policy Copilot is unavailable (agent_graph import failed).",
@@ -336,44 +586,73 @@ async def copilot_decide(
         )
         return state
     except Exception as exc:
-        logger.warning(f"copilot/decide: pipeline failed — {exc}")
+        logger.warning("copilot/decide: pipeline error — %s", exc)
         raise HTTPException(status_code=500, detail=f"Policy Copilot error: {exc}")
 
+
+# ── GET /graph/collusion-rings ───────────────────────────────────────────────
 
 @app.get("/graph/collusion-rings", tags=["Graph Intelligence"])
 async def graph_collusion_rings(
     role: str = Depends(require_roles(["analyst", "admin"])),
 ):
-    """Detect claim-ring collusion from the sample claims dataset."""
-    if GraphCollusionDetector is None:
+    """
+    Detect claim-ring collusion from PostgreSQL claims data.
+
+    Raises **503** if the GraphCollusionDetector is unavailable.
+    Raises **503** if PostgreSQL is unreachable (no CSV fallback in production).
+    """
+    if not _HAS_GRAPH or GraphCollusionDetector is None:
         raise HTTPException(
             status_code=503,
             detail="Graph collusion detector is unavailable.",
         )
 
-    csv_path = Path(__file__).parent.parent / "data" / "sample_claims.csv"
+    # Hard database check — no CSV fallback in the API layer
     try:
-        df = pd.read_csv(csv_path)
+        assert_postgres_reachable()
+    except InfrastructureError as exc:
+        raise _infra_503(exc)
+
+    # Load claims from PostgreSQL
+    try:
+        from src.database import ProductionDatabaseManager
+        import pandas as pd
+        db = ProductionDatabaseManager()
+        records = await db.get_claims()
+        if not records:
+            raise HTTPException(
+                status_code=404,
+                detail="No claims records found in the database.",
+            )
+        df = pd.DataFrame(records)
+    except InfrastructureError as exc:
+        raise _infra_503(exc)
+    except HTTPException:
+        raise
     except Exception as exc:
+        logger.warning("graph/collusion-rings: data load failed — %s", exc)
         raise HTTPException(
             status_code=500,
-            detail=f"Could not load claims data from {csv_path}: {exc}",
+            detail=f"Could not load claims data: {exc}",
         )
 
     try:
         rings = GraphCollusionDetector().analyze(df)
         return {"rings": [r.model_dump() for r in rings]}
     except Exception as exc:
-        logger.warning(f"graph/collusion-rings: analysis failed — {exc}")
+        logger.warning("graph/collusion-rings: analysis failed — %s", exc)
         raise HTTPException(status_code=500, detail=f"Graph analysis error: {exc}")
 
+
+# ── GET /compliance ──────────────────────────────────────────────────────────
 
 @app.get("/compliance", tags=["Compliance"])
 async def compliance(
     role: str = Depends(require_roles(["viewer", "analyst", "admin"])),
 ):
     """Return the IRDAI compliance report with score and per-control detail."""
-    if generate_compliance_report is None:
+    if not _HAS_COMPLIANCE or generate_compliance_report is None:
         raise HTTPException(
             status_code=503,
             detail="Compliance reporting module is unavailable.",
@@ -382,56 +661,26 @@ async def compliance(
         report = generate_compliance_report()
         return report.model_dump() if hasattr(report, "model_dump") else dict(report)
     except Exception as exc:
-        logger.warning(f"compliance: report generation failed — {exc}")
+        logger.warning("compliance: report error — %s", exc)
         raise HTTPException(status_code=500, detail=f"Compliance report error: {exc}")
 
+
+# ── GET /metrics ─────────────────────────────────────────────────────────────
 
 @app.get("/metrics", tags=["Observability"])
 async def metrics(
     role: str = Depends(require_roles(["admin"])),
 ):
-    """Expose Prometheus metrics in text format."""
+    """Expose Prometheus metrics in text format (admin only)."""
     try:
         from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
-
-        return PlainTextResponse(
-            generate_latest().decode(),
-            media_type=CONTENT_TYPE_LATEST,
-        )
+        return PlainTextResponse(generate_latest().decode(), media_type=CONTENT_TYPE_LATEST)
     except ImportError:
-        return JSONResponse({"message": "prometheus_client not installed"}, status_code=200)
+        return JSONResponse({"message": "prometheus_client not installed"})
 
 
 # ---------------------------------------------------------------------------
-# Startup event — warm up ML engines in a background thread
-# ---------------------------------------------------------------------------
-
-
-@app.on_event("startup")
-async def startup_event():
-    logger.info("ClaimGuard AI API starting up")
-
-    import threading
-
-    def _warmup() -> None:
-        try:
-            from src.underwriting import UnderwritingEngine
-
-            UnderwritingEngine()
-        except Exception:
-            pass
-        try:
-            from src.claims_fraud import FraudDetectionEngine
-
-            FraudDetectionEngine()
-        except Exception:
-            pass
-
-    threading.Thread(target=_warmup, daemon=True).start()
-
-
-# ---------------------------------------------------------------------------
-# Main block
+# Main entry-point
 # ---------------------------------------------------------------------------
 
 if __name__ == "__main__":

@@ -33,6 +33,12 @@ prometheus-client>=0.16.0
 # ── SHAP (graceful empty-list fallback if missing) ───────────────────────────
 shap>=0.41.0
 
+# ── Async task queue ─────────────────────────────────────────────────────────
+# celery[redis]: Celery broker/backend transport for Redis.
+celery[redis]>=5.3.0,<6.0.0
+# redis: Python Redis client (also used by worker health checks).
+redis>=5.0.0,<6.0.0
+
 # ── Vector store — hybrid search (Qdrant + BM25 + cross-encoder) ─────────────
 # All three are optional: graceful fallbacks fire if any are absent.
 # qdrant-client: pure-Python, no server required in memory/local modes.
