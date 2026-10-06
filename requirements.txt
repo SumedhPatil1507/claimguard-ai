@@ -33,6 +33,25 @@ prometheus-client>=0.16.0
 # ── SHAP (graceful empty-list fallback if missing) ───────────────────────────
 shap>=0.41.0
 
+# ── GNN collusion detection (optional — heavy, CPU-only wheels shown) ────────
+# Install order matters: torch first, then torch_geometric.
+#
+# CPU-only (recommended for local dev / Streamlit Cloud):
+#   pip install torch --index-url https://download.pytorch.org/whl/cpu
+#   pip install torch_geometric
+#
+# GPU (CUDA 12.1):
+#   pip install torch --index-url https://download.pytorch.org/whl/cu121
+#   pip install torch_geometric
+#
+# Both packages are intentionally commented out here so that the Streamlit
+# Cloud build (which has a 50-package size limit) does not time out.
+# The code in src/gnn_collusion.py and src/graph_collusion.py degrades
+# gracefully to NetworkX ring detection when torch / torch_geometric are absent.
+#
+# torch>=2.1.0
+# torch_geometric>=2.4.0
+
 # ── Async task queue ─────────────────────────────────────────────────────────
 # celery[redis]: Celery broker/backend transport for Redis.
 celery[redis]>=5.3.0,<6.0.0

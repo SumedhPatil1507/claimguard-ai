@@ -2,6 +2,14 @@ fastapi==0.111.0
 uvicorn[standard]==0.29.0
 pydantic==2.7.1
 pydantic-settings==2.3.4
+# ── GNN collusion detection ───────────────────────────────────────────────────
+# CPU wheel (change index URL for GPU builds):
+#   pip install torch --index-url https://download.pytorch.org/whl/cpu
+#   pip install torch_geometric
+# Pinned versions for reproducibility; uncomment to enable:
+# torch==2.3.0
+# torch_geometric==2.5.3
+
 # ── Async task queue ──────────────────────────────────────────────────────────
 celery[redis]==5.4.0
 redis==5.0.7
