@@ -933,6 +933,7 @@ with tabs[2]:
                 if st.button("📤 Push to HITL Queue", use_container_width=True):
                     if HAS_HITL and hitl_queue:
                         hitl_item = HITLItem(
+                            session_id=f"sess-{claim_id}",
                             context_type="claims",
                             decision_draft=f"Claim {claim_id} for ₹{claim_amount:,.2f} scored fraud probability {fraud_score:.3f}. Note: {analyst_tag}",
                             model_result=result.model_dump() if hasattr(result, "model_dump") else vars(result),

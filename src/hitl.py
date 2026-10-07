@@ -36,10 +36,10 @@ class HITLItem(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True, protected_namespaces=())
 
     item_id: str = Field(default_factory=lambda: uuid4().hex)
-    session_id: str
+    session_id: str = Field(default_factory=lambda: uuid4().hex)
     context_type: str  # e.g. 'underwriting' | 'claims'
     decision_draft: str
-    model_result: dict
+    model_result: dict = Field(default_factory=dict)
     analyst_review: Optional[str] = None
     status: Literal["pending", "approved", "rejected", "escalated"] = "pending"
     created_at: datetime = Field(default_factory=datetime.utcnow)
