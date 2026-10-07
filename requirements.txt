@@ -1,14 +1,13 @@
-# Streamlit Community Cloud — ClaimGuard AI
-# Minimal pinned set proven to resolve on Streamlit Cloud (Python 3.11).
-# All optional heavy deps have graceful fallbacks in the code.
+# ClaimGuard AI — Backend & Worker Dependencies (Python 3.11+)
 
 # ── Core (always required) ───────────────────────────────────────────────────
-streamlit>=1.32.0
-plotly>=5.15.0
+fastapi>=0.111.0
+uvicorn[standard]>=0.29.0
 pandas>=1.5.0
 numpy>=1.23.0,<2.0.0
 python-dotenv>=0.21.0
 pydantic>=2.0.0,<3.0.0
+pydantic-settings>=2.0.0
 
 # ── ML layer (graceful sklearn/rule fallback if missing) ─────────────────────
 scikit-learn>=1.2.0
@@ -16,55 +15,33 @@ xgboost>=1.7.0
 lightgbm>=3.3.0
 optuna>=3.0.0
 
-# ── Graph (NetworkX only — no Neo4j server needed) ───────────────────────────
+# ── Graph (NetworkX / Neo4j) ─────────────────────────────────────────────────
 networkx>=2.8
+neo4j>=5.20.0
 
 # ── LangChain / LangGraph (graceful linear fallback if missing) ──────────────
 langchain-core>=0.1.0
 langgraph>=0.0.40
 langchain-groq>=0.0.1
 
-# ── Security helpers ─────────────────────────────────────────────────────────
+# ── Security helpers & JWT ──────────────────────────────────────────────────
 cryptography>=39.0.0
+python-jose[cryptography]>=3.3.0
 
-# ── Observability (no-op stubs if missing) ───────────────────────────────────
+# ── Observability ────────────────────────────────────────────────────────────
 prometheus-client>=0.16.0
 
 # ── SHAP (graceful empty-list fallback if missing) ───────────────────────────
 shap>=0.41.0
 
 # ── GNN collusion detection (optional — heavy, CPU-only wheels shown) ────────
-# Install order matters: torch first, then torch_geometric.
-#
-# CPU-only (recommended for local dev / Streamlit Cloud):
-#   pip install torch --index-url https://download.pytorch.org/whl/cpu
-#   pip install torch_geometric
-#
-# GPU (CUDA 12.1):
-#   pip install torch --index-url https://download.pytorch.org/whl/cu121
-#   pip install torch_geometric
-#
-# Both packages are intentionally commented out here so that the Streamlit
-# Cloud build (which has a 50-package size limit) does not time out.
-# The code in src/gnn_collusion.py and src/graph_collusion.py degrades
-# gracefully to NetworkX ring detection when torch / torch_geometric are absent.
-#
 # torch>=2.1.0
 # torch_geometric>=2.4.0
 
-# ── JWT auth (for /auth/token endpoint) ──────────────────────────────────────
-# python-jose provides RS256/HS256 JWT signing & verification.
-python-jose[cryptography]>=3.3.0
-
 # ── MLflow — experiment tracking, model registry, artifact logging ────────────
-# Graceful: if absent, _log_to_mlflow() in underwriting.py/claims_fraud.py
-# is a complete no-op (HAS_MLFLOW guard). Set MLFLOW_TRACKING_URI env var
-# to point at a remote MLflow server; defaults to ./mlruns (local file store).
 mlflow>=2.12.0,<3.0.0
 
 # ── Evidently AI — data drift + concept drift detection ──────────────────────
-# Graceful: if absent, DriftMonitor falls back to scipy KS test / PSI.
-# scipy is used by the fallback path when evidently is absent.
 evidently>=0.4.30,<0.5.0
 scipy>=1.10.0
 
@@ -75,22 +52,14 @@ matplotlib>=3.7.0
 pyarrow>=14.0.0
 
 # ── Async task queue ─────────────────────────────────────────────────────────
-# celery[redis]: Celery broker/backend transport for Redis.
 celery[redis]>=5.3.0,<6.0.0
-# redis: Python Redis client (also used by worker health checks).
 redis>=5.0.0,<6.0.0
 
 # ── Vector store — hybrid search (Qdrant + BM25 + cross-encoder) ─────────────
-# All three are optional: graceful fallbacks fire if any are absent.
-# qdrant-client: pure-Python, no server required in memory/local modes.
 qdrant-client>=1.9.0
-# rank-bm25: lightweight BM25 sparse retrieval (no native extensions).
 rank-bm25>=0.2.2
-# sentence-transformers: dense embeddings (all-MiniLM-L6-v2) +
-#   cross-encoder re-ranking (cross-encoder/ms-marco-MiniLM-L-6-v2).
 sentence-transformers>=2.7.0
-# pydantic-settings: required by VectorStoreSettings (BaseSettings).
-pydantic-settings>=2.0.0
-# cohere: optional Cohere Rerank API backend (only needed if
-#   CLAIMGUARD_VS_RERANKER_BACKEND=cohere is set).
-# cohere>=5.0.0
+
+# ── Database & Storage ───────────────────────────────────────────────────────
+asyncpg>=0.29.0
+supabase>=2.4.0

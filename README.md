@@ -6,7 +6,7 @@
 
 [![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.111-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
-[![Streamlit](https://img.shields.io/badge/Streamlit-1.35-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)](https://streamlit.io)
+[![Next.js](https://img.shields.io/badge/Next.js-14%20App%20Router-black?style=for-the-badge&logo=next.js)](frontend/)
 [![Celery](https://img.shields.io/badge/Celery-5.4-37814A?style=for-the-badge&logo=celery&logoColor=white)](https://docs.celeryq.dev)
 [![Redis](https://img.shields.io/badge/Redis-7-DC382D?style=for-the-badge&logo=redis&logoColor=white)](https://redis.io)
 [![XGBoost](https://img.shields.io/badge/XGBoost-2.0-FF6600?style=for-the-badge&logo=xgboost)](https://xgboost.ai)
@@ -14,15 +14,14 @@
 [![Qdrant](https://img.shields.io/badge/Qdrant-1.9-DB4437?style=for-the-badge&logo=qdrant)](https://qdrant.tech)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
 [![Tests](https://img.shields.io/badge/Tests-260%20passing-brightgreen?style=for-the-badge&logo=pytest)](tests/)
-[![Next.js](https://img.shields.io/badge/Next.js-14-black?style=for-the-badge&logo=next.js)](frontend/)
 
 <br/>
 
-> **ClaimGuard AI** combines ensemble ML, agentic RAG, and graph analytics to automate and explain the two most critical insurance workflows: **underwriting risk scoring** at policy-issuance time and **claims fraud detection** at filing time — all behind a mandatory Human-in-the-Loop review gate.
+> **ClaimGuard AI** combines ensemble ML, agentic RAG, and graph analytics to automate and explain the two most critical insurance workflows: **underwriting risk scoring** at policy-issuance time and **claims fraud detection** at filing time — all behind a mandatory Human-in-the-Loop review gate with a production-grade **Next.js 14 App Router** frontend.
 
 <br/>
 
-[🚀 Quick Start](#-quick-start) · [🏗️ Architecture](#️-architecture) · [📡 API Reference](#-api-reference) · [🖥️ UI Tabs](#️-streamlit-ui-tabs) · [⚙️ Configuration](#️-configuration) · [🧪 Testing](#-testing)
+[🚀 Quick Start](#-quick-start) · [🏗️ Architecture](#️-architecture) · [📡 API Reference](#-api-reference) · [🖥️ Production Frontend](#️-nextjs-14-production-dashboard) · [⚙️ Configuration](#️-configuration) · [🧪 Testing](#-testing)
 
 </div>
 
@@ -32,12 +31,12 @@
 
 | Version | Highlights |
 |---------|-----------|
-| **v1.6** | 🖥️ **Next.js 14 dashboard** — React + Tailwind + Shadcn UI, React Flow graph, JWT auth, async polling UI |
+| **v1.6** | 🖥️ **Next.js 14 Production Dashboard** — React + Tailwind + Shadcn UI, React Flow collusion graph canvas, JWT auth, async Celery task polling UI (replaces Streamlit as primary frontend) |
 | **v1.5** | 📊 **MLflow + Evidently AI** — experiment tracking (ROC-AUC, F1, artifacts) + data/concept drift detection exposed via Prometheus |
 | **v1.4** | 🕸️ **Heterogeneous R-GCN GNN** — two-stage collusion detection; GNN score bar chart, ring colour-coding, severity upgrade rules |
 | **v1.3** | 🔄 **Celery+Redis** async task queue — `/underwrite` & `/claims/score` return instant `task_id`; poll `/tasks/{id}` |
 | **v1.2** | 🔍 **Hybrid vector search** — ChromaDB replaced with Qdrant + BM25 + Cross-Encoder re-ranking |
-| **v1.1** | 🌐 Streamlit Cloud deployment; graceful degradation for all optional deps |
+| **v1.1** | 🌐 Standalone prototype preserved under `/legacy/streamlit` |
 | **v1.0** | Full platform: ML ensemble, LangGraph copilot, HITL queue, IRDAI compliance, Prometheus |
 
 ---
@@ -46,18 +45,18 @@
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│                              ClaimGuard AI  v1.3                             │
+│                              ClaimGuard AI  v1.6                             │
 │                                                                              │
 │   ┌─────────────────────────────────────────────────────────────────────┐   │
-│   │                        Streamlit UI  (8 tabs)                        │   │
-│   │  Explorer │ Underwrite │ Claims │ Copilot │ Graph │ HITL │ Obs │ ✅  │   │
+│   │               Next.js 14 App Router  (React + Tailwind)             │   │
+│   │  Explorer │ Underwriting │ Claims Fraud │ Graph Intel │ HITL Queue  │   │
 │   └─────────────────────────────┬───────────────────────────────────────┘   │
-│                                 │  HTTP                                      │
+│                                 │  HTTP (JWT Bearer / X-API-Key)            │
 │   ┌─────────────────────────────▼───────────────────────────────────────┐   │
-│   │                   FastAPI  (X-API-Key RBAC + Rate Limit)             │   │
-│   │  POST /underwrite → 202    POST /claims/score → 202                  │   │
-│   │  GET  /tasks/{id}          POST /copilot/decide                      │   │
-│   │  GET  /graph/collusion-rings   GET /compliance   GET /metrics        │   │
+│   │                   FastAPI  (JWT Auth + RBAC + Rate Limit)           │   │
+│   │  POST /auth/token          POST /underwrite → 202 (async task)      │   │
+│   │  POST /claims/score → 202  GET  /tasks/{id}    POST /copilot/decide │   │
+│   │  GET  /graph/collusion-rings   GET /hitl/queue   GET /metrics        │   │
 │   └───┬─────────────────┬───────────────────────────────────────────────┘   │
 │       │  enqueue        │  inline                                           │
 │   ┌───▼──────────┐  ┌───▼──────────────────────────────────────────────┐   │
@@ -75,7 +74,7 @@
 │   ┌─────────────────────────────▼───────────────────────────────────────┐   │
 │   │                      Data / Storage Layer                            │   │
 │   │  PostgreSQL  │  Qdrant (hybrid BM25+dense)  │  Neo4j  │  Redis      │   │
-│   │  HITL JSON   │  Prometheus / Grafana          │  CSV fallback (UI)   │   │
+│   │  HITL JSON   │  Prometheus / Grafana          │  Parquet Baselines   │   │
 │   └─────────────────────────────────────────────────────────────────────┘   │
 └──────────────────────────────────────────────────────────────────────────────┘
 ```
@@ -83,11 +82,11 @@
 ### Async Inference Flow
 
 ```
-Client
+Client (Next.js 14)
   │
-  │  POST /underwrite  {features}
+  │  POST /underwrite  {features}  (Authorization: Bearer <JWT>)
   ▼
-FastAPI  ──► assert_redis_reachable()  ──►  503 if Redis down (no silent fallback)
+FastAPI  ──► assert_redis_reachable()  ──►  503 if Redis down
   │
   │  apply_async(score_underwriting_task, task_id=<uuid>)
   ▼
@@ -102,54 +101,53 @@ Celery Worker
   │
   │  store result
   ▼
-Redis Backend  ◄──── GET /tasks/{task_id}  ◄──── Client polls
+Redis Backend  ◄──── GET /tasks/{task_id}  ◄──── Client polls with useTaskPoller()
 ```
 
 ---
 
 ## 🚀 Quick Start
 
-### Option A — Docker Compose (full stack, recommended)
+### Option A — Docker Compose (Full production stack, recommended)
 
 ```bash
-# 1. Clone
+# 1. Clone repository
 git clone https://github.com/SumedhPatil1507/claimguard-ai.git
 cd claimguard-ai
 
-# 2. Configure
+# 2. Configure environment
 cp .env.example .env
-# Edit .env — set GROQ_API_KEY (optional), leave others for local dev
+# Edit .env — set GROQ_API_KEY (optional) and JWT_SECRET_KEY
 
-# 3. Launch (Redis, Celery worker, API, Streamlit, Postgres, Neo4j, Prometheus, Grafana)
+# 3. Launch full stack (FastAPI, Next.js 14, Redis, Celery, PostgreSQL, Neo4j, Prometheus, Grafana)
 docker compose up --build
 
 # Services
-#   Streamlit UI   → http://localhost:8501
-#   FastAPI docs   → http://localhost:8000/docs
-#   Grafana        → http://localhost:3000  (admin/admin)
-#   Prometheus     → http://localhost:9090
+#   Next.js 14 Web App → http://localhost:3000 (or http://localhost:3001)
+#   FastAPI backend    → http://localhost:8000/docs
+#   Grafana Dashboard  → http://localhost:3002 (admin/admin)
+#   Prometheus         → http://localhost:9090
 ```
 
-### Option B — Local development
+### Option B — Local Development
 
 ```bash
-# Python 3.11+
+# Terminal 1 — Dependencies & Redis
 pip install -r requirements.txt
-
-# Generate synthetic data
 python data/synthetic_generator.py
-
-# Terminal 1 — Redis (Docker)
 docker run -d -p 6379:6379 redis:7-alpine
 
-# Terminal 2 — Celery worker
+# Terminal 2 — Celery Worker
 celery -A src.worker worker --loglevel=info --concurrency=4
 
-# Terminal 3 — FastAPI
+# Terminal 3 — FastAPI Backend
 uvicorn api.main:app --reload --port 8000
 
-# Terminal 4 — Streamlit
-streamlit run app/app.py
+# Terminal 4 — Next.js 14 Production Frontend
+cd frontend
+npm install
+npm run dev
+# Opens on http://localhost:3001 (or http://localhost:3000)
 ```
 
 ### Option C — Streamlit Cloud (UI only, no Redis/Celery needed)
@@ -319,25 +317,29 @@ curl http://localhost:8000/metrics -H "X-API-Key: admin-key-demo"
 
 ---
 
-## 🖥️ Streamlit Interactive Data Dashboard & UI Tabs
+## 🖥️ Next.js 14 Production Dashboard
 
-Run locally with:
+The primary production frontend is built with **Next.js 14 App Router**, **React**, **Tailwind CSS**, and **React Flow**:
+
 ```bash
-streamlit run streamlit_app.py
-# or
-streamlit run app/app.py
+cd frontend
+npm install
+npm run dev
+# Open http://localhost:3001 (or http://localhost:3000)
 ```
 
-| Tab | Description | Interactive Visualizations & Controls |
+### Dashboard Modules
+
+| Route | Module | Key Features |
 |---|---|---|
-| **📊 Data Explorer** | Real-time multi-dimensional portfolio analytics & dynamic slicing | Interactive 3D/Bubble anomaly scatter (size=prior claims, color=fraud flag), hierarchical Sunburst diagram (Coverage → Severity → Fraud), histogram with KDE & marginal box plot, clickable correlation heatmap, filtered CSV export |
-| **🏦 Underwrite** | Automated risk assessment & pricing engine | Interactive risk gauge with target bands, TreeSHAP feature attribution waterfall, **Applicant vs Portfolio Radar Benchmark**, and real-time **What-If Sensitivity Simulator** for instant dynamic re-pricing |
-| **🔍 Claims Fraud** | Anomaly scanner & fraud probability calculator | Real-time dual fraud gauge, TreeSHAP impact chart, preset scenario quick-loader, loss reserve estimate, and one-click direct dispatch to HITL review queue |
-| **🤖 Policy Copilot** | Multi-agent LangGraph orchestrator | Visual agent pipeline stepper (Router → Hybrid Vector Search → XGBoost Tools → Writer → HITL), grounded policy clause relevance badges, quantitative model evidence, session audit history |
-| **🕸️ Graph Intel** | Two-stage collusion ring discovery (structural + R-GCN GNN) | Interactive Plotly/NetworkX collusion graph (nodes sized by GNN risk score), severity filter toggles, collusion ring summary registry, and per-claimant risk attribution |
-| **👤 HITL Review** | IRDAI-mandated human-in-the-loop analyst console | Decision review cards, inline rationale tags, instant Approve / Reject / Escalate workflow actions with toast notifications and audit trail |
-| **📈 Observability** | Live Prometheus metrics, latency percentiles & drift monitoring | P50–P99 inference latency chart with SLA threshold markers, 24-hour request throughput area chart, Kolmogorov-Smirnov & PSI feature drift diagnostic bars |
-| **✅ IRDAI Compliance** | Regulatory audit engine & control conformance matrix | Compliance score radial gauge, 5-dimension radar breakdown (Governance, Fairness, Explainability, Auditability, Reliability), expandable control evidence & JSON report export |
+| `/explorer` | **Data Explorer** | Interactive claims records table with real-time search & pagination, claim type distribution bar charts, fraud ratio donut charts, severity charts, and multi-variable scatter plot |
+| `/underwriting` | **Underwriting Scorer** | Asynchronous Celery risk scoring form with automatic polling (`useTaskPoller`), interactive radial score gauge, and TreeSHAP waterfall feature attribution |
+| `/fraud` | **Claims Fraud Scanner** | Instant fraud probability prediction with Celery polling, high-risk alert banners, TreeSHAP contribution bars, and confidence tier indicators |
+| `/graph` | **Graph Intel Canvas** | Interactive **React Flow** network graph canvas: claimant nodes, shared entity nodes (repair shops/doctors), animated edges for high-severity rings, and claimant-level GNN score breakdowns |
+| `/hitl` | **HITL Review Queue** | IRDAI-mandated human-in-the-loop review console: filter by review status (pending, approved, rejected, escalated), decision draft inspection, inline analyst review notes, and one-click actions |
+| `/login` | **Authentication** | JWT Bearer authentication with token rehydration, role-based access control (Admin, Analyst, Viewer), and quick demo credential autofill |
+
+> 📁 **Legacy Streamlit Prototype:** The original Streamlit prototype has been archived in [`/legacy/streamlit/`](legacy/streamlit/) for reference. Run with `pip install -r legacy/streamlit/requirements.txt && streamlit run legacy/streamlit/app.py`.
 
 ---
 
@@ -714,18 +716,26 @@ Current status: **260 passed · 18 skipped · 0 failed**
 ```
 claimguard-ai/
 ├── api/
-│   └── main.py              FastAPI app (async Celery enqueue, RBAC, rate-limit)
-├── app/
-│   └── app.py               Streamlit UI (8 tabs, Plotly dark theme, interactive charts)
+│   └── main.py              FastAPI app (async Celery enqueue, JWT auth, RBAC, rate-limit)
+├── frontend/                Next.js 14 App Router (Sole Production Frontend)
+│   ├── src/
+│   │   ├── app/             Pages: /login, /explorer, /underwriting, /fraud, /graph, /hitl
+│   │   ├── components/      React Flow collusion graph, Recharts score gauges, SHAP charts
+│   │   ├── hooks/           useAuth (JWT), useTaskPoller (Celery async polling)
+│   │   └── lib/api.ts       Typed API client with backend health checking
+│   ├── package.json
+│   └── Dockerfile
+├── legacy/                  Archived prototypes
+│   └── streamlit/           Legacy Streamlit 8-tab prototype & requirements
 ├── src/
 │   ├── agent_graph.py        LangGraph Policy Copilot pipeline
 │   ├── claims_fraud.py       Fraud detection ML engine
 │   ├── compliance_irdai.py   IRDAI compliance reporting
 │   ├── copilot_metrics.py    Prometheus metrics helpers
 │   ├── database.py           DB manager + ProductionDatabaseManager (no fallback)
-│   ├── drift_monitor.py      Evidently AI + scipy drift detection, Prometheus export (NEW)
+│   ├── drift_monitor.py      Evidently AI + scipy drift detection, Prometheus export
 │   ├── encryption.py         Fernet PII encryption
-│   ├── gnn_collusion.py      Heterogeneous R-GCN GNN for collusion scoring (NEW)
+│   ├── gnn_collusion.py      Heterogeneous R-GCN GNN for collusion scoring
 │   ├── graph_collusion.py    Two-stage ring detector (structural + GNN)
 │   ├── hitl.py               Human-in-the-loop review queue
 │   ├── rate_limit.py         Sliding-window rate limiter
@@ -741,13 +751,13 @@ claimguard-ai/
 │   ├── synthetic_generator.py  Generate sample_claims.csv + sample_policies.csv
 │   ├── policy_docs/            Sample policy wording + IRDAI guidelines
 │   └── models/                 Persisted ML model artefacts
-├── tests/                    pytest test suite (208 tests)
+├── tests/                    pytest test suite (260 tests)
 ├── eval/
 │   └── ragas_eval.py         RAGAS retrieval quality evaluation
-├── docker-compose.yml        Full stack (Redis, Celery, API, Streamlit, PG, Neo4j, Prom, Grafana)
-├── Dockerfile
-├── requirements.txt          Streamlit Cloud compatible
-├── requirements-full.txt     Full local / Docker stack
+├── docker-compose.yml        Full stack (FastAPI, Next.js 14, Redis, Celery, PG, Neo4j, Prom, Grafana)
+├── Dockerfile                FastAPI backend container
+├── requirements.txt          Backend & Celery worker dependencies
+├── requirements-full.txt     Full backend stack dependencies
 └── .env.example
 ```
 

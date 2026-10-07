@@ -31,10 +31,10 @@
       "model_version": "1.0.0",
       "timestamp": "2026-10-05T10:59:45.411935"
     },
-    "analyst_review": null,
-    "status": "pending",
+    "analyst_review": "",
+    "status": "approved",
     "created_at": "2026-10-05T10:59:45.418464",
-    "reviewed_at": null
+    "reviewed_at": "2026-10-07T16:02:40.565065"
   },
   {
     "item_id": "080551d930a84b929992e11d6f00df4e",
@@ -1072,6 +1072,77 @@
     "analyst_review": null,
     "status": "pending",
     "created_at": "2026-10-07T10:31:47.623845",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "03680a8e08924e65a649f8742dd67a8f",
+    "session_id": "ecac9ff5224d4017be4515ed522545b8",
+    "context_type": "claims",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: Health policy applicant aged 54 with disclosed hypertension. Check waiting period clause and recommend premium loading.\nContext type: CLAIMS\n\n--- Relevant Policy / Regulatory Evidence ---\n[1] Source: irdai_guidelines.txt  (relevance: 0.014)\n    \"\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500  Policyholders holding individual health insurance policies have the right to transfer their policy from one insurer to another while retaining credit for waiting periods already served. The portability request must be submitted at least 45 days before the policy rene\"\n[2] Source: sample_policy_wording.txt  (relevance: 0.012)\n    \"\u2500\u2500\u2500\u2500  4.1 General Waiting Period All health benefits are subject to a general waiting period of 30 days from the inception date of the policy. This waiting period does not apply to claims arising purely from accidents.  4.2 Specific Disease Waiting Period Conditions including but not limited to cata\"\n[3] Source: sample_policy_wording.txt  (relevance: 0.009)\n    \"eriod Conditions including but not limited to cataract, hernia, joint replacement, and specified degenerative disorders are subject to a 2-year waiting period. The complete list is specified in Annexure A of the policy schedule.  4.3 Pre-Existing Disease Waiting Period Pre-existing diseases as decla\"\n\nModel scoring data unavailable for this request.\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.",
+    "model_result": {},
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-07T10:48:59.867850",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "fee75a4baae94fb7b79432b48c443775",
+    "session_id": "sess-CLM-8842",
+    "context_type": "claims",
+    "decision_draft": "Claim CLM-8842 for \u20b985,000.00 scored fraud probability 0.156. Note: Standard claim verification",
+    "model_result": {
+      "claim_id": "CLM-8842",
+      "fraud_score": 0.155661,
+      "fraud_flag": false,
+      "confidence_tier": "low",
+      "shap_drivers": [],
+      "model_version": "1.0.0",
+      "timestamp": "2026-10-07T15:54:16.195469"
+    },
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-07T15:54:16.308188",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "deed3a497c2e451bab328e1b4fd7c814",
+    "session_id": "sess-CLM-8842",
+    "context_type": "claims",
+    "decision_draft": "Claim CLM-8842 for \u20b985,000.00 scored fraud probability 0.156. Note: Standard claim verification",
+    "model_result": {
+      "claim_id": "CLM-8842",
+      "fraud_score": 0.155661,
+      "fraud_flag": false,
+      "confidence_tier": "low",
+      "shap_drivers": [],
+      "model_version": "1.0.0",
+      "timestamp": "2026-10-07T15:54:47.943508"
+    },
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-07T15:54:48.025598",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "1f989dc4414743009352bcb998615ce0",
+    "session_id": "a4a1e30a48a645d0baa8a50c5af9c935",
+    "context_type": "claims",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: Health policy applicant aged 54 with disclosed hypertension. Check waiting period clause and recommend premium loading.\nContext type: CLAIMS\n\n--- Relevant Policy / Regulatory Evidence ---\n[1] Source: irdai_guidelines.txt  (relevance: 0.014)\n    \"\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500  Policyholders holding individual health insurance policies have the right to transfer their policy from one insurer to another while retaining credit for waiting periods already served. The portability request must be submitted at least 45 days before the policy rene\"\n[2] Source: sample_policy_wording.txt  (relevance: 0.012)\n    \"\u2500\u2500\u2500\u2500  4.1 General Waiting Period All health benefits are subject to a general waiting period of 30 days from the inception date of the policy. This waiting period does not apply to claims arising purely from accidents.  4.2 Specific Disease Waiting Period Conditions including but not limited to cata\"\n[3] Source: sample_policy_wording.txt  (relevance: 0.009)\n    \"eriod Conditions including but not limited to cataract, hernia, joint replacement, and specified degenerative disorders are subject to a 2-year waiting period. The complete list is specified in Annexure A of the policy schedule.  4.3 Pre-Existing Disease Waiting Period Pre-existing diseases as decla\"\n\nModel scoring data unavailable for this request.\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.",
+    "model_result": {},
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-07T15:55:49.574919",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "56bba578f2c34382a6830dfc17b73680",
+    "session_id": "ad7f19e93d934ed3ae1e3dd07f430fe6",
+    "context_type": "underwriting",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: Applicant filed motor collision claim of \u20b9140,000 only 14 days after policy binding. Evaluate against Section 4 early inception clause.\nContext type: UNDERWRITING\n\n--- Relevant Policy / Regulatory Evidence ---\n[1] Source: sample_policy_wording.txt  (relevance: 0.008)\n    \"apped at INR 7,50,000 per accident unless an enhanced limit rider is endorsed.  1.3 Personal Accident Cover A lump-sum benefit of INR 15,00,000 is payable to the named policyholder in the event of accidental death or permanent total disablement sustained while driving, mounting, or dismounting from\"\n[2] Source: sample_policy_wording.txt  (relevance: 0.008)\n    \"CLAIMS PROCEDURE \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500  3.1 Notification The policyholder must notify the insurer of any loss, damage, accident, or illness requiring a claim within 7 calendar days of the event. For theft, an FIR must be lodged with the near\"\n[3] Source: irdai_guidelines.txt  (relevance: 0.004)\n    \"f receiving the claim intimation. Any delay beyond these timelines attracts interest on the claim amount at 2% above the bank rate. Repudiation of claims must be communicated in writing with a detailed rationale citing the specific policy clause and regulation.  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n\nModel scoring data unavailable for this request.\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.",
+    "model_result": {},
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-07T15:58:03.965826",
     "reviewed_at": null
   }
 ]

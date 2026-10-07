@@ -25,9 +25,8 @@ ENV PYTHONPATH=/app
 # Pre-generate synthetic datasets so they are available at container startup
 RUN python data/synthetic_generator.py
 
-# FastAPI (8000) and Streamlit (8501)
-EXPOSE 8000 8501
+# FastAPI (8000)
+EXPOSE 8000
 
 # Default: run the FastAPI backend.
-# Override with `command:` in docker-compose.yml to run the Streamlit frontend.
 CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000"]

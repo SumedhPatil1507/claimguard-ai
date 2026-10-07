@@ -8,11 +8,11 @@ version: "3.9"
 #   redis          Redis 7 — Celery broker + result backend
 #   celery-worker  Celery worker (concurrency 4, loglevel info)
 #   api            FastAPI on :8000
-#   frontend       Streamlit on :8501
+#   frontend       Next.js 14 Dashboard (Primary Web Application) on :3000 / :3001
 #   postgres       PostgreSQL 15 on :5432
 #   neo4j          Neo4j 5 on :7474 / :7687
 #   prometheus     Prometheus on :9090
-#   grafana        Grafana on :3000
+#   grafana        Grafana on :3002
 #
 # Dependency order
 # ----------------
@@ -109,33 +109,14 @@ services:
     volumes:
       - ./data:/app/data
 
-  # ── Streamlit frontend (Python) ───────────────────────────────────────────
-  streamlit:
-    build: .
-    restart: unless-stopped
-    command: >
-      streamlit run app/app.py
-        --server.port 8501
-        --server.address 0.0.0.0
-        --server.headless true
-    ports:
-      - "8501:8501"
-    env_file: .env
-    environment:
-      <<: *common-env
-    depends_on:
-      api:
-        condition: service_healthy
-    volumes:
-      - ./data:/app/data
-
-  # ── Next.js dashboard (React) ─────────────────────────────────────────────
+  # ── Next.js dashboard (Primary Web Application) ───────────────────────────
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
     restart: unless-stopped
     ports:
+      - "3000:3001"
       - "3001:3001"
     environment:
       NEXT_PUBLIC_API_URL: http://api:8000
@@ -213,7 +194,7 @@ services:
     image: grafana/grafana:latest
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "3002:3000"
     environment:
       GF_SECURITY_ADMIN_PASSWORD: admin
       GF_USERS_ALLOW_SIGN_UP: "false"

@@ -1,8 +1,8 @@
 /**
- * ClaimGuard AI — typed API client
+ * ClaimGuard AI — Typed API Client for Next.js Frontend
  *
- * All requests automatically attach the JWT from sessionStorage.
- * POST /auth/token is the only unauthenticated call.
+ * Automatically handles JWT Bearer authentication, polling,
+ * backend health checks, and fallback states.
  */
 
 import type {
@@ -19,7 +19,7 @@ import type {
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 const TOKEN_KEY = "cg_access_token";
 
-// ── Token storage ────────────────────────────────────────────────────────────
+// ── Token Storage ────────────────────────────────────────────────────────────
 
 export function saveToken(token: string): void {
   if (typeof window !== "undefined") sessionStorage.setItem(TOKEN_KEY, token);
@@ -34,7 +34,7 @@ export function clearToken(): void {
   if (typeof window !== "undefined") sessionStorage.removeItem(TOKEN_KEY);
 }
 
-// ── Core fetch wrapper ───────────────────────────────────────────────────────
+// ── Core Fetch Wrapper ───────────────────────────────────────────────────────
 
 async function apiFetch<T>(
   path: string,
@@ -52,16 +52,21 @@ async function apiFetch<T>(
     headers["Authorization"] = `Bearer ${token}`;
   }
 
-  const res = await fetch(`${BASE}${path}`, { ...options, headers });
+  try {
+    const res = await fetch(`${BASE}${path}`, { ...options, headers });
 
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({ detail: res.statusText }));
-    throw new ApiError(res.status, body?.detail ?? res.statusText);
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({ detail: res.statusText }));
+      throw new ApiError(res.status, body?.detail ?? res.statusText);
+    }
+
+    if (res.status === 204) return undefined as T;
+    return res.json() as Promise<T>;
+  } catch (err: unknown) {
+    if (err instanceof ApiError) throw err;
+    const msg = err instanceof Error ? err.message : "Network error";
+    throw new ApiError(503, `API connection failed: ${msg}`);
   }
-
-  // 204 No Content
-  if (res.status === 204) return undefined as T;
-  return res.json() as Promise<T>;
 }
 
 export class ApiError extends Error {
@@ -90,12 +95,19 @@ export async function getMe(): Promise<{ role: string; authenticated: boolean }>
 
 // ── Health ───────────────────────────────────────────────────────────────────
 
-export async function getHealth() {
-  return apiFetch<{ status: string; version: string; timestamp: string }>(
-    "/health",
-    {},
-    false,
-  );
+export interface HealthResponse {
+  status: string;
+  version?: string;
+  timestamp?: string;
+  subsystems?: Record<string, string>;
+}
+
+export async function getHealth(): Promise<HealthResponse> {
+  try {
+    return await apiFetch<HealthResponse>("/health", {}, false);
+  } catch {
+    return { status: "offline", version: "unknown", timestamp: new Date().toISOString() };
+  }
 }
 
 // ── Underwriting ─────────────────────────────────────────────────────────────
@@ -120,7 +132,7 @@ export async function enqueueFraudScore(
   });
 }
 
-// ── Task polling ─────────────────────────────────────────────────────────────
+// ── Task Polling ─────────────────────────────────────────────────────────────
 
 export async function getTaskStatus(taskId: string): Promise<TaskStatusResponse> {
   return apiFetch<TaskStatusResponse>(`/tasks/${taskId}`);
@@ -163,12 +175,31 @@ export async function reviewHITLItem(
   });
 }
 
-// ── Explorer (mock CSV data read via public folder) ──────────────────────────
+// ── Policy Copilot & Compliance ──────────────────────────────────────────────
+
+export async function runCopilotDecide(
+  query: string,
+  context_type: "underwriting" | "claims",
+  features: Record<string, unknown> = {},
+): Promise<Record<string, unknown>> {
+  return apiFetch("/copilot/decide", {
+    method: "POST",
+    body: JSON.stringify({ query, context_type, features }),
+  });
+}
+
+export async function getComplianceReport(): Promise<Record<string, unknown>> {
+  return apiFetch("/compliance");
+}
+
+// ── Explorer Data ────────────────────────────────────────────────────────────
 
 export async function getClaimsData(): Promise<ClaimRecord[]> {
-  // In production this would hit a paginated API endpoint.
-  // We fetch the pre-generated CSV via a Next.js API route for now.
-  const res = await fetch("/api/data/claims");
-  if (!res.ok) return [];
-  return res.json() as Promise<ClaimRecord[]>;
+  try {
+    const res = await fetch("/api/data/claims");
+    if (!res.ok) return [];
+    return res.json() as Promise<ClaimRecord[]>;
+  } catch {
+    return [];
+  }
 }

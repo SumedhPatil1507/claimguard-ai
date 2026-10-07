@@ -22,7 +22,6 @@ pyarrow==16.1.0
 # ── Async task queue ──────────────────────────────────────────────────────────
 celery[redis]==5.4.0
 redis==5.0.7
-streamlit==1.35.0
 plotly==5.22.0
 xgboost==2.0.3
 lightgbm==4.3.0

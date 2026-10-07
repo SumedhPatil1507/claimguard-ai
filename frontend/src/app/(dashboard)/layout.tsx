@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -12,8 +12,11 @@ import {
   LogOut,
   Activity,
   ChevronRight,
+  Wifi,
+  WifiOff,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { getHealth, type HealthResponse } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 const NAV = [
@@ -34,10 +37,26 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const { user, isLoading, logout } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+  const [apiHealth, setApiHealth] = useState<HealthResponse | null>(null);
 
   useEffect(() => {
     if (!isLoading && !user) router.replace("/login");
   }, [user, isLoading, router]);
+
+  // Periodic health check polling
+  useEffect(() => {
+    let mounted = true;
+    async function check() {
+      const h = await getHealth();
+      if (mounted) setApiHealth(h);
+    }
+    check();
+    const interval = setInterval(check, 15000);
+    return () => {
+      mounted = false;
+      clearInterval(interval);
+    };
+  }, []);
 
   if (isLoading || !user) {
     return (
@@ -48,22 +67,41 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }
 
   const visibleNav = NAV.filter((n) => n.roles.includes(user.role));
+  const isOnline = apiHealth?.status === "ok" || apiHealth?.status === "healthy";
 
   return (
     <div className="flex min-h-screen bg-background">
       {/* ── Sidebar ── */}
       <aside className="w-60 shrink-0 flex flex-col border-r border-border bg-card/50">
-        {/* Logo */}
+        {/* Logo & Platform Info */}
         <div className="px-5 py-5 border-b border-border">
           <div className="flex items-center gap-2.5">
-            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/10">
+            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/10 border border-primary/20">
               <Shield className="w-4 h-4 text-primary" />
             </div>
             <div>
               <p className="text-sm font-bold leading-none">ClaimGuard AI</p>
-              <p className="text-[10px] text-muted-foreground mt-0.5">InsurTech Platform</p>
+              <p className="text-[10px] text-muted-foreground mt-0.5">InsurTech Next.js 14</p>
             </div>
           </div>
+        </div>
+
+        {/* Backend API Connection Status Chip */}
+        <div className="px-4 py-2.5 mx-3 mt-3 rounded-lg bg-secondary/30 border border-border/50 flex items-center justify-between text-xs">
+          <div className="flex items-center gap-2">
+            <span className="relative flex h-2 w-2">
+              <span className={cn("animate-ping absolute inline-flex h-full w-full rounded-full opacity-75", isOnline ? "bg-emerald-400" : "bg-amber-400")} />
+              <span className={cn("relative inline-flex rounded-full h-2 w-2", isOnline ? "bg-emerald-500" : "bg-amber-500")} />
+            </span>
+            <span className="text-[11px] text-muted-foreground font-medium">
+              API: {isOnline ? "Online" : "Fallback/Local"}
+            </span>
+          </div>
+          {isOnline ? (
+            <Wifi className="w-3.5 h-3.5 text-emerald-400" />
+          ) : (
+            <WifiOff className="w-3.5 h-3.5 text-amber-400" />
+          )}
         </div>
 
         {/* Nav links */}
