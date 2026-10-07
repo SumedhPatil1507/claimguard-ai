@@ -14,6 +14,7 @@
 [![Qdrant](https://img.shields.io/badge/Qdrant-1.9-DB4437?style=for-the-badge&logo=qdrant)](https://qdrant.tech)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
 [![Tests](https://img.shields.io/badge/Tests-208%20passing-brightgreen?style=for-the-badge&logo=pytest)](tests/)
+[![Next.js](https://img.shields.io/badge/Next.js-14-black?style=for-the-badge&logo=next.js)](frontend/)
 
 <br/>
 
@@ -31,6 +32,7 @@
 
 | Version | Highlights |
 |---------|-----------|
+| **v1.6** | 🖥️ **Next.js 14 dashboard** — React + Tailwind + Shadcn UI, React Flow graph, JWT auth, async polling UI |
 | **v1.5** | 📊 **MLflow + Evidently AI** — experiment tracking (ROC-AUC, F1, artifacts) + data/concept drift detection exposed via Prometheus |
 | **v1.4** | 🕸️ **Heterogeneous R-GCN GNN** — two-stage collusion detection; GNN score bar chart, ring colour-coding, severity upgrade rules |
 | **v1.3** | 🔄 **Celery+Redis** async task queue — `/underwrite` & `/claims/score` return instant `task_id`; poll `/tasks/{id}` |
@@ -487,6 +489,76 @@ pip install torch_geometric
 **Exit codes**: `0` = success · `1` = data/model error · `2` = PyG absent (soft, not a CI blocker)
 
 
+
+---
+
+## 🖥️ Next.js 14 Dashboard (v1.6)
+
+A production-quality React dashboard that runs alongside the Streamlit UI. Both coexist — Streamlit on `:8501`, Next.js on `:3001`.
+
+### Tech stack
+
+| Layer | Technology |
+|---|---|
+| Framework | Next.js 14 (App Router, `output: standalone`) |
+| Styling | Tailwind CSS v3 · dark navy/teal design system |
+| Components | Shadcn UI design tokens + custom Radix UI primitives |
+| Charts | Recharts — bar, pie, scatter, radial gauge, SHAP waterfall |
+| Graph | **React Flow v11** — interactive force-directed canvas with minimap |
+| Forms | react-hook-form + Zod validation |
+| Auth | JWT (`/auth/token` → `Authorization: Bearer <token>`) |
+| Async jobs | Task-ID polling (`/tasks/{id}`) with `useTaskPoller` hook |
+
+### Pages
+
+| Route | Description |
+|---|---|
+| `/login` | JWT login. Demo: `admin/admin123` · `analyst/analyst123` · `viewer/viewer123` |
+| `/explorer` | Claims data table (search + pagination) + 4 Recharts: type breakdown, fraud pie, severity, prior-claims scatter |
+| `/underwriting` | Feature form → `POST /underwrite` (202) → Celery poll → risk gauge + SHAP bar |
+| `/fraud` | Claim form → `POST /claims/score` (202) → Celery poll → fraud gauge + alert banner + SHAP |
+| `/graph` | `GET /graph/collusion-rings` → React Flow canvas — claimant/entity nodes, ring colour groups, animated high-severity edges |
+| `/hitl` | `GET /hitl/queue` + `POST /hitl/review/{id}` → analyst approve / reject / escalate cards |
+
+### JWT auth
+
+```bash
+# Get a token
+curl -X POST http://localhost:8000/auth/token \
+  -H "Content-Type: application/json" \
+  -d '{"username":"analyst","password":"analyst123"}'
+# → {"access_token":"<jwt>","role":"analyst","expires_in":28800}
+
+# Use on all subsequent requests
+Authorization: Bearer <access_token>
+
+# Legacy X-API-Key still works (no breaking change)
+X-API-Key: analyst-key-demo
+```
+
+Configure via env vars:
+- `JWT_SECRET_KEY` — signing secret (`openssl rand -hex 32` to generate)
+- `JWT_ACCESS_TOKEN_EXPIRE_MINUTES` — default 480 (8 h)
+
+### Quick start (local)
+
+```bash
+cd frontend
+npm install --legacy-peer-deps
+npm run dev          # → http://localhost:3001
+
+# FastAPI must be running for real data:
+uvicorn api.main:app --reload --port 8000
+```
+
+### Quick start (Docker Compose)
+
+```bash
+docker compose up --build
+# Next.js dashboard → http://localhost:3001
+# Streamlit UI      → http://localhost:8501
+# FastAPI + docs    → http://localhost:8000/docs
+```
 
 ---
 

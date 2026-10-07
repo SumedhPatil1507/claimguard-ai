@@ -83,6 +83,25 @@ import uvicorn
 from contextlib import asynccontextmanager
 
 # ---------------------------------------------------------------------------
+# JWT auth dependencies (optional — graceful when python-jose absent)
+# ---------------------------------------------------------------------------
+try:
+    from jose import JWTError, jwt as _jose_jwt   # type: ignore
+    HAS_JOSE = True
+except ImportError:
+    HAS_JOSE = False
+
+import hashlib
+import hmac
+import secrets
+from datetime import timedelta
+
+# JWT configuration — override via env vars
+_JWT_SECRET: str  = os.environ.get("JWT_SECRET_KEY", secrets.token_hex(32))
+_JWT_ALGO:   str  = "HS256"
+_JWT_EXPIRE: int  = int(os.environ.get("JWT_ACCESS_TOKEN_EXPIRE_MINUTES", "480"))  # 8 h
+
+# ---------------------------------------------------------------------------
 # Infrastructure: Celery worker + database checks
 # ---------------------------------------------------------------------------
 try:
@@ -173,26 +192,94 @@ _DEMO_KEYS: Dict[str, str] = {
     "viewer-key-demo":  "viewer",
 }
 
+# Demo username/password → role (used by /auth/token).
+# In production replace with a real user store.
+_DEMO_USERS: Dict[str, Dict[str, str]] = {
+    "admin":   {"password": "admin123",   "role": "admin"},
+    "analyst": {"password": "analyst123", "role": "analyst"},
+    "viewer":  {"password": "viewer123",  "role": "viewer"},
+}
+
 
 # ---------------------------------------------------------------------------
-# Auth dependency
+# JWT helpers
+# ---------------------------------------------------------------------------
+
+def _create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
+    """Mint a signed JWT containing *data* plus an exp claim."""
+    payload = data.copy()
+    expire  = datetime.now(timezone.utc) + (expires_delta or timedelta(minutes=_JWT_EXPIRE))
+    payload.update({"exp": expire})
+    if HAS_JOSE:
+        return _jose_jwt.encode(payload, _JWT_SECRET, algorithm=_JWT_ALGO)
+    # Fallback: base64url-encoded JSON (unsigned — only for dev without python-jose)
+    import base64, json as _j
+    raw = _j.dumps(payload, default=str).encode()
+    return base64.urlsafe_b64encode(raw).decode().rstrip("=")
+
+
+def _decode_token(token: str) -> dict:
+    """Decode and verify a JWT; raise HTTPException on any failure."""
+    if HAS_JOSE:
+        try:
+            return _jose_jwt.decode(token, _JWT_SECRET, algorithms=[_JWT_ALGO])
+        except JWTError as exc:
+            raise HTTPException(status_code=401, detail=f"Token invalid or expired: {exc}")
+    # Fallback: decode unsigned token
+    try:
+        import base64, json as _j
+        padded = token + "=" * (-len(token) % 4)
+        return _j.loads(base64.urlsafe_b64decode(padded))
+    except Exception as exc:
+        raise HTTPException(status_code=401, detail=f"Token decode failed: {exc}")
+
+
+# ---------------------------------------------------------------------------
+# Auth dependency — accepts Bearer JWT **or** X-API-Key header
 # ---------------------------------------------------------------------------
 
 async def get_api_key(
+    request: Request,
     x_api_key: str = Header(None, alias="X-API-Key"),
 ) -> str:
-    if not x_api_key:
-        raise HTTPException(status_code=401, detail="X-API-Key header required.")
-    role = _DEMO_KEYS.get(x_api_key)
-    if not role:
-        try:
-            env_keys: dict = _json.loads(os.environ.get("API_KEYS", "{}"))
-            role = env_keys.get(x_api_key)
-        except Exception:
-            pass
-    if not role:
+    """
+    Resolve a caller identity to a role string.
+
+    Priority:
+      1. Authorization: Bearer <JWT>  — recommended for the Next.js frontend
+      2. X-API-Key: <key>             — legacy / direct API use
+
+    Returns
+    -------
+    str — one of 'admin' | 'analyst' | 'viewer'
+    """
+    # ── 1. Try Bearer JWT ───────────────────────────────────────────────
+    auth_header = request.headers.get("Authorization", "")
+    if auth_header.startswith("Bearer "):
+        token = auth_header[len("Bearer "):]
+        payload = _decode_token(token)   # raises 401 on failure
+        role = payload.get("role")
+        if not role:
+            raise HTTPException(status_code=401, detail="JWT missing 'role' claim.")
+        return role
+
+    # ── 2. Fall back to X-API-Key ────────────────────────────────────────
+    if x_api_key:
+        role = _DEMO_KEYS.get(x_api_key)
+        if not role:
+            try:
+                env_keys: dict = _json.loads(os.environ.get("API_KEYS", "{}"))
+                role = env_keys.get(x_api_key)
+            except Exception:
+                pass
+        if role:
+            return role
         raise HTTPException(status_code=403, detail="Invalid API key.")
-    return role
+
+    raise HTTPException(
+        status_code=401,
+        detail="Authentication required. Use 'Authorization: Bearer <token>' or 'X-API-Key: <key>'.",
+    )
 
 
 def require_roles(allowed: list[str]):
@@ -205,6 +292,25 @@ def require_roles(allowed: list[str]):
             )
         return role
     return _check
+
+
+# ---------------------------------------------------------------------------
+# Pydantic request/response schemas
+# ---------------------------------------------------------------------------
+
+# ---------------------------------------------------------------------------
+# JWT token schemas
+# ---------------------------------------------------------------------------
+
+class TokenRequest(BaseModel):
+    username: str
+    password: str
+
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type:   str = "bearer"
+    role:         str
+    expires_in:   int = _JWT_EXPIRE * 60   # seconds
 
 
 # ---------------------------------------------------------------------------
@@ -354,6 +460,48 @@ def _infra_503(exc: Exception) -> HTTPException:
 # ===========================================================================
 # Endpoints
 # ===========================================================================
+
+# ── /auth/token ─────────────────────────────────────────────────────────────
+
+@app.post("/auth/token", response_model=TokenResponse, tags=["Auth"])
+async def login(body: TokenRequest):
+    """
+    Exchange username + password for a signed JWT access token.
+
+    Demo credentials (change via DEMO_USERS env var in production):
+      admin   / admin123   → role: admin
+      analyst / analyst123 → role: analyst
+      viewer  / viewer123  → role: viewer
+
+    The returned ``access_token`` should be sent as
+    ``Authorization: Bearer <token>`` on every subsequent request.
+    """
+    user = _DEMO_USERS.get(body.username)
+    if not user or user["password"] != body.password:
+        raise HTTPException(
+            status_code=401,
+            detail="Incorrect username or password.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    token = _create_access_token(
+        data={"sub": body.username, "role": user["role"]},
+        expires_delta=timedelta(minutes=_JWT_EXPIRE),
+    )
+    logger.info("auth/token: issued token for user=%s role=%s", body.username, user["role"])
+    return TokenResponse(
+        access_token=token,
+        role=user["role"],
+        expires_in=_JWT_EXPIRE * 60,
+    )
+
+
+# ── /auth/me ──────────────────────────────────────────────────────────────────
+
+@app.get("/auth/me", tags=["Auth"])
+async def me(role: str = Depends(require_roles(["admin", "analyst", "viewer"]))):
+    """Return the currently authenticated user's role."""
+    return {"role": role, "authenticated": True}
+
 
 # ── /health ─────────────────────────────────────────────────────────────────
 
@@ -645,8 +793,47 @@ async def graph_collusion_rings(
         raise HTTPException(status_code=500, detail=f"Graph analysis error: {exc}")
 
 
-# ── GET /compliance ──────────────────────────────────────────────────────────
+# ── HITL queue (for Next.js frontend) ────────────────────────────────────────
 
+class HITLReviewRequest(BaseModel):
+    decision: str        # 'approved' | 'rejected' | 'escalated'
+    analyst_notes: str = ""
+
+@app.get("/hitl/queue", tags=["HITL"])
+async def hitl_queue_list(
+    role: str = Depends(require_roles(["analyst", "admin"])),
+):
+    """Return all HITL queue items (pending + reviewed)."""
+    try:
+        from src.hitl import hitl_queue as _hq
+        items = _hq.get_all()
+        return {"items": [i.model_dump() if hasattr(i, "model_dump") else dict(i) for i in items]}
+    except Exception as exc:
+        logger.warning("hitl/queue: %s", exc)
+        return {"items": []}
+
+
+@app.post("/hitl/review/{item_id}", tags=["HITL"])
+async def hitl_review(
+    item_id: str,
+    body: HITLReviewRequest,
+    role: str = Depends(require_roles(["analyst", "admin"])),
+):
+    """Record an analyst decision on a queued item."""
+    try:
+        from src.hitl import hitl_queue as _hq
+        item = _hq.review(item_id, body.decision, body.analyst_notes)   # type: ignore[arg-type]
+        if item is None:
+            raise HTTPException(status_code=404, detail=f"HITL item {item_id!r} not found.")
+        return item.model_dump() if hasattr(item, "model_dump") else dict(item)
+    except HTTPException:
+        raise
+    except Exception as exc:
+        logger.warning("hitl/review: %s", exc)
+        raise HTTPException(status_code=500, detail=str(exc))
+
+
+# ── GET /compliance ──────────────────────────────────────────────────────────
 @app.get("/compliance", tags=["Compliance"])
 async def compliance(
     role: str = Depends(require_roles(["viewer", "analyst", "admin"])),

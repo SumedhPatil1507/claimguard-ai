@@ -2,6 +2,8 @@ fastapi==0.111.0
 uvicorn[standard]==0.29.0
 pydantic==2.7.1
 pydantic-settings==2.3.4
+# JWT authentication
+python-jose[cryptography]==3.3.0
 # ── MLflow + Evidently AI + drift monitoring dependencies ────────────────────
 mlflow==2.14.3
 evidently==0.4.33

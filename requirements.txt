@@ -52,6 +52,10 @@ shap>=0.41.0
 # torch>=2.1.0
 # torch_geometric>=2.4.0
 
+# ── JWT auth (for /auth/token endpoint) ──────────────────────────────────────
+# python-jose provides RS256/HS256 JWT signing & verification.
+python-jose[cryptography]>=3.3.0
+
 # ── MLflow — experiment tracking, model registry, artifact logging ────────────
 # Graceful: if absent, _log_to_mlflow() in underwriting.py/claims_fraud.py
 # is a complete no-op (HAS_MLFLOW guard). Set MLFLOW_TRACKING_URI env var
