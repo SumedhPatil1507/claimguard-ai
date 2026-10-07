@@ -53,6 +53,8 @@ coverage.xml
 data/claims_data.csv
 data/policies_data.csv
 data/chroma_db/
+data/qdrant_db/
+mlruns/
 
 # Next.js frontend
 frontend/node_modules/

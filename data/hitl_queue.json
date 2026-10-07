@@ -149,5 +149,863 @@
     "status": "pending",
     "created_at": "2026-10-05T11:37:29.480582",
     "reviewed_at": null
+  },
+  {
+    "item_id": "57a26bdc4765480fac9f6fe151c13310",
+    "session_id": "53c5f17905154455bf5ae63319e9ec84",
+    "context_type": "underwriting",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: Assess underwriting risk for new motor policy\nContext type: UNDERWRITING\n\n--- Relevant Policy / Regulatory Evidence ---\n[1] Source: irdai_guidelines.txt  (relevance: 1.000)\n    \"nsurer.  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 5. FREE-LOOK PERIOD \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500  Policyholders purchasing a new policy have the right to review the terms and conditions and return the polic\"\n[2] Source: irdai_guidelines.txt  (relevance: 0.984)\n    \"d the premium paid after deducting a proportionate risk premium for the coverage period and any medical examination costs incurred.  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 6. FRAUD REPORTING OBLIGATIONS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n[3] Source: sample_policy_wording.txt  (relevance: 0.968)\n    \"CLAIMGUARD STANDARD POLICY \u2014 MOTOR AND HEALTH INSURANCE FICTIONAL DEMO DOCUMENT \u2014 FOR TRAINING AND DEMONSTRATION PURPOSES ONLY  Policy Reference: CGS-2024-DEMO Insurer: ClaimGuard Insurance Limited (Fictional Entity) Regulator: Insurance Regulatory and Development Authority of India (IRDAI)  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n\n--- Model Scoring Evidence ---\nRisk Score : 0.000424\nRisk Tier  : LOW\nPremium Adj: 0.8003\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.",
+    "model_result": {
+      "risk_tier": "low",
+      "risk_score": 0.000424,
+      "premium_adjustment": 0.8003,
+      "shap_drivers": [],
+      "model_version": "1.0.0",
+      "timestamp": "2026-10-06T04:51:06.080151"
+    },
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-06T04:51:06.085141",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "e4d10a66ca5d4ad4a8a317131cf0f44f",
+    "session_id": "a6af178d78774471bdcd7c554afee10f",
+    "context_type": "claims",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: Evaluate fraud risk for motor claim\nContext type: CLAIMS\n\n--- Relevant Policy / Regulatory Evidence ---\n[1] Source: irdai_guidelines.txt  (relevance: 1.000)\n    \"d the premium paid after deducting a proportionate risk premium for the coverage period and any medical examination costs incurred.  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 6. FRAUD REPORTING OBLIGATIONS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n[2] Source: sample_policy_wording.txt  (relevance: 0.984)\n    \"nt. For theft, an FIR must be lodged with the nearest police station and a copy submitted along with the claim intimation.  3.2 Documents Required Motor claim: duly completed claim form, copy of registration certificate, driving licence, insurance certificate, fitness certificate (commercial vehicle\"\n[3] Source: irdai_guidelines.txt  (relevance: 0.968)\n    \"\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500  IRDAI's Insurance Fraud Monitoring Framework requires insurers to establish a dedicated fraud management unit, maintain a fraud repository, and report detected fraud cases to the IRDAI fraud reporting portal. Insurers must\"\n\n--- Model Scoring Evidence ---\nFraud Score      : 0.360516\nFraud Flag       : False\nConfidence Tier  : LOW\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.",
+    "model_result": {
+      "claim_id": "CLM001",
+      "fraud_score": 0.360516,
+      "fraud_flag": false,
+      "confidence_tier": "low",
+      "shap_drivers": [],
+      "model_version": "1.0.0",
+      "timestamp": "2026-10-06T04:51:06.152267"
+    },
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-06T04:51:06.154181",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "5117681cec0c4495922d553bcaa9903a",
+    "session_id": "test-session-001",
+    "context_type": "underwriting",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: test query\nContext type: UNDERWRITING\n\n--- Relevant Policy / Regulatory Evidence ---\n[1] Source: irdai_guidelines.txt  (relevance: 1.000)\n    \"IRDAI REGULATORY GUIDELINES \u2014 SUMMARY FOR CLAIMGUARD AI TRAINING DEMO / TRAINING SUMMARY ONLY \u2014 NOT LEGAL ADVICE  Source reference: Insurance Regulatory and Development Authority of India (IRDAI) Compiled for: ClaimGuard AI Platform (internal training corpus)  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n[2] Source: irdai_guidelines.txt  (relevance: 0.984)\n    \"g corpus)  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 1. CLAIM SETTLEMENT TIMELINES \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500  Under IRDAI (Protection of Policyholders' Interests) Regulations, insurers are required to settl\"\n[3] Source: irdai_guidelines.txt  (relevance: 0.968)\n    \"rests) Regulations, insurers are required to settle all claims within 30 days of receipt of the last necessary document. Where the claim requires further investigation, the insurer must complete the investigation and settle the claim within 45 days of receiving the claim intimation. Any delay beyond\"\n\n--- Model Scoring Evidence ---\nRisk Score : 0.000424\nRisk Tier  : LOW\nPremium Adj: 0.8003\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.",
+    "model_result": {
+      "risk_tier": "low",
+      "risk_score": 0.000424,
+      "premium_adjustment": 0.8003,
+      "shap_drivers": [],
+      "model_version": "1.0.0",
+      "timestamp": "2026-10-06T04:51:06.191715"
+    },
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-06T04:51:06.191715",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "dcfc5afc1a4a43faa82d1052fa6ea80e",
+    "session_id": "bf27e8e8668e40a0beb4439c565ee882",
+    "context_type": "underwriting",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: test\nContext type: UNDERWRITING\n\n--- Relevant Policy / Regulatory Evidence ---\n[1] Source: irdai_guidelines.txt  (relevance: 1.000)\n    \"IRDAI REGULATORY GUIDELINES \u2014 SUMMARY FOR CLAIMGUARD AI TRAINING DEMO / TRAINING SUMMARY ONLY \u2014 NOT LEGAL ADVICE  Source reference: Insurance Regulatory and Development Authority of India (IRDAI) Compiled for: ClaimGuard AI Platform (internal training corpus)  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n[2] Source: irdai_guidelines.txt  (relevance: 0.984)\n    \"g corpus)  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 1. CLAIM SETTLEMENT TIMELINES \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500  Under IRDAI (Protection of Policyholders' Interests) Regulations, insurers are required to settl\"\n[3] Source: irdai_guidelines.txt  (relevance: 0.968)\n    \"rests) Regulations, insurers are required to settle all claims within 30 days of receipt of the last necessary document. Where the claim requires further investigation, the insurer must complete the investigation and settle the claim within 45 days of receiving the claim intimation. Any delay beyond\"\n\nModel scoring data unavailable for this request.\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.",
+    "model_result": {},
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-06T04:51:06.203387",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "3ab1a3f1716641bc803f2c0db63974d9",
+    "session_id": "be11519ada924521be1197a6ab915353",
+    "context_type": "underwriting",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: Assess underwriting risk for new motor policy\nContext type: UNDERWRITING\n\n--- Relevant Policy / Regulatory Evidence ---\n[1] Source: irdai_guidelines.txt  (relevance: 1.000)\n    \"nsurer.  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 5. FREE-LOOK PERIOD \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500  Policyholders purchasing a new policy have the right to review the terms and conditions and return the polic\"\n[2] Source: irdai_guidelines.txt  (relevance: 0.984)\n    \"d the premium paid after deducting a proportionate risk premium for the coverage period and any medical examination costs incurred.  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 6. FRAUD REPORTING OBLIGATIONS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n[3] Source: sample_policy_wording.txt  (relevance: 0.968)\n    \"CLAIMGUARD STANDARD POLICY \u2014 MOTOR AND HEALTH INSURANCE FICTIONAL DEMO DOCUMENT \u2014 FOR TRAINING AND DEMONSTRATION PURPOSES ONLY  Policy Reference: CGS-2024-DEMO Insurer: ClaimGuard Insurance Limited (Fictional Entity) Regulator: Insurance Regulatory and Development Authority of India (IRDAI)  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n\n--- Model Scoring Evidence ---\nRisk Score : 0.000424\nRisk Tier  : LOW\nPremium Adj: 0.8003\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.",
+    "model_result": {
+      "risk_tier": "low",
+      "risk_score": 0.000424,
+      "premium_adjustment": 0.8003,
+      "shap_drivers": [],
+      "model_version": "1.0.0",
+      "timestamp": "2026-10-06T05:18:39.637386"
+    },
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-06T05:18:39.639098",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "fc106395921c4b46989587224c18b563",
+    "session_id": "907668093c67472e92e025f69a87c60c",
+    "context_type": "claims",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: Evaluate fraud risk for motor claim\nContext type: CLAIMS\n\n--- Relevant Policy / Regulatory Evidence ---\n[1] Source: irdai_guidelines.txt  (relevance: 1.000)\n    \"d the premium paid after deducting a proportionate risk premium for the coverage period and any medical examination costs incurred.  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 6. FRAUD REPORTING OBLIGATIONS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n[2] Source: sample_policy_wording.txt  (relevance: 0.984)\n    \"nt. For theft, an FIR must be lodged with the nearest police station and a copy submitted along with the claim intimation.  3.2 Documents Required Motor claim: duly completed claim form, copy of registration certificate, driving licence, insurance certificate, fitness certificate (commercial vehicle\"\n[3] Source: irdai_guidelines.txt  (relevance: 0.968)\n    \"\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500  IRDAI's Insurance Fraud Monitoring Framework requires insurers to establish a dedicated fraud management unit, maintain a fraud repository, and report detected fraud cases to the IRDAI fraud reporting portal. Insurers must\"\n\n--- Model Scoring Evidence ---\nFraud Score      : 0.360516\nFraud Flag       : False\nConfidence Tier  : LOW\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.",
+    "model_result": {
+      "claim_id": "CLM001",
+      "fraud_score": 0.360516,
+      "fraud_flag": false,
+      "confidence_tier": "low",
+      "shap_drivers": [],
+      "model_version": "1.0.0",
+      "timestamp": "2026-10-06T05:18:39.664499"
+    },
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-06T05:18:39.666503",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "91380b351f1a4524b8cc54f41d2aed53",
+    "session_id": "test-session-001",
+    "context_type": "underwriting",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: test query\nContext type: UNDERWRITING\n\n--- Relevant Policy / Regulatory Evidence ---\n[1] Source: irdai_guidelines.txt  (relevance: 1.000)\n    \"IRDAI REGULATORY GUIDELINES \u2014 SUMMARY FOR CLAIMGUARD AI TRAINING DEMO / TRAINING SUMMARY ONLY \u2014 NOT LEGAL ADVICE  Source reference: Insurance Regulatory and Development Authority of India (IRDAI) Compiled for: ClaimGuard AI Platform (internal training corpus)  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n[2] Source: irdai_guidelines.txt  (relevance: 0.984)\n    \"g corpus)  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 1. CLAIM SETTLEMENT TIMELINES \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500  Under IRDAI (Protection of Policyholders' Interests) Regulations, insurers are required to settl\"\n[3] Source: irdai_guidelines.txt  (relevance: 0.968)\n    \"rests) Regulations, insurers are required to settle all claims within 30 days of receipt of the last necessary document. Where the claim requires further investigation, the insurer must complete the investigation and settle the claim within 45 days of receiving the claim intimation. Any delay beyond\"\n\n--- Model Scoring Evidence ---\nRisk Score : 0.000424\nRisk Tier  : LOW\nPremium Adj: 0.8003\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.",
+    "model_result": {
+      "risk_tier": "low",
+      "risk_score": 0.000424,
+      "premium_adjustment": 0.8003,
+      "shap_drivers": [],
+      "model_version": "1.0.0",
+      "timestamp": "2026-10-06T05:18:39.690786"
+    },
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-06T05:18:39.690786",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "05021d667f8d466ab2e3c15b4c87bd5b",
+    "session_id": "bd7afec3de5f4e708111b107340ceb7a",
+    "context_type": "underwriting",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: test\nContext type: UNDERWRITING\n\n--- Relevant Policy / Regulatory Evidence ---\n[1] Source: irdai_guidelines.txt  (relevance: 1.000)\n    \"IRDAI REGULATORY GUIDELINES \u2014 SUMMARY FOR CLAIMGUARD AI TRAINING DEMO / TRAINING SUMMARY ONLY \u2014 NOT LEGAL ADVICE  Source reference: Insurance Regulatory and Development Authority of India (IRDAI) Compiled for: ClaimGuard AI Platform (internal training corpus)  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n[2] Source: irdai_guidelines.txt  (relevance: 0.984)\n    \"g corpus)  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 1. CLAIM SETTLEMENT TIMELINES \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500  Under IRDAI (Protection of Policyholders' Interests) Regulations, insurers are required to settl\"\n[3] Source: irdai_guidelines.txt  (relevance: 0.968)\n    \"rests) Regulations, insurers are required to settle all claims within 30 days of receipt of the last necessary document. Where the claim requires further investigation, the insurer must complete the investigation and settle the claim within 45 days of receiving the claim intimation. Any delay beyond\"\n\nModel scoring data unavailable for this request.\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.",
+    "model_result": {},
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-06T05:18:39.695728",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "0945e3af5dae41ceb4752ce5eb8897d9",
+    "session_id": "f4924bc3e6ab4b1c90ed9445db7d4b28",
+    "context_type": "underwriting",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: Assess underwriting risk for new motor policy\nContext type: UNDERWRITING\n\n--- Relevant Policy / Regulatory Evidence ---\n[1] Source: irdai_guidelines.txt  (relevance: 1.000)\n    \"nsurer.  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 5. FREE-LOOK PERIOD \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500  Policyholders purchasing a new policy have the right to review the terms and conditions and return the polic\"\n[2] Source: irdai_guidelines.txt  (relevance: 0.984)\n    \"d the premium paid after deducting a proportionate risk premium for the coverage period and any medical examination costs incurred.  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 6. FRAUD REPORTING OBLIGATIONS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n[3] Source: sample_policy_wording.txt  (relevance: 0.968)\n    \"CLAIMGUARD STANDARD POLICY \u2014 MOTOR AND HEALTH INSURANCE FICTIONAL DEMO DOCUMENT \u2014 FOR TRAINING AND DEMONSTRATION PURPOSES ONLY  Policy Reference: CGS-2024-DEMO Insurer: ClaimGuard Insurance Limited (Fictional Entity) Regulator: Insurance Regulatory and Development Authority of India (IRDAI)  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n\n--- Model Scoring Evidence ---\nRisk Score : 0.000424\nRisk Tier  : LOW\nPremium Adj: 0.8003\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.",
+    "model_result": {
+      "risk_tier": "low",
+      "risk_score": 0.000424,
+      "premium_adjustment": 0.8003,
+      "shap_drivers": [],
+      "model_version": "1.0.0",
+      "timestamp": "2026-10-06T05:25:45.196359"
+    },
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-06T05:25:45.199375",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "b34dcf2753374457b8750edbb430704c",
+    "session_id": "ecec825ec9594226a730287ae01ad462",
+    "context_type": "claims",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: Evaluate fraud risk for motor claim\nContext type: CLAIMS\n\n--- Relevant Policy / Regulatory Evidence ---\n[1] Source: irdai_guidelines.txt  (relevance: 1.000)\n    \"d the premium paid after deducting a proportionate risk premium for the coverage period and any medical examination costs incurred.  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 6. FRAUD REPORTING OBLIGATIONS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n[2] Source: sample_policy_wording.txt  (relevance: 0.984)\n    \"nt. For theft, an FIR must be lodged with the nearest police station and a copy submitted along with the claim intimation.  3.2 Documents Required Motor claim: duly completed claim form, copy of registration certificate, driving licence, insurance certificate, fitness certificate (commercial vehicle\"\n[3] Source: irdai_guidelines.txt  (relevance: 0.968)\n    \"\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500  IRDAI's Insurance Fraud Monitoring Framework requires insurers to establish a dedicated fraud management unit, maintain a fraud repository, and report detected fraud cases to the IRDAI fraud reporting portal. Insurers must\"\n\n--- Model Scoring Evidence ---\nFraud Score      : 0.360516\nFraud Flag       : False\nConfidence Tier  : LOW\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.",
+    "model_result": {
+      "claim_id": "CLM001",
+      "fraud_score": 0.360516,
+      "fraud_flag": false,
+      "confidence_tier": "low",
+      "shap_drivers": [],
+      "model_version": "1.0.0",
+      "timestamp": "2026-10-06T05:25:45.238530"
+    },
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-06T05:25:45.238530",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "9d073c1764fa440f96a5d61c8a850545",
+    "session_id": "test-session-001",
+    "context_type": "underwriting",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: test query\nContext type: UNDERWRITING\n\n--- Relevant Policy / Regulatory Evidence ---\n[1] Source: irdai_guidelines.txt  (relevance: 1.000)\n    \"IRDAI REGULATORY GUIDELINES \u2014 SUMMARY FOR CLAIMGUARD AI TRAINING DEMO / TRAINING SUMMARY ONLY \u2014 NOT LEGAL ADVICE  Source reference: Insurance Regulatory and Development Authority of India (IRDAI) Compiled for: ClaimGuard AI Platform (internal training corpus)  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n[2] Source: irdai_guidelines.txt  (relevance: 0.984)\n    \"g corpus)  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 1. CLAIM SETTLEMENT TIMELINES \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500  Under IRDAI (Protection of Policyholders' Interests) Regulations, insurers are required to settl\"\n[3] Source: irdai_guidelines.txt  (relevance: 0.968)\n    \"rests) Regulations, insurers are required to settle all claims within 30 days of receipt of the last necessary document. Where the claim requires further investigation, the insurer must complete the investigation and settle the claim within 45 days of receiving the claim intimation. Any delay beyond\"\n\n--- Model Scoring Evidence ---\nRisk Score : 0.000424\nRisk Tier  : LOW\nPremium Adj: 0.8003\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.",
+    "model_result": {
+      "risk_tier": "low",
+      "risk_score": 0.000424,
+      "premium_adjustment": 0.8003,
+      "shap_drivers": [],
+      "model_version": "1.0.0",
+      "timestamp": "2026-10-06T05:25:45.268405"
+    },
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-06T05:25:45.268405",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "b0e1fd75ef0f4b14b108ff147d3501f0",
+    "session_id": "93a9648d0c2b4b0b9280c5c29ec066ab",
+    "context_type": "underwriting",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: test\nContext type: UNDERWRITING\n\n--- Relevant Policy / Regulatory Evidence ---\n[1] Source: irdai_guidelines.txt  (relevance: 1.000)\n    \"IRDAI REGULATORY GUIDELINES \u2014 SUMMARY FOR CLAIMGUARD AI TRAINING DEMO / TRAINING SUMMARY ONLY \u2014 NOT LEGAL ADVICE  Source reference: Insurance Regulatory and Development Authority of India (IRDAI) Compiled for: ClaimGuard AI Platform (internal training corpus)  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n[2] Source: irdai_guidelines.txt  (relevance: 0.984)\n    \"g corpus)  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 1. CLAIM SETTLEMENT TIMELINES \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500  Under IRDAI (Protection of Policyholders' Interests) Regulations, insurers are required to settl\"\n[3] Source: irdai_guidelines.txt  (relevance: 0.968)\n    \"rests) Regulations, insurers are required to settle all claims within 30 days of receipt of the last necessary document. Where the claim requires further investigation, the insurer must complete the investigation and settle the claim within 45 days of receiving the claim intimation. Any delay beyond\"\n\nModel scoring data unavailable for this request.\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.",
+    "model_result": {},
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-06T05:25:45.277169",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "21972efe56a14d9ea8ea3d1f1218dcd6",
+    "session_id": "04b24b0ac65e45b796eb8f800176b967",
+    "context_type": "underwriting",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: Assess underwriting risk for new motor policy\nContext type: UNDERWRITING\n\n--- Relevant Policy / Regulatory Evidence ---\n[1] Source: irdai_guidelines.txt  (relevance: 1.000)\n    \"nsurer.  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 5. FREE-LOOK PERIOD \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500  Policyholders purchasing a new policy have the right to review the terms and conditions and return the polic\"\n[2] Source: irdai_guidelines.txt  (relevance: 0.984)\n    \"d the premium paid after deducting a proportionate risk premium for the coverage period and any medical examination costs incurred.  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 6. FRAUD REPORTING OBLIGATIONS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n[3] Source: sample_policy_wording.txt  (relevance: 0.968)\n    \"CLAIMGUARD STANDARD POLICY \u2014 MOTOR AND HEALTH INSURANCE FICTIONAL DEMO DOCUMENT \u2014 FOR TRAINING AND DEMONSTRATION PURPOSES ONLY  Policy Reference: CGS-2024-DEMO Insurer: ClaimGuard Insurance Limited (Fictional Entity) Regulator: Insurance Regulatory and Development Authority of India (IRDAI)  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n\n--- Model Scoring Evidence ---\nRisk Score : 0.000424\nRisk Tier  : LOW\nPremium Adj: 0.8003\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.",
+    "model_result": {
+      "risk_tier": "low",
+      "risk_score": 0.000424,
+      "premium_adjustment": 0.8003,
+      "shap_drivers": [],
+      "model_version": "1.0.0",
+      "timestamp": "2026-10-06T05:33:28.271191"
+    },
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-06T05:33:28.271191",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "e306a589505f4c8ea19ca998c531f318",
+    "session_id": "62f4311a418c401794e2b347a2478c3e",
+    "context_type": "claims",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: Evaluate fraud risk for motor claim\nContext type: CLAIMS\n\n--- Relevant Policy / Regulatory Evidence ---\n[1] Source: irdai_guidelines.txt  (relevance: 1.000)\n    \"d the premium paid after deducting a proportionate risk premium for the coverage period and any medical examination costs incurred.  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 6. FRAUD REPORTING OBLIGATIONS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n[2] Source: sample_policy_wording.txt  (relevance: 0.984)\n    \"nt. For theft, an FIR must be lodged with the nearest police station and a copy submitted along with the claim intimation.  3.2 Documents Required Motor claim: duly completed claim form, copy of registration certificate, driving licence, insurance certificate, fitness certificate (commercial vehicle\"\n[3] Source: irdai_guidelines.txt  (relevance: 0.968)\n    \"\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500  IRDAI's Insurance Fraud Monitoring Framework requires insurers to establish a dedicated fraud management unit, maintain a fraud repository, and report detected fraud cases to the IRDAI fraud reporting portal. Insurers must\"\n\n--- Model Scoring Evidence ---\nFraud Score      : 0.360516\nFraud Flag       : False\nConfidence Tier  : LOW\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.",
+    "model_result": {
+      "claim_id": "CLM001",
+      "fraud_score": 0.360516,
+      "fraud_flag": false,
+      "confidence_tier": "low",
+      "shap_drivers": [],
+      "model_version": "1.0.0",
+      "timestamp": "2026-10-06T05:33:28.334195"
+    },
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-06T05:33:28.341243",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "3251365225f440f98d495b081784182e",
+    "session_id": "test-session-001",
+    "context_type": "underwriting",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: test query\nContext type: UNDERWRITING\n\n--- Relevant Policy / Regulatory Evidence ---\n[1] Source: irdai_guidelines.txt  (relevance: 1.000)\n    \"IRDAI REGULATORY GUIDELINES \u2014 SUMMARY FOR CLAIMGUARD AI TRAINING DEMO / TRAINING SUMMARY ONLY \u2014 NOT LEGAL ADVICE  Source reference: Insurance Regulatory and Development Authority of India (IRDAI) Compiled for: ClaimGuard AI Platform (internal training corpus)  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n[2] Source: irdai_guidelines.txt  (relevance: 0.984)\n    \"g corpus)  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 1. CLAIM SETTLEMENT TIMELINES \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500  Under IRDAI (Protection of Policyholders' Interests) Regulations, insurers are required to settl\"\n[3] Source: irdai_guidelines.txt  (relevance: 0.968)\n    \"rests) Regulations, insurers are required to settle all claims within 30 days of receipt of the last necessary document. Where the claim requires further investigation, the insurer must complete the investigation and settle the claim within 45 days of receiving the claim intimation. Any delay beyond\"\n\n--- Model Scoring Evidence ---\nRisk Score : 0.000424\nRisk Tier  : LOW\nPremium Adj: 0.8003\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.",
+    "model_result": {
+      "risk_tier": "low",
+      "risk_score": 0.000424,
+      "premium_adjustment": 0.8003,
+      "shap_drivers": [],
+      "model_version": "1.0.0",
+      "timestamp": "2026-10-06T05:33:28.386435"
+    },
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-06T05:33:28.386435",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "5334de3448564e28a73ed0e514c9256b",
+    "session_id": "51570a77c9324d7aaf60bcc76bad0271",
+    "context_type": "underwriting",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: test\nContext type: UNDERWRITING\n\n--- Relevant Policy / Regulatory Evidence ---\n[1] Source: irdai_guidelines.txt  (relevance: 1.000)\n    \"IRDAI REGULATORY GUIDELINES \u2014 SUMMARY FOR CLAIMGUARD AI TRAINING DEMO / TRAINING SUMMARY ONLY \u2014 NOT LEGAL ADVICE  Source reference: Insurance Regulatory and Development Authority of India (IRDAI) Compiled for: ClaimGuard AI Platform (internal training corpus)  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n[2] Source: irdai_guidelines.txt  (relevance: 0.984)\n    \"g corpus)  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 1. CLAIM SETTLEMENT TIMELINES \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500  Under IRDAI (Protection of Policyholders' Interests) Regulations, insurers are required to settl\"\n[3] Source: irdai_guidelines.txt  (relevance: 0.968)\n    \"rests) Regulations, insurers are required to settle all claims within 30 days of receipt of the last necessary document. Where the claim requires further investigation, the insurer must complete the investigation and settle the claim within 45 days of receiving the claim intimation. Any delay beyond\"\n\nModel scoring data unavailable for this request.\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.",
+    "model_result": {},
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-06T05:33:28.403576",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "60e65789e8d8496fb6bfc919060bd4f9",
+    "session_id": "daa171178ed546aabced424c9d074fb3",
+    "context_type": "underwriting",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: Assess underwriting risk for new motor policy\nContext type: UNDERWRITING\n\n--- Relevant Policy / Regulatory Evidence ---\n[1] Source: irdai_guidelines.txt  (relevance: 1.000)\n    \"nsurer.  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 5. FREE-LOOK PERIOD \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500  Policyholders purchasing a new policy have the right to review the terms and conditions and return the polic\"\n[2] Source: irdai_guidelines.txt  (relevance: 0.984)\n    \"d the premium paid after deducting a proportionate risk premium for the coverage period and any medical examination costs incurred.  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 6. FRAUD REPORTING OBLIGATIONS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n[3] Source: sample_policy_wording.txt  (relevance: 0.968)\n    \"CLAIMGUARD STANDARD POLICY \u2014 MOTOR AND HEALTH INSURANCE FICTIONAL DEMO DOCUMENT \u2014 FOR TRAINING AND DEMONSTRATION PURPOSES ONLY  Policy Reference: CGS-2024-DEMO Insurer: ClaimGuard Insurance Limited (Fictional Entity) Regulator: Insurance Regulatory and Development Authority of India (IRDAI)  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n\n--- Model Scoring Evidence ---\nRisk Score : 0.000424\nRisk Tier  : LOW\nPremium Adj: 0.8003\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.",
+    "model_result": {
+      "risk_tier": "low",
+      "risk_score": 0.000424,
+      "premium_adjustment": 0.8003,
+      "shap_drivers": [],
+      "model_version": "1.0.0",
+      "timestamp": "2026-10-06T05:53:42.346361"
+    },
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-06T05:53:42.354487",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "dbbe0c495d0e4d16a6b984c6253224b1",
+    "session_id": "5c07c7252ecf4509a1b437d01cff75c7",
+    "context_type": "claims",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: Evaluate fraud risk for motor claim\nContext type: CLAIMS\n\n--- Relevant Policy / Regulatory Evidence ---\n[1] Source: irdai_guidelines.txt  (relevance: 1.000)\n    \"d the premium paid after deducting a proportionate risk premium for the coverage period and any medical examination costs incurred.  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 6. FRAUD REPORTING OBLIGATIONS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n[2] Source: sample_policy_wording.txt  (relevance: 0.984)\n    \"nt. For theft, an FIR must be lodged with the nearest police station and a copy submitted along with the claim intimation.  3.2 Documents Required Motor claim: duly completed claim form, copy of registration certificate, driving licence, insurance certificate, fitness certificate (commercial vehicle\"\n[3] Source: irdai_guidelines.txt  (relevance: 0.968)\n    \"\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500  IRDAI's Insurance Fraud Monitoring Framework requires insurers to establish a dedicated fraud management unit, maintain a fraud repository, and report detected fraud cases to the IRDAI fraud reporting portal. Insurers must\"\n\n--- Model Scoring Evidence ---\nFraud Score      : 0.360516\nFraud Flag       : False\nConfidence Tier  : LOW\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.",
+    "model_result": {
+      "claim_id": "CLM001",
+      "fraud_score": 0.360516,
+      "fraud_flag": false,
+      "confidence_tier": "low",
+      "shap_drivers": [],
+      "model_version": "1.0.0",
+      "timestamp": "2026-10-06T05:53:42.414502"
+    },
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-06T05:53:42.425545",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "205ff1f38c5d4b008680efde643a6ac6",
+    "session_id": "test-session-001",
+    "context_type": "underwriting",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: test query\nContext type: UNDERWRITING\n\n--- Relevant Policy / Regulatory Evidence ---\n[1] Source: irdai_guidelines.txt  (relevance: 1.000)\n    \"IRDAI REGULATORY GUIDELINES \u2014 SUMMARY FOR CLAIMGUARD AI TRAINING DEMO / TRAINING SUMMARY ONLY \u2014 NOT LEGAL ADVICE  Source reference: Insurance Regulatory and Development Authority of India (IRDAI) Compiled for: ClaimGuard AI Platform (internal training corpus)  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n[2] Source: irdai_guidelines.txt  (relevance: 0.984)\n    \"g corpus)  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 1. CLAIM SETTLEMENT TIMELINES \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500  Under IRDAI (Protection of Policyholders' Interests) Regulations, insurers are required to settl\"\n[3] Source: irdai_guidelines.txt  (relevance: 0.968)\n    \"rests) Regulations, insurers are required to settle all claims within 30 days of receipt of the last necessary document. Where the claim requires further investigation, the insurer must complete the investigation and settle the claim within 45 days of receiving the claim intimation. Any delay beyond\"\n\n--- Model Scoring Evidence ---\nRisk Score : 0.000424\nRisk Tier  : LOW\nPremium Adj: 0.8003\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.",
+    "model_result": {
+      "risk_tier": "low",
+      "risk_score": 0.000424,
+      "premium_adjustment": 0.8003,
+      "shap_drivers": [],
+      "model_version": "1.0.0",
+      "timestamp": "2026-10-06T05:53:42.486321"
+    },
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-06T05:53:42.491297",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "1ff5cc54e1c94863a28e4bec1fc03db1",
+    "session_id": "d7ea64520e8b49458e4aa4151d935ff6",
+    "context_type": "underwriting",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: test\nContext type: UNDERWRITING\n\n--- Relevant Policy / Regulatory Evidence ---\n[1] Source: irdai_guidelines.txt  (relevance: 1.000)\n    \"IRDAI REGULATORY GUIDELINES \u2014 SUMMARY FOR CLAIMGUARD AI TRAINING DEMO / TRAINING SUMMARY ONLY \u2014 NOT LEGAL ADVICE  Source reference: Insurance Regulatory and Development Authority of India (IRDAI) Compiled for: ClaimGuard AI Platform (internal training corpus)  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n[2] Source: irdai_guidelines.txt  (relevance: 0.984)\n    \"g corpus)  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 1. CLAIM SETTLEMENT TIMELINES \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500  Under IRDAI (Protection of Policyholders' Interests) Regulations, insurers are required to settl\"\n[3] Source: irdai_guidelines.txt  (relevance: 0.968)\n    \"rests) Regulations, insurers are required to settle all claims within 30 days of receipt of the last necessary document. Where the claim requires further investigation, the insurer must complete the investigation and settle the claim within 45 days of receiving the claim intimation. Any delay beyond\"\n\nModel scoring data unavailable for this request.\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.",
+    "model_result": {},
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-06T05:53:42.507785",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "4b2df1e7c40549cf952729697ad27d35",
+    "session_id": "eeeaf2f1c8364b2dafedb5da85b2b611",
+    "context_type": "underwriting",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: Assess underwriting risk for new motor policy\nContext type: UNDERWRITING\n\n--- Relevant Policy / Regulatory Evidence ---\n[1] Source: irdai_guidelines.txt  (relevance: 1.000)\n    \"nsurer.  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 5. FREE-LOOK PERIOD \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500  Policyholders purchasing a new policy have the right to review the terms and conditions and return the polic\"\n[2] Source: irdai_guidelines.txt  (relevance: 0.984)\n    \"d the premium paid after deducting a proportionate risk premium for the coverage period and any medical examination costs incurred.  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 6. FRAUD REPORTING OBLIGATIONS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n[3] Source: sample_policy_wording.txt  (relevance: 0.968)\n    \"CLAIMGUARD STANDARD POLICY \u2014 MOTOR AND HEALTH INSURANCE FICTIONAL DEMO DOCUMENT \u2014 FOR TRAINING AND DEMONSTRATION PURPOSES ONLY  Policy Reference: CGS-2024-DEMO Insurer: ClaimGuard Insurance Limited (Fictional Entity) Regulator: Insurance Regulatory and Development Authority of India (IRDAI)  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n\n--- Model Scoring Evidence ---\nRisk Score : 0.000424\nRisk Tier  : LOW\nPremium Adj: 0.8003\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.",
+    "model_result": {
+      "risk_tier": "low",
+      "risk_score": 0.000424,
+      "premium_adjustment": 0.8003,
+      "shap_drivers": [],
+      "model_version": "1.0.0",
+      "timestamp": "2026-10-06T07:13:20.205777"
+    },
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-06T07:13:20.207256",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "51c6fc2cf18f4bf08656c3475c2e8b1b",
+    "session_id": "256bf98130fd4fa6a9997be33d8ab03a",
+    "context_type": "claims",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: Evaluate fraud risk for motor claim\nContext type: CLAIMS\n\n--- Relevant Policy / Regulatory Evidence ---\n[1] Source: irdai_guidelines.txt  (relevance: 1.000)\n    \"d the premium paid after deducting a proportionate risk premium for the coverage period and any medical examination costs incurred.  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 6. FRAUD REPORTING OBLIGATIONS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n[2] Source: sample_policy_wording.txt  (relevance: 0.984)\n    \"nt. For theft, an FIR must be lodged with the nearest police station and a copy submitted along with the claim intimation.  3.2 Documents Required Motor claim: duly completed claim form, copy of registration certificate, driving licence, insurance certificate, fitness certificate (commercial vehicle\"\n[3] Source: irdai_guidelines.txt  (relevance: 0.968)\n    \"\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500  IRDAI's Insurance Fraud Monitoring Framework requires insurers to establish a dedicated fraud management unit, maintain a fraud repository, and report detected fraud cases to the IRDAI fraud reporting portal. Insurers must\"\n\n--- Model Scoring Evidence ---\nFraud Score      : 0.360516\nFraud Flag       : False\nConfidence Tier  : LOW\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.",
+    "model_result": {
+      "claim_id": "CLM001",
+      "fraud_score": 0.360516,
+      "fraud_flag": false,
+      "confidence_tier": "low",
+      "shap_drivers": [],
+      "model_version": "1.0.0",
+      "timestamp": "2026-10-06T07:13:20.254789"
+    },
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-06T07:13:20.256749",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "41fd324bf906413ea262fbff6f30babd",
+    "session_id": "test-session-001",
+    "context_type": "underwriting",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: test query\nContext type: UNDERWRITING\n\n--- Relevant Policy / Regulatory Evidence ---\n[1] Source: irdai_guidelines.txt  (relevance: 1.000)\n    \"IRDAI REGULATORY GUIDELINES \u2014 SUMMARY FOR CLAIMGUARD AI TRAINING DEMO / TRAINING SUMMARY ONLY \u2014 NOT LEGAL ADVICE  Source reference: Insurance Regulatory and Development Authority of India (IRDAI) Compiled for: ClaimGuard AI Platform (internal training corpus)  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n[2] Source: irdai_guidelines.txt  (relevance: 0.984)\n    \"g corpus)  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 1. CLAIM SETTLEMENT TIMELINES \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500  Under IRDAI (Protection of Policyholders' Interests) Regulations, insurers are required to settl\"\n[3] Source: irdai_guidelines.txt  (relevance: 0.968)\n    \"rests) Regulations, insurers are required to settle all claims within 30 days of receipt of the last necessary document. Where the claim requires further investigation, the insurer must complete the investigation and settle the claim within 45 days of receiving the claim intimation. Any delay beyond\"\n\n--- Model Scoring Evidence ---\nRisk Score : 0.000424\nRisk Tier  : LOW\nPremium Adj: 0.8003\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.",
+    "model_result": {
+      "risk_tier": "low",
+      "risk_score": 0.000424,
+      "premium_adjustment": 0.8003,
+      "shap_drivers": [],
+      "model_version": "1.0.0",
+      "timestamp": "2026-10-06T07:13:20.287871"
+    },
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-06T07:13:20.287871",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "2efd43c0ece748a2abd1860f9132eff6",
+    "session_id": "1051ece1ece1417da6b320f2d81ff02c",
+    "context_type": "underwriting",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: test\nContext type: UNDERWRITING\n\n--- Relevant Policy / Regulatory Evidence ---\n[1] Source: irdai_guidelines.txt  (relevance: 1.000)\n    \"IRDAI REGULATORY GUIDELINES \u2014 SUMMARY FOR CLAIMGUARD AI TRAINING DEMO / TRAINING SUMMARY ONLY \u2014 NOT LEGAL ADVICE  Source reference: Insurance Regulatory and Development Authority of India (IRDAI) Compiled for: ClaimGuard AI Platform (internal training corpus)  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n[2] Source: irdai_guidelines.txt  (relevance: 0.984)\n    \"g corpus)  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 1. CLAIM SETTLEMENT TIMELINES \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500  Under IRDAI (Protection of Policyholders' Interests) Regulations, insurers are required to settl\"\n[3] Source: irdai_guidelines.txt  (relevance: 0.968)\n    \"rests) Regulations, insurers are required to settle all claims within 30 days of receipt of the last necessary document. Where the claim requires further investigation, the insurer must complete the investigation and settle the claim within 45 days of receiving the claim intimation. Any delay beyond\"\n\nModel scoring data unavailable for this request.\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.",
+    "model_result": {},
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-06T07:13:20.290861",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "bd489db1d75d44a69d99bcf947060980",
+    "session_id": "6d7f610ecd5f47098148c17aa699c3de",
+    "context_type": "underwriting",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: Assess underwriting risk for new motor policy\nContext type: UNDERWRITING\n\n--- Relevant Policy / Regulatory Evidence ---\n[1] Source: irdai_guidelines.txt  (relevance: 1.000)\n    \"nsurer.  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 5. FREE-LOOK PERIOD \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500  Policyholders purchasing a new policy have the right to review the terms and conditions and return the polic\"\n[2] Source: irdai_guidelines.txt  (relevance: 0.984)\n    \"d the premium paid after deducting a proportionate risk premium for the coverage period and any medical examination costs incurred.  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 6. FRAUD REPORTING OBLIGATIONS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n[3] Source: sample_policy_wording.txt  (relevance: 0.968)\n    \"CLAIMGUARD STANDARD POLICY \u2014 MOTOR AND HEALTH INSURANCE FICTIONAL DEMO DOCUMENT \u2014 FOR TRAINING AND DEMONSTRATION PURPOSES ONLY  Policy Reference: CGS-2024-DEMO Insurer: ClaimGuard Insurance Limited (Fictional Entity) Regulator: Insurance Regulatory and Development Authority of India (IRDAI)  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n\n--- Model Scoring Evidence ---\nRisk Score : 0.000424\nRisk Tier  : LOW\nPremium Adj: 0.8003\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.",
+    "model_result": {
+      "risk_tier": "low",
+      "risk_score": 0.000424,
+      "premium_adjustment": 0.8003,
+      "shap_drivers": [],
+      "model_version": "1.0.0",
+      "timestamp": "2026-10-06T07:28:37.439484"
+    },
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-06T07:28:37.440484",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "54c4d898ce0b4754a5702ce9a8224f84",
+    "session_id": "240be69bf2ba4991b568a5c7eba237d5",
+    "context_type": "claims",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: Evaluate fraud risk for motor claim\nContext type: CLAIMS\n\n--- Relevant Policy / Regulatory Evidence ---\n[1] Source: irdai_guidelines.txt  (relevance: 1.000)\n    \"d the premium paid after deducting a proportionate risk premium for the coverage period and any medical examination costs incurred.  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 6. FRAUD REPORTING OBLIGATIONS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n[2] Source: sample_policy_wording.txt  (relevance: 0.984)\n    \"nt. For theft, an FIR must be lodged with the nearest police station and a copy submitted along with the claim intimation.  3.2 Documents Required Motor claim: duly completed claim form, copy of registration certificate, driving licence, insurance certificate, fitness certificate (commercial vehicle\"\n[3] Source: irdai_guidelines.txt  (relevance: 0.968)\n    \"\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500  IRDAI's Insurance Fraud Monitoring Framework requires insurers to establish a dedicated fraud management unit, maintain a fraud repository, and report detected fraud cases to the IRDAI fraud reporting portal. Insurers must\"\n\n--- Model Scoring Evidence ---\nFraud Score      : 0.360516\nFraud Flag       : False\nConfidence Tier  : LOW\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.",
+    "model_result": {
+      "claim_id": "CLM001",
+      "fraud_score": 0.360516,
+      "fraud_flag": false,
+      "confidence_tier": "low",
+      "shap_drivers": [],
+      "model_version": "1.0.0",
+      "timestamp": "2026-10-06T07:28:37.470179"
+    },
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-06T07:28:37.471694",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "281abb3632674ec29d1cf8647a0b96e9",
+    "session_id": "test-session-001",
+    "context_type": "underwriting",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: test query\nContext type: UNDERWRITING\n\n--- Relevant Policy / Regulatory Evidence ---\n[1] Source: irdai_guidelines.txt  (relevance: 1.000)\n    \"IRDAI REGULATORY GUIDELINES \u2014 SUMMARY FOR CLAIMGUARD AI TRAINING DEMO / TRAINING SUMMARY ONLY \u2014 NOT LEGAL ADVICE  Source reference: Insurance Regulatory and Development Authority of India (IRDAI) Compiled for: ClaimGuard AI Platform (internal training corpus)  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n[2] Source: irdai_guidelines.txt  (relevance: 0.984)\n    \"g corpus)  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 1. CLAIM SETTLEMENT TIMELINES \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500  Under IRDAI (Protection of Policyholders' Interests) Regulations, insurers are required to settl\"\n[3] Source: irdai_guidelines.txt  (relevance: 0.968)\n    \"rests) Regulations, insurers are required to settle all claims within 30 days of receipt of the last necessary document. Where the claim requires further investigation, the insurer must complete the investigation and settle the claim within 45 days of receiving the claim intimation. Any delay beyond\"\n\n--- Model Scoring Evidence ---\nRisk Score : 0.000424\nRisk Tier  : LOW\nPremium Adj: 0.8003\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.",
+    "model_result": {
+      "risk_tier": "low",
+      "risk_score": 0.000424,
+      "premium_adjustment": 0.8003,
+      "shap_drivers": [],
+      "model_version": "1.0.0",
+      "timestamp": "2026-10-06T07:28:37.492036"
+    },
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-06T07:28:37.492036",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "ac7f3adbb3f041938ee5d6a16535e67a",
+    "session_id": "9257e3ef6a3b4b629a0e5de8b98035d7",
+    "context_type": "underwriting",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: test\nContext type: UNDERWRITING\n\n--- Relevant Policy / Regulatory Evidence ---\n[1] Source: irdai_guidelines.txt  (relevance: 1.000)\n    \"IRDAI REGULATORY GUIDELINES \u2014 SUMMARY FOR CLAIMGUARD AI TRAINING DEMO / TRAINING SUMMARY ONLY \u2014 NOT LEGAL ADVICE  Source reference: Insurance Regulatory and Development Authority of India (IRDAI) Compiled for: ClaimGuard AI Platform (internal training corpus)  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n[2] Source: irdai_guidelines.txt  (relevance: 0.984)\n    \"g corpus)  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 1. CLAIM SETTLEMENT TIMELINES \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500  Under IRDAI (Protection of Policyholders' Interests) Regulations, insurers are required to settl\"\n[3] Source: irdai_guidelines.txt  (relevance: 0.968)\n    \"rests) Regulations, insurers are required to settle all claims within 30 days of receipt of the last necessary document. Where the claim requires further investigation, the insurer must complete the investigation and settle the claim within 45 days of receiving the claim intimation. Any delay beyond\"\n\nModel scoring data unavailable for this request.\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.",
+    "model_result": {},
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-06T07:28:37.501686",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "31926d21122a48c5a7c02300e0c9ae92",
+    "session_id": "79aa1287641e4b2694dfd56a05a67382",
+    "context_type": "underwriting",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: Assess underwriting risk for new motor policy\nContext type: UNDERWRITING\n\n--- Relevant Policy / Regulatory Evidence ---\n[1] Source: irdai_guidelines.txt  (relevance: 1.000)\n    \"nsurer.  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 5. FREE-LOOK PERIOD \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500  Policyholders purchasing a new policy have the right to review the terms and conditions and return the polic\"\n[2] Source: irdai_guidelines.txt  (relevance: 0.984)\n    \"d the premium paid after deducting a proportionate risk premium for the coverage period and any medical examination costs incurred.  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 6. FRAUD REPORTING OBLIGATIONS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n[3] Source: sample_policy_wording.txt  (relevance: 0.968)\n    \"CLAIMGUARD STANDARD POLICY \u2014 MOTOR AND HEALTH INSURANCE FICTIONAL DEMO DOCUMENT \u2014 FOR TRAINING AND DEMONSTRATION PURPOSES ONLY  Policy Reference: CGS-2024-DEMO Insurer: ClaimGuard Insurance Limited (Fictional Entity) Regulator: Insurance Regulatory and Development Authority of India (IRDAI)  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n\n--- Model Scoring Evidence ---\nRisk Score : 0.000424\nRisk Tier  : LOW\nPremium Adj: 0.8003\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.",
+    "model_result": {
+      "risk_tier": "low",
+      "risk_score": 0.000424,
+      "premium_adjustment": 0.8003,
+      "shap_drivers": [],
+      "model_version": "1.0.0",
+      "timestamp": "2026-10-06T08:31:04.172894"
+    },
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-06T08:31:04.181094",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "914c82d5513b431e99e6893c85f28b07",
+    "session_id": "b650fcb5f53f406b9467d9229b7f99bc",
+    "context_type": "claims",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: Evaluate fraud risk for motor claim\nContext type: CLAIMS\n\n--- Relevant Policy / Regulatory Evidence ---\n[1] Source: irdai_guidelines.txt  (relevance: 1.000)\n    \"d the premium paid after deducting a proportionate risk premium for the coverage period and any medical examination costs incurred.  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 6. FRAUD REPORTING OBLIGATIONS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n[2] Source: sample_policy_wording.txt  (relevance: 0.984)\n    \"nt. For theft, an FIR must be lodged with the nearest police station and a copy submitted along with the claim intimation.  3.2 Documents Required Motor claim: duly completed claim form, copy of registration certificate, driving licence, insurance certificate, fitness certificate (commercial vehicle\"\n[3] Source: irdai_guidelines.txt  (relevance: 0.968)\n    \"\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500  IRDAI's Insurance Fraud Monitoring Framework requires insurers to establish a dedicated fraud management unit, maintain a fraud repository, and report detected fraud cases to the IRDAI fraud reporting portal. Insurers must\"\n\n--- Model Scoring Evidence ---\nFraud Score      : 0.360516\nFraud Flag       : False\nConfidence Tier  : LOW\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.",
+    "model_result": {
+      "claim_id": "CLM001",
+      "fraud_score": 0.360516,
+      "fraud_flag": false,
+      "confidence_tier": "low",
+      "shap_drivers": [],
+      "model_version": "1.0.0",
+      "timestamp": "2026-10-06T08:31:04.256289"
+    },
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-06T08:31:04.256289",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "15f1a349dc4740bfa9047af7caa49e53",
+    "session_id": "test-session-001",
+    "context_type": "underwriting",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: test query\nContext type: UNDERWRITING\n\n--- Relevant Policy / Regulatory Evidence ---\n[1] Source: irdai_guidelines.txt  (relevance: 1.000)\n    \"IRDAI REGULATORY GUIDELINES \u2014 SUMMARY FOR CLAIMGUARD AI TRAINING DEMO / TRAINING SUMMARY ONLY \u2014 NOT LEGAL ADVICE  Source reference: Insurance Regulatory and Development Authority of India (IRDAI) Compiled for: ClaimGuard AI Platform (internal training corpus)  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n[2] Source: irdai_guidelines.txt  (relevance: 0.984)\n    \"g corpus)  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 1. CLAIM SETTLEMENT TIMELINES \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500  Under IRDAI (Protection of Policyholders' Interests) Regulations, insurers are required to settl\"\n[3] Source: irdai_guidelines.txt  (relevance: 0.968)\n    \"rests) Regulations, insurers are required to settle all claims within 30 days of receipt of the last necessary document. Where the claim requires further investigation, the insurer must complete the investigation and settle the claim within 45 days of receiving the claim intimation. Any delay beyond\"\n\n--- Model Scoring Evidence ---\nRisk Score : 0.000424\nRisk Tier  : LOW\nPremium Adj: 0.8003\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.",
+    "model_result": {
+      "risk_tier": "low",
+      "risk_score": 0.000424,
+      "premium_adjustment": 0.8003,
+      "shap_drivers": [],
+      "model_version": "1.0.0",
+      "timestamp": "2026-10-06T08:31:04.315289"
+    },
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-06T08:31:04.315289",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "9413abdaa11640c4a1701e4f81fe4063",
+    "session_id": "2e3f4c9808e84446825311a383043197",
+    "context_type": "underwriting",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: test\nContext type: UNDERWRITING\n\n--- Relevant Policy / Regulatory Evidence ---\n[1] Source: irdai_guidelines.txt  (relevance: 1.000)\n    \"IRDAI REGULATORY GUIDELINES \u2014 SUMMARY FOR CLAIMGUARD AI TRAINING DEMO / TRAINING SUMMARY ONLY \u2014 NOT LEGAL ADVICE  Source reference: Insurance Regulatory and Development Authority of India (IRDAI) Compiled for: ClaimGuard AI Platform (internal training corpus)  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n[2] Source: irdai_guidelines.txt  (relevance: 0.984)\n    \"g corpus)  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 1. CLAIM SETTLEMENT TIMELINES \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500  Under IRDAI (Protection of Policyholders' Interests) Regulations, insurers are required to settl\"\n[3] Source: irdai_guidelines.txt  (relevance: 0.968)\n    \"rests) Regulations, insurers are required to settle all claims within 30 days of receipt of the last necessary document. Where the claim requires further investigation, the insurer must complete the investigation and settle the claim within 45 days of receiving the claim intimation. Any delay beyond\"\n\nModel scoring data unavailable for this request.\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.",
+    "model_result": {},
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-06T08:31:04.331581",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "30a3570070f7488ba868d6b04a04b30e",
+    "session_id": "46e4123388124603b16b0f8b336e805c",
+    "context_type": "underwriting",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: Assess underwriting risk for new motor policy\nContext type: UNDERWRITING\n\n--- Relevant Policy / Regulatory Evidence ---\n[1] Source: irdai_guidelines.txt  (relevance: 1.000)\n    \"nsurer.  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 5. FREE-LOOK PERIOD \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500  Policyholders purchasing a new policy have the right to review the terms and conditions and return the polic\"\n[2] Source: irdai_guidelines.txt  (relevance: 0.984)\n    \"d the premium paid after deducting a proportionate risk premium for the coverage period and any medical examination costs incurred.  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 6. FRAUD REPORTING OBLIGATIONS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n[3] Source: sample_policy_wording.txt  (relevance: 0.968)\n    \"CLAIMGUARD STANDARD POLICY \u2014 MOTOR AND HEALTH INSURANCE FICTIONAL DEMO DOCUMENT \u2014 FOR TRAINING AND DEMONSTRATION PURPOSES ONLY  Policy Reference: CGS-2024-DEMO Insurer: ClaimGuard Insurance Limited (Fictional Entity) Regulator: Insurance Regulatory and Development Authority of India (IRDAI)  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n\n--- Model Scoring Evidence ---\nRisk Score : 0.000424\nRisk Tier  : LOW\nPremium Adj: 0.8003\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.",
+    "model_result": {
+      "risk_tier": "low",
+      "risk_score": 0.000424,
+      "premium_adjustment": 0.8003,
+      "shap_drivers": [],
+      "model_version": "1.0.0",
+      "timestamp": "2026-10-06T08:49:51.879193"
+    },
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-06T08:49:51.883800",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "9dbab57298fb4aebaf1073726b4c6123",
+    "session_id": "64ff92cc3f734309af22296ed57b3f2c",
+    "context_type": "claims",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: Evaluate fraud risk for motor claim\nContext type: CLAIMS\n\n--- Relevant Policy / Regulatory Evidence ---\n[1] Source: irdai_guidelines.txt  (relevance: 1.000)\n    \"d the premium paid after deducting a proportionate risk premium for the coverage period and any medical examination costs incurred.  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 6. FRAUD REPORTING OBLIGATIONS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n[2] Source: sample_policy_wording.txt  (relevance: 0.984)\n    \"nt. For theft, an FIR must be lodged with the nearest police station and a copy submitted along with the claim intimation.  3.2 Documents Required Motor claim: duly completed claim form, copy of registration certificate, driving licence, insurance certificate, fitness certificate (commercial vehicle\"\n[3] Source: irdai_guidelines.txt  (relevance: 0.968)\n    \"\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500  IRDAI's Insurance Fraud Monitoring Framework requires insurers to establish a dedicated fraud management unit, maintain a fraud repository, and report detected fraud cases to the IRDAI fraud reporting portal. Insurers must\"\n\n--- Model Scoring Evidence ---\nFraud Score      : 0.360516\nFraud Flag       : False\nConfidence Tier  : LOW\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.",
+    "model_result": {
+      "claim_id": "CLM001",
+      "fraud_score": 0.360516,
+      "fraud_flag": false,
+      "confidence_tier": "low",
+      "shap_drivers": [],
+      "model_version": "1.0.0",
+      "timestamp": "2026-10-06T08:49:51.954372"
+    },
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-06T08:49:51.956385",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "9729dbd9579647adb1ddf2e51de13499",
+    "session_id": "test-session-001",
+    "context_type": "underwriting",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: test query\nContext type: UNDERWRITING\n\n--- Relevant Policy / Regulatory Evidence ---\n[1] Source: irdai_guidelines.txt  (relevance: 1.000)\n    \"IRDAI REGULATORY GUIDELINES \u2014 SUMMARY FOR CLAIMGUARD AI TRAINING DEMO / TRAINING SUMMARY ONLY \u2014 NOT LEGAL ADVICE  Source reference: Insurance Regulatory and Development Authority of India (IRDAI) Compiled for: ClaimGuard AI Platform (internal training corpus)  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n[2] Source: irdai_guidelines.txt  (relevance: 0.984)\n    \"g corpus)  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 1. CLAIM SETTLEMENT TIMELINES \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500  Under IRDAI (Protection of Policyholders' Interests) Regulations, insurers are required to settl\"\n[3] Source: irdai_guidelines.txt  (relevance: 0.968)\n    \"rests) Regulations, insurers are required to settle all claims within 30 days of receipt of the last necessary document. Where the claim requires further investigation, the insurer must complete the investigation and settle the claim within 45 days of receiving the claim intimation. Any delay beyond\"\n\n--- Model Scoring Evidence ---\nRisk Score : 0.000424\nRisk Tier  : LOW\nPremium Adj: 0.8003\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.",
+    "model_result": {
+      "risk_tier": "low",
+      "risk_score": 0.000424,
+      "premium_adjustment": 0.8003,
+      "shap_drivers": [],
+      "model_version": "1.0.0",
+      "timestamp": "2026-10-06T08:49:52.009617"
+    },
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-06T08:49:52.009617",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "3ab22a3b9140420d896f2f2469e4a9c4",
+    "session_id": "4b7c97685bbc444fa07119833f62bd51",
+    "context_type": "underwriting",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: test\nContext type: UNDERWRITING\n\n--- Relevant Policy / Regulatory Evidence ---\n[1] Source: irdai_guidelines.txt  (relevance: 1.000)\n    \"IRDAI REGULATORY GUIDELINES \u2014 SUMMARY FOR CLAIMGUARD AI TRAINING DEMO / TRAINING SUMMARY ONLY \u2014 NOT LEGAL ADVICE  Source reference: Insurance Regulatory and Development Authority of India (IRDAI) Compiled for: ClaimGuard AI Platform (internal training corpus)  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n[2] Source: irdai_guidelines.txt  (relevance: 0.984)\n    \"g corpus)  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 1. CLAIM SETTLEMENT TIMELINES \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500  Under IRDAI (Protection of Policyholders' Interests) Regulations, insurers are required to settl\"\n[3] Source: irdai_guidelines.txt  (relevance: 0.968)\n    \"rests) Regulations, insurers are required to settle all claims within 30 days of receipt of the last necessary document. Where the claim requires further investigation, the insurer must complete the investigation and settle the claim within 45 days of receiving the claim intimation. Any delay beyond\"\n\nModel scoring data unavailable for this request.\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.",
+    "model_result": {},
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-06T08:49:52.057465",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "047ecf40fc1a4cf3bb216c6f2bfd36f5",
+    "session_id": "6a1931c2ad214e2995284acfbb9b29f4",
+    "context_type": "underwriting",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: Assess underwriting risk for new motor policy\nContext type: UNDERWRITING\n\n--- Relevant Policy / Regulatory Evidence ---\n[1] Source: irdai_guidelines.txt  (relevance: 1.000)\n    \"nsurer.  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 5. FREE-LOOK PERIOD \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500  Policyholders purchasing a new policy have the right to review the terms and conditions and return the polic\"\n[2] Source: irdai_guidelines.txt  (relevance: 0.984)\n    \"d the premium paid after deducting a proportionate risk premium for the coverage period and any medical examination costs incurred.  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 6. FRAUD REPORTING OBLIGATIONS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n[3] Source: sample_policy_wording.txt  (relevance: 0.968)\n    \"CLAIMGUARD STANDARD POLICY \u2014 MOTOR AND HEALTH INSURANCE FICTIONAL DEMO DOCUMENT \u2014 FOR TRAINING AND DEMONSTRATION PURPOSES ONLY  Policy Reference: CGS-2024-DEMO Insurer: ClaimGuard Insurance Limited (Fictional Entity) Regulator: Insurance Regulatory and Development Authority of India (IRDAI)  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n\n--- Model Scoring Evidence ---\nRisk Score : 0.000424\nRisk Tier  : LOW\nPremium Adj: 0.8003\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.",
+    "model_result": {
+      "risk_tier": "low",
+      "risk_score": 0.000424,
+      "premium_adjustment": 0.8003,
+      "shap_drivers": [],
+      "model_version": "1.0.0",
+      "timestamp": "2026-10-06T09:08:10.249421"
+    },
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-06T09:08:10.251425",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "1a24b399f28445a0b943d4e127dd4481",
+    "session_id": "4e82004df10f46b28aab9b2e420a7b22",
+    "context_type": "claims",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: Evaluate fraud risk for motor claim\nContext type: CLAIMS\n\n--- Relevant Policy / Regulatory Evidence ---\n[1] Source: irdai_guidelines.txt  (relevance: 1.000)\n    \"d the premium paid after deducting a proportionate risk premium for the coverage period and any medical examination costs incurred.  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 6. FRAUD REPORTING OBLIGATIONS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n[2] Source: sample_policy_wording.txt  (relevance: 0.984)\n    \"nt. For theft, an FIR must be lodged with the nearest police station and a copy submitted along with the claim intimation.  3.2 Documents Required Motor claim: duly completed claim form, copy of registration certificate, driving licence, insurance certificate, fitness certificate (commercial vehicle\"\n[3] Source: irdai_guidelines.txt  (relevance: 0.968)\n    \"\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500  IRDAI's Insurance Fraud Monitoring Framework requires insurers to establish a dedicated fraud management unit, maintain a fraud repository, and report detected fraud cases to the IRDAI fraud reporting portal. Insurers must\"\n\n--- Model Scoring Evidence ---\nFraud Score      : 0.360516\nFraud Flag       : False\nConfidence Tier  : LOW\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.",
+    "model_result": {
+      "claim_id": "CLM001",
+      "fraud_score": 0.360516,
+      "fraud_flag": false,
+      "confidence_tier": "low",
+      "shap_drivers": [],
+      "model_version": "1.0.0",
+      "timestamp": "2026-10-06T09:08:10.286723"
+    },
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-06T09:08:10.288727",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "95da7caed4a64d46935c7408e9220a5b",
+    "session_id": "test-session-001",
+    "context_type": "underwriting",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: test query\nContext type: UNDERWRITING\n\n--- Relevant Policy / Regulatory Evidence ---\n[1] Source: irdai_guidelines.txt  (relevance: 1.000)\n    \"IRDAI REGULATORY GUIDELINES \u2014 SUMMARY FOR CLAIMGUARD AI TRAINING DEMO / TRAINING SUMMARY ONLY \u2014 NOT LEGAL ADVICE  Source reference: Insurance Regulatory and Development Authority of India (IRDAI) Compiled for: ClaimGuard AI Platform (internal training corpus)  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n[2] Source: irdai_guidelines.txt  (relevance: 0.984)\n    \"g corpus)  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 1. CLAIM SETTLEMENT TIMELINES \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500  Under IRDAI (Protection of Policyholders' Interests) Regulations, insurers are required to settl\"\n[3] Source: irdai_guidelines.txt  (relevance: 0.968)\n    \"rests) Regulations, insurers are required to settle all claims within 30 days of receipt of the last necessary document. Where the claim requires further investigation, the insurer must complete the investigation and settle the claim within 45 days of receiving the claim intimation. Any delay beyond\"\n\n--- Model Scoring Evidence ---\nRisk Score : 0.000424\nRisk Tier  : LOW\nPremium Adj: 0.8003\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.",
+    "model_result": {
+      "risk_tier": "low",
+      "risk_score": 0.000424,
+      "premium_adjustment": 0.8003,
+      "shap_drivers": [],
+      "model_version": "1.0.0",
+      "timestamp": "2026-10-06T09:08:10.316382"
+    },
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-06T09:08:10.316382",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "a75abc4814764e1aa249775cf07fc147",
+    "session_id": "37f9c9871d7f4f81a8879ce8b1246585",
+    "context_type": "underwriting",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: test\nContext type: UNDERWRITING\n\n--- Relevant Policy / Regulatory Evidence ---\n[1] Source: irdai_guidelines.txt  (relevance: 1.000)\n    \"IRDAI REGULATORY GUIDELINES \u2014 SUMMARY FOR CLAIMGUARD AI TRAINING DEMO / TRAINING SUMMARY ONLY \u2014 NOT LEGAL ADVICE  Source reference: Insurance Regulatory and Development Authority of India (IRDAI) Compiled for: ClaimGuard AI Platform (internal training corpus)  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n[2] Source: irdai_guidelines.txt  (relevance: 0.984)\n    \"g corpus)  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 1. CLAIM SETTLEMENT TIMELINES \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500  Under IRDAI (Protection of Policyholders' Interests) Regulations, insurers are required to settl\"\n[3] Source: irdai_guidelines.txt  (relevance: 0.968)\n    \"rests) Regulations, insurers are required to settle all claims within 30 days of receipt of the last necessary document. Where the claim requires further investigation, the insurer must complete the investigation and settle the claim within 45 days of receiving the claim intimation. Any delay beyond\"\n\nModel scoring data unavailable for this request.\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.",
+    "model_result": {},
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-06T09:08:10.327052",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "c76e58b41eaf496aa53ce0a2af14e770",
+    "session_id": "584da5635f7c48ed9dd5cbc4ae33e160",
+    "context_type": "underwriting",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: Assess underwriting risk for new motor policy\nContext type: UNDERWRITING\n\n--- Relevant Policy / Regulatory Evidence ---\n[1] Source: irdai_guidelines.txt  (relevance: 1.000)\n    \"nsurer.  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 5. FREE-LOOK PERIOD \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500  Policyholders purchasing a new policy have the right to review the terms and conditions and return the polic\"\n[2] Source: irdai_guidelines.txt  (relevance: 0.984)\n    \"d the premium paid after deducting a proportionate risk premium for the coverage period and any medical examination costs incurred.  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 6. FRAUD REPORTING OBLIGATIONS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n[3] Source: sample_policy_wording.txt  (relevance: 0.968)\n    \"CLAIMGUARD STANDARD POLICY \u2014 MOTOR AND HEALTH INSURANCE FICTIONAL DEMO DOCUMENT \u2014 FOR TRAINING AND DEMONSTRATION PURPOSES ONLY  Policy Reference: CGS-2024-DEMO Insurer: ClaimGuard Insurance Limited (Fictional Entity) Regulator: Insurance Regulatory and Development Authority of India (IRDAI)  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n\n--- Model Scoring Evidence ---\nRisk Score : 0.000424\nRisk Tier  : LOW\nPremium Adj: 0.8003\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.",
+    "model_result": {
+      "risk_tier": "low",
+      "risk_score": 0.000424,
+      "premium_adjustment": 0.8003,
+      "shap_drivers": [],
+      "model_version": "1.0.0",
+      "timestamp": "2026-10-06T14:16:10.041412"
+    },
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-06T14:16:10.045974",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "35daaaf06ea445d6b5af005826fcc09a",
+    "session_id": "1617260004334affb763a8dd1eaeec65",
+    "context_type": "claims",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: Evaluate fraud risk for motor claim\nContext type: CLAIMS\n\n--- Relevant Policy / Regulatory Evidence ---\n[1] Source: irdai_guidelines.txt  (relevance: 1.000)\n    \"d the premium paid after deducting a proportionate risk premium for the coverage period and any medical examination costs incurred.  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 6. FRAUD REPORTING OBLIGATIONS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n[2] Source: sample_policy_wording.txt  (relevance: 0.984)\n    \"nt. For theft, an FIR must be lodged with the nearest police station and a copy submitted along with the claim intimation.  3.2 Documents Required Motor claim: duly completed claim form, copy of registration certificate, driving licence, insurance certificate, fitness certificate (commercial vehicle\"\n[3] Source: irdai_guidelines.txt  (relevance: 0.968)\n    \"\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500  IRDAI's Insurance Fraud Monitoring Framework requires insurers to establish a dedicated fraud management unit, maintain a fraud repository, and report detected fraud cases to the IRDAI fraud reporting portal. Insurers must\"\n\n--- Model Scoring Evidence ---\nFraud Score      : 0.360516\nFraud Flag       : False\nConfidence Tier  : LOW\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.",
+    "model_result": {
+      "claim_id": "CLM001",
+      "fraud_score": 0.360516,
+      "fraud_flag": false,
+      "confidence_tier": "low",
+      "shap_drivers": [],
+      "model_version": "1.0.0",
+      "timestamp": "2026-10-06T14:16:10.086746"
+    },
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-06T14:16:10.087751",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "1880c12ec6de4b738ebe39b5f1af534d",
+    "session_id": "test-session-001",
+    "context_type": "underwriting",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: test query\nContext type: UNDERWRITING\n\n--- Relevant Policy / Regulatory Evidence ---\n[1] Source: irdai_guidelines.txt  (relevance: 1.000)\n    \"IRDAI REGULATORY GUIDELINES \u2014 SUMMARY FOR CLAIMGUARD AI TRAINING DEMO / TRAINING SUMMARY ONLY \u2014 NOT LEGAL ADVICE  Source reference: Insurance Regulatory and Development Authority of India (IRDAI) Compiled for: ClaimGuard AI Platform (internal training corpus)  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n[2] Source: irdai_guidelines.txt  (relevance: 0.984)\n    \"g corpus)  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 1. CLAIM SETTLEMENT TIMELINES \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500  Under IRDAI (Protection of Policyholders' Interests) Regulations, insurers are required to settl\"\n[3] Source: irdai_guidelines.txt  (relevance: 0.968)\n    \"rests) Regulations, insurers are required to settle all claims within 30 days of receipt of the last necessary document. Where the claim requires further investigation, the insurer must complete the investigation and settle the claim within 45 days of receiving the claim intimation. Any delay beyond\"\n\n--- Model Scoring Evidence ---\nRisk Score : 0.000424\nRisk Tier  : LOW\nPremium Adj: 0.8003\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.",
+    "model_result": {
+      "risk_tier": "low",
+      "risk_score": 0.000424,
+      "premium_adjustment": 0.8003,
+      "shap_drivers": [],
+      "model_version": "1.0.0",
+      "timestamp": "2026-10-06T14:16:10.118698"
+    },
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-06T14:16:10.118698",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "c22a1079d9574938ac7ed9f7162de780",
+    "session_id": "d1c71188ae96458080ea66e3e3f1ce2f",
+    "context_type": "underwriting",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: test\nContext type: UNDERWRITING\n\n--- Relevant Policy / Regulatory Evidence ---\n[1] Source: irdai_guidelines.txt  (relevance: 1.000)\n    \"IRDAI REGULATORY GUIDELINES \u2014 SUMMARY FOR CLAIMGUARD AI TRAINING DEMO / TRAINING SUMMARY ONLY \u2014 NOT LEGAL ADVICE  Source reference: Insurance Regulatory and Development Authority of India (IRDAI) Compiled for: ClaimGuard AI Platform (internal training corpus)  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n[2] Source: irdai_guidelines.txt  (relevance: 0.984)\n    \"g corpus)  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 1. CLAIM SETTLEMENT TIMELINES \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500  Under IRDAI (Protection of Policyholders' Interests) Regulations, insurers are required to settl\"\n[3] Source: irdai_guidelines.txt  (relevance: 0.968)\n    \"rests) Regulations, insurers are required to settle all claims within 30 days of receipt of the last necessary document. Where the claim requires further investigation, the insurer must complete the investigation and settle the claim within 45 days of receiving the claim intimation. Any delay beyond\"\n\nModel scoring data unavailable for this request.\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.",
+    "model_result": {},
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-06T14:16:10.130460",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "7438bf91ad4c4c82985cae840dc069cd",
+    "session_id": "68f2fa2ba02e47c89abbe23789cd535c",
+    "context_type": "underwriting",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: Assess underwriting risk for new motor policy\nContext type: UNDERWRITING\n\n--- Relevant Policy / Regulatory Evidence ---\n[1] Source: irdai_guidelines.txt  (relevance: 1.000)\n    \"nsurer.  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 5. FREE-LOOK PERIOD \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500  Policyholders purchasing a new policy have the right to review the terms and conditions and return the polic\"\n[2] Source: irdai_guidelines.txt  (relevance: 0.984)\n    \"d the premium paid after deducting a proportionate risk premium for the coverage period and any medical examination costs incurred.  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 6. FRAUD REPORTING OBLIGATIONS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n[3] Source: sample_policy_wording.txt  (relevance: 0.968)\n    \"CLAIMGUARD STANDARD POLICY \u2014 MOTOR AND HEALTH INSURANCE FICTIONAL DEMO DOCUMENT \u2014 FOR TRAINING AND DEMONSTRATION PURPOSES ONLY  Policy Reference: CGS-2024-DEMO Insurer: ClaimGuard Insurance Limited (Fictional Entity) Regulator: Insurance Regulatory and Development Authority of India (IRDAI)  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n\n--- Model Scoring Evidence ---\nRisk Score : 0.000424\nRisk Tier  : LOW\nPremium Adj: 0.8003\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.",
+    "model_result": {
+      "risk_tier": "low",
+      "risk_score": 0.000424,
+      "premium_adjustment": 0.8003,
+      "shap_drivers": [],
+      "model_version": "1.0.0",
+      "timestamp": "2026-10-06T14:23:57.632904"
+    },
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-06T14:23:57.642009",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "9bb8694787154160bce755ffd4e6e751",
+    "session_id": "a243e0e0cf094bbaadddf9c08e9ba348",
+    "context_type": "claims",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: Evaluate fraud risk for motor claim\nContext type: CLAIMS\n\n--- Relevant Policy / Regulatory Evidence ---\n[1] Source: irdai_guidelines.txt  (relevance: 1.000)\n    \"d the premium paid after deducting a proportionate risk premium for the coverage period and any medical examination costs incurred.  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 6. FRAUD REPORTING OBLIGATIONS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n[2] Source: sample_policy_wording.txt  (relevance: 0.984)\n    \"nt. For theft, an FIR must be lodged with the nearest police station and a copy submitted along with the claim intimation.  3.2 Documents Required Motor claim: duly completed claim form, copy of registration certificate, driving licence, insurance certificate, fitness certificate (commercial vehicle\"\n[3] Source: irdai_guidelines.txt  (relevance: 0.968)\n    \"\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500  IRDAI's Insurance Fraud Monitoring Framework requires insurers to establish a dedicated fraud management unit, maintain a fraud repository, and report detected fraud cases to the IRDAI fraud reporting portal. Insurers must\"\n\n--- Model Scoring Evidence ---\nFraud Score      : 0.360516\nFraud Flag       : False\nConfidence Tier  : LOW\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.",
+    "model_result": {
+      "claim_id": "CLM001",
+      "fraud_score": 0.360516,
+      "fraud_flag": false,
+      "confidence_tier": "low",
+      "shap_drivers": [],
+      "model_version": "1.0.0",
+      "timestamp": "2026-10-06T14:23:57.682020"
+    },
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-06T14:23:57.683621",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "71914d9be36c4ee0a80b593cdd26490a",
+    "session_id": "test-session-001",
+    "context_type": "underwriting",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: test query\nContext type: UNDERWRITING\n\n--- Relevant Policy / Regulatory Evidence ---\n[1] Source: irdai_guidelines.txt  (relevance: 1.000)\n    \"IRDAI REGULATORY GUIDELINES \u2014 SUMMARY FOR CLAIMGUARD AI TRAINING DEMO / TRAINING SUMMARY ONLY \u2014 NOT LEGAL ADVICE  Source reference: Insurance Regulatory and Development Authority of India (IRDAI) Compiled for: ClaimGuard AI Platform (internal training corpus)  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n[2] Source: irdai_guidelines.txt  (relevance: 0.984)\n    \"g corpus)  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 1. CLAIM SETTLEMENT TIMELINES \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500  Under IRDAI (Protection of Policyholders' Interests) Regulations, insurers are required to settl\"\n[3] Source: irdai_guidelines.txt  (relevance: 0.968)\n    \"rests) Regulations, insurers are required to settle all claims within 30 days of receipt of the last necessary document. Where the claim requires further investigation, the insurer must complete the investigation and settle the claim within 45 days of receiving the claim intimation. Any delay beyond\"\n\n--- Model Scoring Evidence ---\nRisk Score : 0.000424\nRisk Tier  : LOW\nPremium Adj: 0.8003\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.",
+    "model_result": {
+      "risk_tier": "low",
+      "risk_score": 0.000424,
+      "premium_adjustment": 0.8003,
+      "shap_drivers": [],
+      "model_version": "1.0.0",
+      "timestamp": "2026-10-06T14:23:57.710445"
+    },
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-06T14:23:57.710445",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "9739e55d452b4a7baf87ec610520b2d8",
+    "session_id": "5b59e1bc05ca463996d72d03bfc46c57",
+    "context_type": "underwriting",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: test\nContext type: UNDERWRITING\n\n--- Relevant Policy / Regulatory Evidence ---\n[1] Source: irdai_guidelines.txt  (relevance: 1.000)\n    \"IRDAI REGULATORY GUIDELINES \u2014 SUMMARY FOR CLAIMGUARD AI TRAINING DEMO / TRAINING SUMMARY ONLY \u2014 NOT LEGAL ADVICE  Source reference: Insurance Regulatory and Development Authority of India (IRDAI) Compiled for: ClaimGuard AI Platform (internal training corpus)  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n[2] Source: irdai_guidelines.txt  (relevance: 0.984)\n    \"g corpus)  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 1. CLAIM SETTLEMENT TIMELINES \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500  Under IRDAI (Protection of Policyholders' Interests) Regulations, insurers are required to settl\"\n[3] Source: irdai_guidelines.txt  (relevance: 0.968)\n    \"rests) Regulations, insurers are required to settle all claims within 30 days of receipt of the last necessary document. Where the claim requires further investigation, the insurer must complete the investigation and settle the claim within 45 days of receiving the claim intimation. Any delay beyond\"\n\nModel scoring data unavailable for this request.\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.",
+    "model_result": {},
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-06T14:23:57.722026",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "74f5ad21f2c047b68329f504cf43aedf",
+    "session_id": "4dbe24234d9c4c1797b154e16f0decab",
+    "context_type": "underwriting",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: Assess underwriting risk for new motor policy\nContext type: UNDERWRITING\n\n--- Relevant Policy / Regulatory Evidence ---\n[1] Source: sample_policy_wording.txt  (relevance: 0.010)\n    \"Motor) The insurer agrees to indemnify the policyholder against loss or damage to the insured vehicle arising from accidental collision, fire, explosion, self-ignition, lightning, theft, burglary, housebreaking, riot, strike, malicious act, flood, cyclone, storm, tempest, inundation, hailstorm, fros\"\n[2] Source: sample_policy_wording.txt  (relevance: 0.000)\n    \"clone, storm, tempest, inundation, hailstorm, frost, landslide, rockslide, or during transit by rail, road, inland waterway, lift, elevator, or air.  1.2 Third-Party Liability (Motor) The insurer shall indemnify the policyholder against any liability incurred in respect of death or bodily injury to\"\n[3] Source: sample_policy_wording.txt  (relevance: 0.000)\n    \"tic reports, prescriptions, and pharmacy receipts, treating doctor's certificate confirming diagnosis and necessity of hospitalisation.  3.3 Repair Authorisation For motor own-damage claims, the policyholder must obtain prior authorisation from the insurer's surveyor or the designated garage network\"\n\n--- Model Scoring Evidence ---\nRisk Score : 0.000424\nRisk Tier  : LOW\nPremium Adj: 0.8003\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.",
+    "model_result": {
+      "risk_tier": "low",
+      "risk_score": 0.000424,
+      "premium_adjustment": 0.8003,
+      "shap_drivers": [],
+      "model_version": "1.0.0",
+      "timestamp": "2026-10-07T07:53:26.313938"
+    },
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-07T07:53:26.321960",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "1d889b6d3d2c47babc540dc5d8c6c771",
+    "session_id": "cdd9969337164c63aaac7916d4f40e6c",
+    "context_type": "claims",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: Evaluate fraud risk for motor claim\nContext type: CLAIMS\n\n--- Relevant Policy / Regulatory Evidence ---\n[1] Source: sample_policy_wording.txt  (relevance: 0.014)\n    \"nt. For theft, an FIR must be lodged with the nearest police station and a copy submitted along with the claim intimation.  3.2 Documents Required Motor claim: duly completed claim form, copy of registration certificate, driving licence, insurance certificate, fitness certificate (commercial vehicle\"\n[2] Source: sample_policy_wording.txt  (relevance: 0.005)\n    \"tic reports, prescriptions, and pharmacy receipts, treating doctor's certificate confirming diagnosis and necessity of hospitalisation.  3.3 Repair Authorisation For motor own-damage claims, the policyholder must obtain prior authorisation from the insurer's surveyor or the designated garage network\"\n[3] Source: sample_policy_wording.txt  (relevance: 0.002)\n    \"Motor) The insurer agrees to indemnify the policyholder against loss or damage to the insured vehicle arising from accidental collision, fire, explosion, self-ignition, lightning, theft, burglary, housebreaking, riot, strike, malicious act, flood, cyclone, storm, tempest, inundation, hailstorm, fros\"\n\n--- Model Scoring Evidence ---\nFraud Score      : 0.360516\nFraud Flag       : False\nConfidence Tier  : LOW\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.",
+    "model_result": {
+      "claim_id": "CLM001",
+      "fraud_score": 0.360516,
+      "fraud_flag": false,
+      "confidence_tier": "low",
+      "shap_drivers": [],
+      "model_version": "1.0.0",
+      "timestamp": "2026-10-07T07:53:26.659597"
+    },
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-07T07:53:26.659597",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "2d3d439ffc1b4b7b8482abf66d8e2d6c",
+    "session_id": "test-session-001",
+    "context_type": "underwriting",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: test query\nContext type: UNDERWRITING\n\n--- Relevant Policy / Regulatory Evidence ---\n[1] Source: sample_policy_wording.txt  (relevance: 0.000)\n    \"an independent surveyor's report at the policyholder's request.  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 SECTION 4 \u2014 WAITING PERIODS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500  4.1 General Waiting Period All health benefi\"\n[2] Source: irdai_guidelines.txt  (relevance: 0.000)\n    \"\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 3. KYC AND AML REQUIREMENTS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500  IRDAI mandates Know Your Customer (KYC) verification for all new policies where the annual premium exceeds INR 1,00,000 or the sum insured exceeds INR 10,00,000. Accep\"\n[3] Source: irdai_guidelines.txt  (relevance: 0.000)\n    \"d the premium paid after deducting a proportionate risk premium for the coverage period and any medical examination costs incurred.  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 6. FRAUD REPORTING OBLIGATIONS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n\n--- Model Scoring Evidence ---\nRisk Score : 0.000424\nRisk Tier  : LOW\nPremium Adj: 0.8003\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.",
+    "model_result": {
+      "risk_tier": "low",
+      "risk_score": 0.000424,
+      "premium_adjustment": 0.8003,
+      "shap_drivers": [],
+      "model_version": "1.0.0",
+      "timestamp": "2026-10-07T07:53:26.966559"
+    },
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-07T07:53:26.966559",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "4242aa45d21c4ae78090af311a3cca4e",
+    "session_id": "dacac5dfb2e44f4589d08250de08403f",
+    "context_type": "underwriting",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: test\nContext type: UNDERWRITING\n\n--- Relevant Policy / Regulatory Evidence ---\n[1] Source: irdai_guidelines.txt  (relevance: 0.001)\n    \"d the premium paid after deducting a proportionate risk premium for the coverage period and any medical examination costs incurred.  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 6. FRAUD REPORTING OBLIGATIONS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n[2] Source: irdai_guidelines.txt  (relevance: 0.000)\n    \"\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 3. KYC AND AML REQUIREMENTS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500  IRDAI mandates Know Your Customer (KYC) verification for all new policies where the annual premium exceeds INR 1,00,000 or the sum insured exceeds INR 10,00,000. Accep\"\n[3] Source: sample_policy_wording.txt  (relevance: 0.000)\n    \"an independent surveyor's report at the policyholder's request.  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 SECTION 4 \u2014 WAITING PERIODS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500  4.1 General Waiting Period All health benefi\"\n\nModel scoring data unavailable for this request.\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.",
+    "model_result": {},
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-07T07:53:27.230470",
+    "reviewed_at": null
   }
 ]

@@ -13,7 +13,7 @@
 [![LangGraph](https://img.shields.io/badge/LangGraph-0.1-00A67E?style=for-the-badge)](https://langchain-ai.github.io/langgraph/)
 [![Qdrant](https://img.shields.io/badge/Qdrant-1.9-DB4437?style=for-the-badge&logo=qdrant)](https://qdrant.tech)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
-[![Tests](https://img.shields.io/badge/Tests-208%20passing-brightgreen?style=for-the-badge&logo=pytest)](tests/)
+[![Tests](https://img.shields.io/badge/Tests-260%20passing-brightgreen?style=for-the-badge&logo=pytest)](tests/)
 [![Next.js](https://img.shields.io/badge/Next.js-14-black?style=for-the-badge&logo=next.js)](frontend/)
 
 <br/>
@@ -319,18 +319,25 @@ curl http://localhost:8000/metrics -H "X-API-Key: admin-key-demo"
 
 ---
 
-## 🖥️ Streamlit UI Tabs
+## 🖥️ Streamlit Interactive Data Dashboard & UI Tabs
 
-| Tab | Description | Key Charts |
+Run locally with:
+```bash
+streamlit run streamlit_app.py
+# or
+streamlit run app/app.py
+```
+
+| Tab | Description | Interactive Visualizations & Controls |
 |---|---|---|
-| **📊 Explorer** | EDA on 500 synthetic claims + 300 policies | Fraud distribution histogram, scatter plot, correlation heatmap, risk tier bar |
-| **🏦 Underwrite** | Real-time risk scoring form | Risk score gauge (Plotly Indicator), SHAP waterfall horizontal bar |
-| **🔍 Claims** | Fraud scoring form | Fraud score gauge, SHAP feature importance bar |
-| **🤖 Policy Copilot** | LangGraph agent chat interface | Retrieved policy clauses, model evidence table |
-| **🕸️ Graph Intel** | Two-stage collusion detection: structural rings + R-GCN GNN re-scoring | GNN score bar chart with thresholds, network graph (node size ∝ GNN risk), severity filter toggle, per-ring mini bar charts |
-| **👤 HITL Review** | Analyst approve/reject/escalate queue | Queue depth metric, item cards with inline review |
-| **📈 Observability** | Prometheus metrics + Drift Monitoring + MLflow runs | Latency bar, decisions time-series, per-feature drift bar chart (🔴 drifted / 🟢 stable), MLflow run table |
-| **✅ Compliance** | IRDAI 10-control dashboard | Score gauge, compliant/partial/non_compliant pie, expandable control cards |
+| **📊 Data Explorer** | Real-time multi-dimensional portfolio analytics & dynamic slicing | Interactive 3D/Bubble anomaly scatter (size=prior claims, color=fraud flag), hierarchical Sunburst diagram (Coverage → Severity → Fraud), histogram with KDE & marginal box plot, clickable correlation heatmap, filtered CSV export |
+| **🏦 Underwrite** | Automated risk assessment & pricing engine | Interactive risk gauge with target bands, TreeSHAP feature attribution waterfall, **Applicant vs Portfolio Radar Benchmark**, and real-time **What-If Sensitivity Simulator** for instant dynamic re-pricing |
+| **🔍 Claims Fraud** | Anomaly scanner & fraud probability calculator | Real-time dual fraud gauge, TreeSHAP impact chart, preset scenario quick-loader, loss reserve estimate, and one-click direct dispatch to HITL review queue |
+| **🤖 Policy Copilot** | Multi-agent LangGraph orchestrator | Visual agent pipeline stepper (Router → Hybrid Vector Search → XGBoost Tools → Writer → HITL), grounded policy clause relevance badges, quantitative model evidence, session audit history |
+| **🕸️ Graph Intel** | Two-stage collusion ring discovery (structural + R-GCN GNN) | Interactive Plotly/NetworkX collusion graph (nodes sized by GNN risk score), severity filter toggles, collusion ring summary registry, and per-claimant risk attribution |
+| **👤 HITL Review** | IRDAI-mandated human-in-the-loop analyst console | Decision review cards, inline rationale tags, instant Approve / Reject / Escalate workflow actions with toast notifications and audit trail |
+| **📈 Observability** | Live Prometheus metrics, latency percentiles & drift monitoring | P50–P99 inference latency chart with SLA threshold markers, 24-hour request throughput area chart, Kolmogorov-Smirnov & PSI feature drift diagnostic bars |
+| **✅ IRDAI Compliance** | Regulatory audit engine & control conformance matrix | Compliance score radial gauge, 5-dimension radar breakdown (Governance, Fairness, Explainability, Auditability, Reliability), expandable control evidence & JSON report export |
 
 ---
 
@@ -698,7 +705,7 @@ pytest tests/test_compliance.py      # IRDAI compliance
 pytest tests/test_agent_graph.py     # LangGraph copilot
 ```
 
-Current status: **208 passed · 24 skipped (torch DLL broken locally / sentence-transformers not installed) · 0 failed**
+Current status: **260 passed · 18 skipped · 0 failed**
 
 ---
 
