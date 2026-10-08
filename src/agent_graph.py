@@ -123,6 +123,42 @@ except Exception:
     def set_hitl_queue_depth(*a: Any, **k: Any) -> None:  # type: ignore[misc]
         pass
 
+# ---------------------------------------------------------------------------
+# Optional: Guardrails AI for IRDAI compliance validation
+# ---------------------------------------------------------------------------
+try:
+    from src.guardrails_config import get_irdai_validator
+    HAS_GUARDRAILS = True
+except Exception:
+    HAS_GUARDRAILS = False
+    get_irdai_validator = None  # type: ignore[assignment]
+
+# ---------------------------------------------------------------------------
+# Optional: Enterprise System Prompt
+# ---------------------------------------------------------------------------
+try:
+    from src.policy_copilot_system_prompt import get_system_prompt
+    HAS_SYSTEM_PROMPT = True
+except Exception:
+    HAS_SYSTEM_PROMPT = False
+
+    def get_system_prompt():  # type: ignore[misc]
+        return "You are ClaimGuard AI Policy Copilot, an insurance analysis assistant."
+
+# ---------------------------------------------------------------------------
+# Optional: OpenTelemetry instrumentation
+# ---------------------------------------------------------------------------
+try:
+    from opentelemetry import trace
+    from opentelemetry.trace import Status, StatusCode
+    HAS_OPENTELEMETRY = True
+    _tracer = trace.get_tracer(__name__)
+except ImportError:
+    HAS_OPENTELEMETRY = False
+    _tracer = None  # type: ignore[assignment]
+    Status = None  # type: ignore[assignment]
+    StatusCode = None  # type: ignore[assignment]
+
 
 # ---------------------------------------------------------------------------
 # Node: retriever_node
@@ -134,14 +170,31 @@ def retriever_node(state: CopilotState) -> dict:
     t0 = time.monotonic()
     results: List[dict] = []
 
-    try:
-        if policy_store is not None:
-            results = policy_store.search(state["query"], top_k=3)
-            if results:
-                record_retriever_hit()
-    except Exception as exc:
-        logger.warning("retriever_node: search failed — %s", exc)
-        results = []
+    if HAS_OPENTELEMETRY and _tracer:
+        with _tracer.start_as_current_span("agent_graph.retriever_node") as span:
+            span.set_attribute("query", state.get("query", "")[:200])
+            span.set_attribute("session_id", state.get("session_id", ""))
+            try:
+                if policy_store is not None:
+                    results = policy_store.search(state["query"], top_k=3)
+                    if results:
+                        record_retriever_hit()
+                        span.set_attribute("retrieved_count", len(results))
+                else:
+                    span.set_status(Status(StatusCode.ERROR, "policy_store not available"))
+            except Exception as exc:
+                logger.warning("retriever_node: search failed — %s", exc)
+                span.set_status(Status(StatusCode.ERROR, str(exc)))
+                results = []
+    else:
+        try:
+            if policy_store is not None:
+                results = policy_store.search(state["query"], top_k=3)
+                if results:
+                    record_retriever_hit()
+        except Exception as exc:
+            logger.warning("retriever_node: search failed — %s", exc)
+            results = []
 
     record_agent_run("retriever", time.monotonic() - t0)
     return {"retrieved_docs": results}
@@ -155,38 +208,82 @@ def retriever_node(state: CopilotState) -> dict:
 def tool_node(state: CopilotState) -> dict:
     """Call the appropriate ML scoring engine based on context_type."""
     t0 = time.monotonic()
-    try:
-        context = state.get("context_type", "")
-        raw_features = state.get("features", {})
 
-        if context == "underwriting" and _underwriting_engine is not None and UnderwritingFeatures is not None:
+    if HAS_OPENTELEMETRY and _tracer:
+        with _tracer.start_as_current_span("agent_graph.tool_node") as span:
+            span.set_attribute("context_type", state.get("context_type", ""))
+            span.set_attribute("session_id", state.get("session_id", ""))
             try:
-                features = UnderwritingFeatures(**raw_features)
-                result = _underwriting_engine.predict(features)
-                record_tool_call("underwriting")
-                return {"model_result": result.model_dump()}
-            except Exception as exc:
-                logger.warning("tool_node: underwriting scoring failed — %s", exc)
+                context = state.get("context_type", "")
+                raw_features = state.get("features", {})
+
+                if context == "underwriting" and _underwriting_engine is not None and UnderwritingFeatures is not None:
+                    try:
+                        features = UnderwritingFeatures(**raw_features)
+                        result = _underwriting_engine.predict(features)
+                        record_tool_call("underwriting")
+                        span.set_attribute("tool_type", "underwriting")
+                        return {"model_result": result.model_dump()}
+                    except Exception as exc:
+                        logger.warning("tool_node: underwriting scoring failed — %s", exc)
+                        span.set_status(Status(StatusCode.ERROR, str(exc)))
+                        return {"model_result": {}}
+
+                if context == "claims" and _fraud_engine is not None and ClaimFeatures is not None:
+                    try:
+                        features = ClaimFeatures(**raw_features)
+                        result = _fraud_engine.predict(features)
+                        record_tool_call("fraud_scoring")
+                        span.set_attribute("tool_type", "fraud_scoring")
+                        return {"model_result": result.model_dump()}
+                    except Exception as exc:
+                        logger.warning("tool_node: fraud scoring failed — %s", exc)
+                        span.set_status(Status(StatusCode.ERROR, str(exc)))
+                        return {"model_result": {}}
+
+                # No matching engine or unknown context type.
+                span.set_status(Status(StatusCode.ERROR, "No matching engine"))
                 return {"model_result": {}}
 
-        if context == "claims" and _fraud_engine is not None and ClaimFeatures is not None:
-            try:
-                features = ClaimFeatures(**raw_features)
-                result = _fraud_engine.predict(features)
-                record_tool_call("fraud_scoring")
-                return {"model_result": result.model_dump()}
             except Exception as exc:
-                logger.warning("tool_node: fraud scoring failed — %s", exc)
+                logger.warning("tool_node: unexpected error — %s", exc)
+                span.set_status(Status(StatusCode.ERROR, str(exc)))
                 return {"model_result": {}}
+            finally:
+                record_agent_run("tool", time.monotonic() - t0)
+    else:
+        try:
+            context = state.get("context_type", "")
+            raw_features = state.get("features", {})
 
-        # No matching engine or unknown context type.
-        return {"model_result": {}}
+            if context == "underwriting" and _underwriting_engine is not None and UnderwritingFeatures is not None:
+                try:
+                    features = UnderwritingFeatures(**raw_features)
+                    result = _underwriting_engine.predict(features)
+                    record_tool_call("underwriting")
+                    return {"model_result": result.model_dump()}
+                except Exception as exc:
+                    logger.warning("tool_node: underwriting scoring failed — %s", exc)
+                    return {"model_result": {}}
 
-    except Exception as exc:
-        logger.warning("tool_node: unexpected error — %s", exc)
-        return {"model_result": {}}
-    finally:
-        record_agent_run("tool", time.monotonic() - t0)
+            if context == "claims" and _fraud_engine is not None and ClaimFeatures is not None:
+                try:
+                    features = ClaimFeatures(**raw_features)
+                    result = _fraud_engine.predict(features)
+                    record_tool_call("fraud_scoring")
+                    return {"model_result": result.model_dump()}
+                except Exception as exc:
+                    logger.warning("tool_node: fraud scoring failed — %s", exc)
+                    return {"model_result": {}}
+
+            # No matching engine or unknown context type.
+            return {"model_result": {}}
+
+        except Exception as exc:
+            logger.warning("tool_node: unexpected error — %s", exc)
+            return {"model_result": {}}
+        finally:
+            record_agent_run("tool", time.monotonic() - t0)
 
 
 # ---------------------------------------------------------------------------
@@ -267,46 +364,184 @@ def writer_node(state: CopilotState) -> dict:
     t0 = time.monotonic()
     draft = ""
 
-    try:
-        if HAS_GROQ and os.environ.get("GROQ_API_KEY"):
-            # Build a structured prompt.
-            docs = state.get("retrieved_docs", [])[:2]
-            doc_snippets = "\n".join(
-                f"[Source: {d.get('source', 'unknown')}]\n{d.get('content', '')[:500]}"
-                for d in docs
-            )
-            model_result = state.get("model_result", {})
+    if HAS_OPENTELEMETRY and _tracer:
+        with _tracer.start_as_current_span("agent_graph.writer_node") as span:
+            span.set_attribute("context_type", state.get("context_type", ""))
+            span.set_attribute("session_id", state.get("session_id", ""))
+            span.set_attribute("has_groq", HAS_GROQ and bool(os.environ.get("GROQ_API_KEY")))
+            try:
+                if HAS_GROQ and os.environ.get("GROQ_API_KEY"):
+                    span.set_attribute("generation_method", "llm")
+                    # Build a structured prompt using enterprise system prompt
+                    docs = state.get("retrieved_docs", [])[:2]
+                    doc_snippets = "\n".join(
+                        f"[Chunk ID: {d.get('chunk_id', 'unknown')}]\n"
+                        f"Source: {d.get('source', 'unknown')}\n"
+                        f"Relevance: {d.get('score', 0.0):.2f}\n"
+                        f"Content: {d.get('content', '')[:500]}"
+                        for d in docs
+                    )
+                    model_result = state.get("model_result", {})
 
-            prompt = (
-                "You are the ClaimGuard AI Policy Copilot, an expert insurance analyst assistant.\n\n"
-                f"QUERY: {state.get('query', '')}\n\n"
-                f"CONTEXT TYPE: {state.get('context_type', '').upper()}\n\n"
-                "RETRIEVED POLICY / IRDAI EVIDENCE:\n"
-                f"{doc_snippets if doc_snippets else 'No relevant documents retrieved.'}\n\n"
-                "MODEL SCORING EVIDENCE:\n"
-                f"{model_result if model_result else 'No model result available.'}\n\n"
-                "Write a structured decision draft that:\n"
-                "1. Cites the specific retrieved policy clause or IRDAI regulation that applies.\n"
-                "2. References the model risk/fraud score and top SHAP drivers as quantitative evidence.\n"
-                "3. Notes any collusion flags if present in the model result.\n"
-                "4. States clearly that this draft requires mandatory human analyst review per IRDAI "
-                "guidelines before any approval or denial is issued.\n"
-                "5. Maintains a professional, concise tone suitable for an insurance analyst.\n"
-            )
+                    # Use enterprise system prompt if available
+                    system_prompt = get_system_prompt() if HAS_SYSTEM_PROMPT else (
+                        "You are the ClaimGuard AI Policy Copilot, an expert insurance analyst assistant."
+                    )
 
-            llm = ChatGroq(model="llama3-8b-8192", temperature=0)
-            response = llm.invoke([HumanMessage(content=prompt)])
-            draft = response.content
-        else:
+                    prompt = (
+                        f"{system_prompt}\n\n"
+                        f"QUERY: {state.get('query', '')}\n\n"
+                        f"CONTEXT TYPE: {state.get('context_type', '').upper()}\n\n"
+                        "RETRIEVED POLICY / IRDAI EVIDENCE:\n"
+                        f"{doc_snippets if doc_snippets else 'No relevant documents retrieved.'}\n\n"
+                        "MODEL SCORING EVIDENCE:\n"
+                        f"{model_result if model_result else 'No model result available.'}\n\n"
+                        "Generate a structured decision draft following the output format specified in the system prompt. "
+                        "Ensure you include chunk IDs for all citations and set appropriate confidence scores."
+                    )
+
+                    llm = ChatGroq(model="llama3-8b-8192", temperature=0)
+                    response = llm.invoke([HumanMessage(content=prompt)])
+                    draft = response.content
+                else:
+                    span.set_attribute("generation_method", "rule_based")
+                    draft = _rule_based_narrative(state)
+
+            except Exception as exc:
+                logger.warning("writer_node: LLM call failed (%s), using rule-based fallback.", exc)
+                span.set_status(Status(StatusCode.ERROR, str(exc)))
+                draft = _rule_based_narrative(state)
+
+            # ---------------------------------------------------------------------------
+            # IRDAI Compliance Validation with Guardrails AI
+            # ---------------------------------------------------------------------------
+            if HAS_GUARDRAILS and get_irdai_validator is not None:
+                try:
+                    # Get validator with claim type
+                    context = state.get("context_type", "underwriting")
+                    claim_type = "motor" if context == "underwriting" else "motor"  # Can be enhanced
+                    validator = get_irdai_validator(claim_type=claim_type)
+
+                    # Validate with retrieved docs and model result
+                    validation_result = validator.validate_draft(
+                        draft,
+                        retrieved_docs=state.get("retrieved_docs"),
+                        model_result=state.get("model_result")
+                    )
+
+                    span.set_attribute("guardrails_enabled", True)
+                    span.set_attribute("guardrails_is_valid", validation_result["is_valid"])
+                    span.set_attribute("guardrails_hitl_required", validation_result.get("hitl_required", False))
+
+                    if not validation_result["is_valid"]:
+                        logger.warning(
+                            "writer_node: IRDAI compliance validation failed for draft. "
+                            "Validation result: %s",
+                            validation_result["validation_result"]
+                        )
+                        # Append compliance warning to the draft
+                        draft = (
+                            f"{draft}\n\n"
+                            f"[COMPLIANCE NOTE: This draft failed IRDAI compliance validation. "
+                            f"Details: {validation_result['validation_result'].get('validation_notes', 'See validation result')}]\n"
+                        )
+                    else:
+                        logger.info("writer_node: IRDAI compliance validation passed")
+
+                    # Update state with HITL requirement from validation
+                    if validation_result.get("hitl_required"):
+                        state["requires_human_review"] = True
+
+                except Exception as exc:
+                    logger.warning("writer_node: Guardrails validation failed: %s", exc)
+                    span.set_status(Status(StatusCode.ERROR, f"Guardrails validation failed: {exc}"))
+
+            record_decision_drafted()
+            record_agent_run("writer", time.monotonic() - t0)
+            return {"decision_draft": draft}
+    else:
+        try:
+            if HAS_GROQ and os.environ.get("GROQ_API_KEY"):
+                # Build a structured prompt using enterprise system prompt
+                docs = state.get("retrieved_docs", [])[:2]
+                doc_snippets = "\n".join(
+                    f"[Chunk ID: {d.get('chunk_id', 'unknown')}]\n"
+                    f"Source: {d.get('source', 'unknown')}\n"
+                    f"Relevance: {d.get('score', 0.0):.2f}\n"
+                    f"Content: {d.get('content', '')[:500]}"
+                    for d in docs
+                )
+                model_result = state.get("model_result", {})
+
+                # Use enterprise system prompt if available
+                system_prompt = get_system_prompt() if HAS_SYSTEM_PROMPT else (
+                    "You are the ClaimGuard AI Policy Copilot, an expert insurance analyst assistant."
+                )
+
+                prompt = (
+                    f"{system_prompt}\n\n"
+                    f"QUERY: {state.get('query', '')}\n\n"
+                    f"CONTEXT TYPE: {state.get('context_type', '').upper()}\n\n"
+                    "RETRIEVED POLICY / IRDAI EVIDENCE:\n"
+                    f"{doc_snippets if doc_snippets else 'No relevant documents retrieved.'}\n\n"
+                    "MODEL SCORING EVIDENCE:\n"
+                    f"{model_result if model_result else 'No model result available.'}\n\n"
+                    "Generate a structured decision draft following the output format specified in the system prompt. "
+                    "Ensure you include chunk IDs for all citations and set appropriate confidence scores."
+                )
+
+                llm = ChatGroq(model="llama3-8b-8192", temperature=0)
+                response = llm.invoke([HumanMessage(content=prompt)])
+                draft = response.content
+            else:
+                draft = _rule_based_narrative(state)
+
+        except Exception as exc:
+            logger.warning("writer_node: LLM call failed (%s), using rule-based fallback.", exc)
             draft = _rule_based_narrative(state)
 
-    except Exception as exc:
-        logger.warning("writer_node: LLM call failed (%s), using rule-based fallback.", exc)
-        draft = _rule_based_narrative(state)
+        # ---------------------------------------------------------------------------
+        # IRDAI Compliance Validation with Guardrails AI
+        # ---------------------------------------------------------------------------
+        if HAS_GUARDRAILS and get_irdai_validator is not None:
+            try:
+                # Get validator with claim type
+                context = state.get("context_type", "underwriting")
+                claim_type = "motor" if context == "underwriting" else "motor"
+                validator = get_irdai_validator(claim_type=claim_type)
 
-    record_decision_drafted()
-    record_agent_run("writer", time.monotonic() - t0)
-    return {"decision_draft": draft}
+                # Validate with retrieved docs and model result
+                validation_result = validator.validate_draft(
+                    draft,
+                    retrieved_docs=state.get("retrieved_docs"),
+                    model_result=state.get("model_result")
+                )
+
+                if not validation_result["is_valid"]:
+                    logger.warning(
+                        "writer_node: IRDAI compliance validation failed for draft. "
+                        "Validation result: %s",
+                        validation_result["validation_result"]
+                    )
+                    # Append compliance warning to the draft
+                    draft = (
+                        f"{draft}\n\n"
+                        f"[COMPLIANCE NOTE: This draft failed IRDAI compliance validation. "
+                        f"Details: {validation_result['validation_result'].get('validation_notes', 'See validation result')}]\n"
+                    )
+                else:
+                    logger.info("writer_node: IRDAI compliance validation passed")
+
+                # Update state with HITL requirement from validation
+                if validation_result.get("hitl_required"):
+                    state["requires_human_review"] = True
+
+            except Exception as exc:
+                logger.warning("writer_node: Guardrails validation failed: %s", exc)
+
+        record_decision_drafted()
+        record_agent_run("writer", time.monotonic() - t0)
+        return {"decision_draft": draft}
 
 
 # ---------------------------------------------------------------------------
@@ -316,23 +551,51 @@ def writer_node(state: CopilotState) -> dict:
 
 def hitl_router_node(state: CopilotState) -> dict:
     """Enqueue the decision draft for mandatory human analyst review."""
-    try:
-        if hitl_queue is not None and HITLItem is not None:
-            item = HITLItem(
-                session_id=state.get("session_id", uuid.uuid4().hex),
-                context_type=state.get("context_type", "unknown"),
-                decision_draft=state.get("decision_draft", ""),
-                model_result=state.get("model_result", {}),
-            )
-            hitl_queue.enqueue(item)
+    if HAS_OPENTELEMETRY and _tracer:
+        with _tracer.start_as_current_span("agent_graph.hitl_router_node") as span:
+            span.set_attribute("context_type", state.get("context_type", ""))
+            span.set_attribute("session_id", state.get("session_id", ""))
+            try:
+                if hitl_queue is not None and HITLItem is not None:
+                    item = HITLItem(
+                        session_id=state.get("session_id", uuid.uuid4().hex),
+                        context_type=state.get("context_type", "unknown"),
+                        decision_draft=state.get("decision_draft", ""),
+                        model_result=state.get("model_result", {}),
+                    )
+                    hitl_queue.enqueue(item)
+                    span.set_attribute("enqueued", True)
+                else:
+                    span.set_status(Status(StatusCode.ERROR, "hitl_queue not available"))
+                    span.set_attribute("enqueued", False)
 
-        depth = hitl_queue.queue_depth() if hitl_queue is not None else 0
-        set_hitl_queue_depth(depth)
+                depth = hitl_queue.queue_depth() if hitl_queue is not None else 0
+                set_hitl_queue_depth(depth)
+                span.set_attribute("queue_depth", depth)
 
-    except Exception as exc:
-        logger.warning("hitl_router_node: failed to enqueue HITL item — %s", exc)
+            except Exception as exc:
+                logger.warning("hitl_router_node: failed to enqueue HITL item — %s", exc)
+                span.set_status(Status(StatusCode.ERROR, str(exc)))
 
-    return {"requires_human_review": True}
+            return {"requires_human_review": True}
+    else:
+        try:
+            if hitl_queue is not None and HITLItem is not None:
+                item = HITLItem(
+                    session_id=state.get("session_id", uuid.uuid4().hex),
+                    context_type=state.get("context_type", "unknown"),
+                    decision_draft=state.get("decision_draft", ""),
+                    model_result=state.get("model_result", {}),
+                )
+                hitl_queue.enqueue(item)
+
+            depth = hitl_queue.queue_depth() if hitl_queue is not None else 0
+            set_hitl_queue_depth(depth)
+
+        except Exception as exc:
+            logger.warning("hitl_router_node: failed to enqueue HITL item — %s", exc)
+
+        return {"requires_human_review": True}
 
 
 # ---------------------------------------------------------------------------
@@ -426,13 +689,36 @@ def run_copilot(
         "timestamp": datetime.now(timezone.utc).isoformat(),
     }
 
-    if _compiled_graph is not None:
-        try:
-            result = _compiled_graph.invoke(state)
-            return dict(result)
-        except Exception as exc:
-            logger.warning(
-                "run_copilot: LangGraph invoke failed (%s); falling back to linear pipeline.", exc
-            )
+    if HAS_OPENTELEMETRY and _tracer:
+        with _tracer.start_as_current_span("agent_graph.run_copilot") as span:
+            span.set_attribute("query", query[:200])
+            span.set_attribute("context_type", context_type)
+            span.set_attribute("session_id", state["session_id"])
+            span.set_attribute("has_langgraph", _compiled_graph is not None)
 
-    return run_copilot_fallback(state)
+            if _compiled_graph is not None:
+                try:
+                    result = _compiled_graph.invoke(state)
+                    span.set_attribute("execution_mode", "langgraph")
+                    return dict(result)
+                except Exception as exc:
+                    logger.warning(
+                        "run_copilot: LangGraph invoke failed (%s); falling back to linear pipeline.", exc
+                    )
+                    span.set_status(Status(StatusCode.ERROR, f"LangGraph failed: {exc}"))
+                    span.set_attribute("execution_mode", "fallback")
+            else:
+                span.set_attribute("execution_mode", "fallback")
+
+            return run_copilot_fallback(state)
+    else:
+        if _compiled_graph is not None:
+            try:
+                result = _compiled_graph.invoke(state)
+                return dict(result)
+            except Exception as exc:
+                logger.warning(
+                    "run_copilot: LangGraph invoke failed (%s); falling back to linear pipeline.", exc
+                )
+
+        return run_copilot_fallback(state)

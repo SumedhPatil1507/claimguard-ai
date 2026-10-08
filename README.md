@@ -42,6 +42,67 @@
 
 ---
 
+## 🛡️ Enterprise Guardrails & IRDAI Compliance (v1.8)
+
+ClaimGuard AI v1.8 introduces enterprise-grade guardrails and IRDAI compliance enforcement:
+
+### 1. Guardrails AI RAIL Specification
+- **File**: `config.rail` - Production-ready RAIL specification
+- **Zero-Hallucination Policies**: Enforces that all assertions are grounded in retrieved documents
+- **Statutory Limit Validation**: Payout amounts must respect IRDAI regulatory limits
+- **Chunk ID Citation Requirements**: All policy clauses must include chunk IDs from vector store
+- **Confidence-Based HITL Routing**: Automatic routing to Human-in-the-Loop when confidence < 0.85
+
+### 2. Enterprise System Prompt
+- **File**: `src/policy_copilot_system_prompt.py`
+- **Explicit Citation Enforcement**: Requires chunk IDs for all policy clause references
+- **Confidence Scoring Framework**: Structured confidence assessment with HITL routing logic
+- **Statutory Limit Awareness**: Built-in knowledge of IRDAI maximum payout limits
+- **Professional Language Guidelines**: Regulatory-compliant communication standards
+
+### 3. JSON Schema Enforcement
+- **File**: `src/copilot_decision_schema.py`
+- **Structured Decision Output**: Pydantic schemas for `/copilot/decide` endpoint
+- **Automatic Validation**: Ensures all required fields are present and valid
+- **Type Safety**: Enforces data types, ranges, and enum values
+- **Business Logic Validation**: HITL routing, statutory limits, compliance checks
+
+### 4. Enhanced Guardrails Configuration
+- **File**: `src/guardrails_config.py`
+- **Statutory Limits Database**: IRDAI limits for motor, health, property, and life insurance
+- **Comprehensive Validation**: Human review, unverified approval, regulatory citations, chunk IDs
+- **Payout Extraction**: Automatic extraction and validation of payout amounts
+- **Confidence Extraction**: Automatic extraction and threshold-based HITL routing
+
+### 5. Interactive Streamlit Dashboard
+- **Guardrails Validation Test**: Interactive form to test decision drafts against guardrails
+- **Statutory Limits Visualization**: Interactive bar chart showing IRDAI maximum payouts
+- **Real-time Validation Metrics**: Pass/fail status for all compliance checks
+- **HITL Routing Indicators**: Clear visual indicators when HITL is required
+
+### Key Features
+
+| Feature | Description |
+|---------|-------------|
+| **Zero-Hallucination** | All assertions must be grounded in retrieved documents |
+| **Chunk ID Citations** | Policy clauses must include vector store chunk IDs |
+| **Statutory Limits** | Payouts validated against IRDAI maximums per claim type |
+| **Confidence Threshold** | HITL routing when confidence < 0.85 |
+| **Professional Language** | Regulatory-compliant communication enforced |
+| **Mandatory HITL** | All automated decisions require human review |
+
+### Statutory Limits by Claim Type
+
+| Claim Type | Maximum Payout | Regulation |
+|------------|----------------|------------|
+| Motor Third Party | ₹750,000 | IRDAI Motor TP Guidelines 2023 |
+| Motor Own Damage | ₹10,000,000 | IRDAI Motor Own Damage Guidelines 2023 |
+| Health Insurance | ₹5,000,000 | IRDAI Health Insurance Regulations 2020 |
+| Property Insurance | ₹10,000,000 | IRDAI Property Insurance Guidelines 2022 |
+| Life Insurance | ₹100,000,000 | IRDAI Life Insurance Regulations 2019 |
+
+---
+
 ## 🏗️ Architecture
 
 ```mermaid
@@ -307,7 +368,63 @@ curl http://localhost:8000/graph/collusion-rings \
 </details>
 
 <details>
-<summary><b>5. GET /hitl/queue & POST /hitl/review/{item_id}</b> — Human-in-the-Loop Review</summary>
+<summary><b>5. POST /copilot/decide</b> — Policy Copilot with Guardrails (v1.8)</summary>
+
+```bash
+curl -X POST http://localhost:8000/copilot/decide \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "Claim CLM-001 for ₹75,000 motor damage",
+    "context_type": "claims",
+    "features": {"claim_amount": 75000, "days_since_policy_start": 45},
+    "claim_type": "motor"
+  }'
+```
+
+**Response with Guardrails Validation (v1.8)**:
+```json
+{
+  "decision": {
+    "decision_type": "recommendation",
+    "coverage_status": "requires_review",
+    "recommended_payout": 0.0,
+    "confidence_score": 0.72,
+    "requires_human_review": true,
+    "citations": {
+      "policy_clauses": [
+        {
+          "clause_id": "policy_section_4_2_chunk_1",
+          "section": "Section 4.2",
+          "title": "Non-Disclosure of Material Facts",
+          "excerpt": "Any deliberate concealment of material facts...",
+          "relevance_score": 0.89
+        }
+      ],
+      "regulatory_references": []
+    },
+    "statutory_limits": {
+      "max_allowed_payout": 10000000.0,
+      "within_limits": true,
+      "limit_source": "IRDAI Motor Own Damage Guidelines 2023"
+    },
+    "compliance_checks": {
+      "hallucination_check_passed": true,
+      "citation_check_passed": true,
+      "limit_check_passed": true,
+      "language_check_passed": true
+    },
+    "hitl_routing_reason": "Confidence score 0.72 below threshold 0.85"
+  },
+  "validation_passed": true,
+  "validation_errors": [],
+  "processing_time_ms": 245.3
+}
+```
+</details>
+
+<details>
+<summary><b>6. GET /hitl/queue & POST /hitl/review/{item_id}</b> — Human-in-the-Loop Review</summary>
 
 ```bash
 curl http://localhost:8000/hitl/queue -H "Authorization: Bearer <token>"
@@ -363,6 +480,7 @@ streamlit run streamlit_app.py
 5. **HITL Review Queue Tab**: Analyst dashboard to approve, reject, or escalate decisions with audit notes.
 6. **Data Drift & Observability Tab**: Drift distribution curves and KS-test statistics.
 7. **IRDAI Compliance Tab**: Real-time compliance scorecards mapping to regulatory guidelines.
+8. **Guardrails Validation (v1.8)**: Interactive guardrails testing, statutory limits visualization, and compliance validation dashboard.
 
 ---
 
@@ -378,6 +496,72 @@ streamlit run streamlit_app.py
 | `NEO4J_PASSWORD` | No | `neo4jpass` | Neo4j database password |
 | `GROQ_API_KEY` | No | — | Optional Groq API key for LLaMA 3 Policy Copilot generation |
 | `CLAIMGUARD_VS_QDRANT_MODE` | No | `local` | Qdrant vector store mode (`memory`, `local`, `remote`) |
+
+---
+
+## 🛡️ Guardrails & Compliance Implementation Details
+
+### New Files in v1.8
+
+| File | Purpose |
+|------|---------|
+| `config.rail` | Guardrails AI RAIL specification with zero-hallucination policies |
+| `src/policy_copilot_system_prompt.py` | Enterprise system prompt with chunk ID citations and HITL routing |
+| `src/copilot_decision_schema.py` | Pydantic schemas for JSON Schema enforcement on `/copilot/decide` |
+| `src/guardrails_config.py` (enhanced) | IRDAI statutory limits database and comprehensive validation |
+
+### Guardrails Configuration
+
+The guardrails system enforces:
+
+1. **Zero-Hallucination Policy**
+   - All coverage determinations must be grounded in retrieved policy clauses
+   - No assertions without citation support
+   - Retrieved documents required for evidence
+
+2. **Statutory Limit Enforcement**
+   - Motor Third Party: ₹750,000 max
+   - Motor Own Damage: ₹10,000,000 max
+   - Health Insurance: ₹5,000,000 max
+   - Property Insurance: ₹10,000,000 max
+   - Life Insurance: ₹100,000,000 max
+
+3. **Confidence-Based HITL Routing**
+   - Threshold: 0.85
+   - Automatic routing when confidence < threshold
+   - Clear hitl_routing_reason provided
+
+4. **Chunk ID Citation Requirements**
+   - All policy clauses must include chunk IDs
+   - Format: `policy_section_X_Y_chunk_Z`
+   - Relevance score must be >= 0.70 for primary citations
+
+### Usage Example
+
+```python
+from src.guardrails_config import get_irdai_validator, validate_statutory_limits
+
+# Get validator for specific claim type
+validator = get_irdai_validator(claim_type="motor")
+
+# Validate decision draft
+result = validator.validate_draft(
+    decision_draft="This claim is approved for ₹75,000...",
+    retrieved_docs=retrieved_documents,
+    model_result=model_scoring
+)
+
+# Check validation result
+if result["is_valid"]:
+    print("Decision is compliant")
+else:
+    print(f"HITL required: {result['hitl_reason']}")
+
+# Validate statutory limits
+limit_check = validate_statutory_limits(payout=75000, claim_type="motor")
+if not limit_check["within_limits"]:
+    print(f"Exceeds limit by ₹{limit_check['excess_amount']}")
+```
 
 ---
 

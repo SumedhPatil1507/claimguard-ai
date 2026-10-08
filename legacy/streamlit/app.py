@@ -104,6 +104,12 @@ try:
 except Exception:
     HAS_COMPLIANCE = False
 
+try:
+    from src.guardrails_config import get_irdai_validator, _IRDAI_STATUTORY_LIMITS, _HITL_CONFIDENCE_THRESHOLD
+    HAS_GUARDRAILS_UI = True
+except Exception:
+    HAS_GUARDRAILS_UI = False
+
 # ---------------------------------------------------------------------------
 # Page configuration
 # ---------------------------------------------------------------------------
@@ -1349,6 +1355,147 @@ with tabs[6]:
 with tabs[7]:
     st.markdown("### ✅ IRDAI Regulatory Compliance & Algorithmic Audit Dashboard")
     st.caption("Comprehensive regulatory conformance tracker for IRDAI guidelines on automated underwriting, explainable AI, fairness, and mandatory human review.")
+
+    # Guardrails AI Configuration Section
+    if HAS_GUARDRAILS_UI:
+        st.markdown("---")
+        st.markdown("#### 🛡️ Guardrails AI Zero-Hallucination Enforcement")
+
+        g_c1, g_c2, g_c3 = st.columns(3)
+        g_c1.metric("HITL Confidence Threshold", f"{_HITL_CONFIDENCE_THRESHOLD:.2f}")
+        g_c2.metric("Statutory Limits Configured", f"{len(_IRDAI_STATUTORY_LIMITS)} types")
+        g_c3.metric("Guardrails Status", "🟢 Active")
+
+        # Statutory Limits Visualization
+        with st.expander("📊 IRDAI Statutory Payout Limits by Claim Type", expanded=True):
+            limit_data = []
+            for claim_type, config in _IRDAI_STATUTORY_LIMITS.items():
+                limit_data.append({
+                    "Claim Type": claim_type.title(),
+                    "Max Payout (₹)": config["max_allowed_payout"],
+                    "Regulation": config["regulation"]
+                })
+            limits_df = pd.DataFrame(limit_data)
+
+            if HAS_PLOTLY:
+                fig_limits = px.bar(
+                    limits_df,
+                    x="Claim Type",
+                    y="Max Payout (₹)",
+                    color="Claim Type",
+                    title="IRDAI Statutory Maximum Payout Limits",
+                    text="Max Payout (₹)",
+                    template="plotly_dark",
+                )
+                fig_limits.update_traces(texttemplate="₹{text:,.0f}", textposition="outside")
+                fig_limits.update_layout(showlegend=False, height=350)
+                _show_chart(fig_limits, key="statutory_limits")
+
+            st.dataframe(limits_df, use_container_width=True)
+
+        # Interactive Guardrails Validation Test
+        st.markdown("---")
+        st.markdown("#### 🔍 Interactive Guardrails Validation Test")
+
+        with st.form("guardrails_test_form"):
+            test_col1, test_col2 = st.columns(2)
+            with test_col1:
+                test_decision = st.text_area(
+                    "Test Decision Draft",
+                    value="This claim is approved for ₹75,000.00 based on policy Section 4.2.",
+                    height=100,
+                    help="Enter a decision draft to test against guardrails validation"
+                )
+            with test_col2:
+                test_claim_type = st.selectbox(
+                    "Claim Type for Statutory Validation",
+                    options=list(_IRDAI_STATUTORY_LIMITS.keys()),
+                    index=0
+                )
+                test_payout = st.number_input(
+                    "Test Payout Amount (₹)",
+                    min_value=0.0,
+                    max_value=100000000.0,
+                    value=75000.0,
+                    step=5000.0
+                )
+
+            test_submit = st.form_submit_button("🔬 Run Guardrails Validation", use_container_width=True)
+
+        if test_submit:
+            try:
+                validator = get_irdai_validator(claim_type=test_claim_type)
+                result = validator.validate_draft(test_decision)
+
+                # Display validation results
+                v_c1, v_c2, v_c3 = st.columns(3)
+                v_c1.metric(
+                    "Validation Status",
+                    "✅ PASSED" if result["is_valid"] else "❌ FAILED",
+                    delta_color="normal" if result["is_valid"] else "inverse"
+                )
+                v_c2.metric(
+                    "HITL Required",
+                    "🟡 YES" if result.get("hitl_required") else "🟢 NO"
+                )
+                v_c3.metric(
+                    "Validation Method",
+                    result["validation_result"].get("validation_method", "unknown")
+                )
+
+                # Statutory limit check
+                from src.guardrails_config import validate_statutory_limits
+                limit_check = validate_statutory_limits(test_payout, test_claim_type)
+
+                st.markdown("#### 📊 Detailed Validation Results")
+
+                # Create validation metrics table
+                val_metrics = {
+                    "Check": [
+                        "Human Review Statement",
+                        "Unverified Approval",
+                        "Regulatory Citations",
+                        "Chunk ID Citations",
+                        "Statutory Limits",
+                        "Confidence Score"
+                    ],
+                    "Status": [
+                        "✅" if result["validation_result"].get("requires_human_review") else "❌",
+                        "✅" if not result["validation_result"].get("contains_approval") else "❌",
+                        "✅" if result["validation_result"].get("references_regulation") else "❌",
+                        "✅" if result["validation_result"].get("has_chunk_citations") else "❌",
+                        "✅" if limit_check["within_limits"] else "❌",
+                        "✅" if result["validation_result"].get("confidence_score", 1.0) >= _HITL_CONFIDENCE_THRESHOLD else "❌"
+                    ],
+                    "Details": [
+                        "Mandatory human review statement present" if result["validation_result"].get("requires_human_review") else "Missing human review statement",
+                        "No unverified approvals detected" if not result["validation_result"].get("contains_approval") else "Unverified approval detected",
+                        "Regulatory citations present" if result["validation_result"].get("references_regulation") else "Missing regulatory citations",
+                        "Chunk ID citations present" if result["validation_result"].get("has_chunk_citations") else "Missing chunk ID citations",
+                        f"Within ₹{limit_check['max_allowed']:,.0f} limit" if limit_check["within_limits"] else f"Exceeds limit by ₹{limit_check['excess_amount']:,.0f}",
+                        f"Score: {result['validation_result'].get('confidence_score', 0.0):.2f}" if "confidence_score" in result["validation_result"] else "Not evaluated"
+                    ]
+                }
+                val_df = pd.DataFrame(val_metrics)
+                st.dataframe(val_df, use_container_width=True, hide_index=True)
+
+                # HITL routing reason
+                if result.get("hitl_required"):
+                    st.warning(
+                        f"⚠️ **HITL Routing Required**: {result.get('hitl_reason', 'See details above')}"
+                    )
+
+                # Statutory limit details
+                if not limit_check["within_limits"]:
+                    st.error(
+                        f"🚨 **Statutory Limit Violation**: Payout ₹{test_payout:,.2f} exceeds "
+                        f"maximum ₹{limit_check['max_allowed']:,.2f} per {limit_check['regulation']}"
+                    )
+
+            except Exception as exc:
+                st.error(f"Guardrails validation error: {exc}")
+
+    st.markdown("---")
 
     if not HAS_COMPLIANCE:
         overall_score = 92.5
