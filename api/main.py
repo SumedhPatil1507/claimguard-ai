@@ -83,6 +83,16 @@ import uvicorn
 from contextlib import asynccontextmanager
 
 # ---------------------------------------------------------------------------
+# Server-Sent Events (SSE) Streaming Response
+# ---------------------------------------------------------------------------
+try:
+    from sse_starlette.sse import EventSourceResponse
+    HAS_SSE = True
+except ImportError:
+    HAS_SSE = False
+    EventSourceResponse = None  # type: ignore[assignment,misc]
+
+# ---------------------------------------------------------------------------
 # JWT auth dependencies (optional — graceful when python-jose absent)
 # ---------------------------------------------------------------------------
 try:
@@ -108,6 +118,7 @@ try:
     from src.worker import (
         HAS_CELERY,
         celery_app,
+        get_task_channel,
         get_task_result,
         score_claim_task,
         score_underwriting_task,
@@ -119,6 +130,7 @@ except Exception as _e:
     get_task_result = None          # type: ignore[assignment]
     score_underwriting_task = None  # type: ignore[assignment]
     score_claim_task = None         # type: ignore[assignment]
+    get_task_channel = lambda tid: f"claimguard:task_events:{tid}"  # type: ignore[assignment]
 
 try:
     from src.database import (
@@ -253,10 +265,15 @@ async def get_api_key(
     -------
     str — one of 'admin' | 'analyst' | 'viewer'
     """
-    # ── 1. Try Bearer JWT ───────────────────────────────────────────────
+    # ── 1. Try Bearer JWT (header or ?token= query parameter for EventSource) ──
+    token = ""
     auth_header = request.headers.get("Authorization", "")
     if auth_header.startswith("Bearer "):
         token = auth_header[len("Bearer "):]
+    elif "token" in request.query_params:
+        token = request.query_params["token"]
+
+    if token:
         payload = _decode_token(token)   # raises 401 on failure
         role = payload.get("role")
         if not role:
@@ -704,7 +721,182 @@ async def task_status(
     return TaskStatusResponse(**payload)
 
 
-# ── POST /copilot/decide ─────────────────────────────────────────────────────
+# ===========================================================================
+# Server-Sent Events (SSE) Streaming Endpoints
+# ===========================================================================
+
+async def _stream_task_events(task_id: str, request: Request):
+    """
+    Server-Sent Events generator that streams real-time Celery task execution
+    progress and final outcome from Redis Pub/Sub.
+    """
+    # 1. Immediate task snapshot from Celery backend
+    try:
+        current = get_task_result(task_id) if get_task_result is not None else {
+            "task_id": task_id, "status": "PENDING", "progress": {"stage": "Queued", "percent": 5}
+        }
+    except Exception as exc:
+        current = {
+            "task_id": task_id,
+            "status": "PENDING",
+            "progress": {"stage": "Queued in worker broker", "percent": 5},
+        }
+
+    yield {
+        "event": "message",
+        "data": _json.dumps(current),
+    }
+
+    if current.get("status") in ("SUCCESS", "FAILURE"):
+        return
+
+    # 2. Subscribe to Redis Pub/Sub channel
+    channel_name = get_task_channel(task_id) if callable(get_task_channel) else f"claimguard:task_events:{task_id}"
+    redis_url = os.environ.get("REDIS_URL", "redis://localhost:6379/0")
+
+    aioredis_client = None
+    pubsub = None
+    try:
+        import redis.asyncio as aioredis
+        aioredis_client = aioredis.from_url(redis_url, decode_responses=True)
+        pubsub = aioredis_client.pubsub()
+        await pubsub.subscribe(channel_name)
+    except Exception as exc:
+        logger.warning("SSE Redis Pub/Sub subscription unavailable: %s; falling back to reactive polling", exc)
+        pubsub = None
+
+    try:
+        start_time = time.monotonic()
+        max_duration = 300  # 5 minutes safety timeout
+
+        while time.monotonic() - start_time < max_duration:
+            if await request.is_disconnected():
+                logger.info("SSE client disconnected for task %s", task_id)
+                break
+
+            msg = None
+            if pubsub is not None:
+                try:
+                    import asyncio
+                    msg = await asyncio.wait_for(pubsub.get_message(ignore_subscribe_messages=True), timeout=1.0)
+                except asyncio.TimeoutError:
+                    msg = None
+                except Exception:
+                    msg = None
+
+            if msg and msg.get("type") == "message":
+                raw_data = msg.get("data")
+                if raw_data:
+                    yield {
+                        "event": "message",
+                        "data": raw_data if isinstance(raw_data, str) else _json.dumps(raw_data),
+                    }
+                    try:
+                        parsed = _json.loads(raw_data) if isinstance(raw_data, str) else raw_data
+                        if parsed.get("status") in ("SUCCESS", "FAILURE"):
+                            break
+                    except Exception:
+                        pass
+            else:
+                # Fallback check against Celery AsyncResult state
+                if get_task_result is not None:
+                    try:
+                        state = get_task_result(task_id)
+                        if state.get("status") in ("SUCCESS", "FAILURE"):
+                            yield {
+                                "event": "message",
+                                "data": _json.dumps(state),
+                            }
+                            break
+                        elif state.get("status") in ("STARTED", "PROGRESS"):
+                            yield {
+                                "event": "message",
+                                "data": _json.dumps(state),
+                            }
+                    except Exception:
+                        pass
+
+                import asyncio
+                await asyncio.sleep(0.5)
+
+    finally:
+        if pubsub is not None:
+            try:
+                await pubsub.unsubscribe(channel_name)
+                await pubsub.close()
+            except Exception:
+                pass
+        if aioredis_client is not None:
+            try:
+                await aioredis_client.close()
+            except Exception:
+                pass
+
+
+@app.get(
+    "/underwrite/stream/{task_id}",
+    tags=["Underwriting", "Streaming"],
+    summary="Stream real-time underwriting risk-scoring task execution events (SSE)",
+)
+async def stream_underwrite_task(
+    task_id: str,
+    request: Request,
+    role: str = Depends(require_roles(["analyst", "admin", "viewer"])),
+):
+    """
+    Stream live Celery task execution progress for underwriting jobs via Server-Sent Events (SSE).
+    Listens to Redis Pub/Sub events published as the worker moves through STARTED, PROGRESS,
+    SUCCESS, or FAILURE states.
+    """
+    if not HAS_SSE or EventSourceResponse is None:
+        raise HTTPException(
+            status_code=503,
+            detail="sse-starlette is not installed for SSE streaming.",
+        )
+    return EventSourceResponse(_stream_task_events(task_id, request))
+
+
+@app.get(
+    "/claims/stream/{task_id}",
+    tags=["Claims", "Streaming"],
+    summary="Stream real-time claims fraud-scoring task execution events (SSE)",
+)
+async def stream_claims_task(
+    task_id: str,
+    request: Request,
+    role: str = Depends(require_roles(["analyst", "admin", "viewer"])),
+):
+    """
+    Stream live Celery task execution progress for claims fraud-scoring jobs via Server-Sent Events (SSE).
+    Listens to Redis Pub/Sub events published as the worker moves through STARTED, PROGRESS,
+    SUCCESS, or FAILURE states.
+    """
+    if not HAS_SSE or EventSourceResponse is None:
+        raise HTTPException(
+            status_code=503,
+            detail="sse-starlette is not installed for SSE streaming.",
+        )
+    return EventSourceResponse(_stream_task_events(task_id, request))
+
+
+@app.get(
+    "/tasks/stream/{task_id}",
+    tags=["Tasks", "Streaming"],
+    summary="Stream real-time task execution events for any Celery task (SSE)",
+)
+async def stream_generic_task(
+    task_id: str,
+    request: Request,
+    role: str = Depends(require_roles(["analyst", "admin", "viewer"])),
+):
+    """Generic SSE streaming endpoint for any enqueued Celery task."""
+    if not HAS_SSE or EventSourceResponse is None:
+        raise HTTPException(
+            status_code=503,
+            detail="sse-starlette is not installed for SSE streaming.",
+        )
+    return EventSourceResponse(_stream_task_events(task_id, request))
+
 
 @app.post("/copilot/decide", tags=["Policy Copilot"])
 async def copilot_decide(

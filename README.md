@@ -2,113 +2,107 @@
 
 # 🛡️ ClaimGuard AI
 
-### Agentic InsurTech Platform · Underwriting Risk Scoring · Claims Fraud Detection
+### Agentic InsurTech Platform · Underwriting Risk Scoring · Claims Fraud Detection · Real-Time SSE Streaming
 
 [![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.111-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
 [![Next.js](https://img.shields.io/badge/Next.js-14%20App%20Router-black?style=for-the-badge&logo=next.js)](frontend/)
+[![Streamlit](https://img.shields.io/badge/Streamlit-Interactive%20UI-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)](streamlit_app.py)
 [![Celery](https://img.shields.io/badge/Celery-5.4-37814A?style=for-the-badge&logo=celery&logoColor=white)](https://docs.celeryq.dev)
-[![Redis](https://img.shields.io/badge/Redis-7-DC382D?style=for-the-badge&logo=redis&logoColor=white)](https://redis.io)
+[![Redis](https://img.shields.io/badge/Redis-7%20Pub%2FSub-DC382D?style=for-the-badge&logo=redis&logoColor=white)](https://redis.io)
 [![XGBoost](https://img.shields.io/badge/XGBoost-2.0-FF6600?style=for-the-badge&logo=xgboost)](https://xgboost.ai)
 [![LangGraph](https://img.shields.io/badge/LangGraph-0.1-00A67E?style=for-the-badge)](https://langchain-ai.github.io/langgraph/)
 [![Qdrant](https://img.shields.io/badge/Qdrant-1.9-DB4437?style=for-the-badge&logo=qdrant)](https://qdrant.tech)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
-[![Tests](https://img.shields.io/badge/Tests-260%20passing-brightgreen?style=for-the-badge&logo=pytest)](tests/)
+[![Tests](https://img.shields.io/badge/Tests-268%20passing-brightgreen?style=for-the-badge&logo=pytest)](tests/)
 
 <br/>
 
-> **ClaimGuard AI** combines ensemble ML, agentic RAG, and graph analytics to automate and explain the two most critical insurance workflows: **underwriting risk scoring** at policy-issuance time and **claims fraud detection** at filing time — all behind a mandatory Human-in-the-Loop review gate with a production-grade **Next.js 14 App Router** frontend.
+> **ClaimGuard AI** combines ensemble machine learning (XGBoost, LightGBM, TreeSHAP), agentic RAG (LangGraph, Qdrant hybrid search), heterogeneous graph neural networks (R-GCN, Neo4j), and real-time **Server-Sent Events (SSE)** via **Redis Pub/Sub** to automate and explain insurance workflows: **underwriting risk scoring** at policy-issuance time and **claims fraud detection** at filing time — protected by a mandatory Human-in-the-Loop review gate.
 
 <br/>
 
-[🚀 Quick Start](#-quick-start) · [🏗️ Architecture](#️-architecture) · [📡 API Reference](#-api-reference) · [🖥️ Production Frontend](#️-nextjs-14-production-dashboard) · [⚙️ Configuration](#️-configuration) · [🧪 Testing](#-testing)
+[🚀 Quick Start](#-quick-start) · [🏗️ Architecture](#️-architecture) · [📡 SSE Streaming & API Reference](#-real-time-sse-streaming--api-reference) · [🖥️ Next.js 14 Frontend](#️-nextjs-14-production-frontend) · [🎈 Streamlit Interactive Platform](#-interactive-streamlit-platform) · [⚙️ Configuration](#️-configuration) · [🧪 Testing](#-testing)
 
 </div>
 
 ---
 
-## ✨ What's New
+## ✨ Highlights & Releases
 
 | Version | Highlights |
 |---------|-----------|
-| **v1.6** | 🖥️ **Next.js 14 Production Dashboard** — React + Tailwind + Shadcn UI, React Flow collusion graph canvas, JWT auth, async Celery task polling UI (replaces Streamlit as primary frontend) |
-| **v1.5** | 📊 **MLflow + Evidently AI** — experiment tracking (ROC-AUC, F1, artifacts) + data/concept drift detection exposed via Prometheus |
-| **v1.4** | 🕸️ **Heterogeneous R-GCN GNN** — two-stage collusion detection; GNN score bar chart, ring colour-coding, severity upgrade rules |
-| **v1.3** | 🔄 **Celery+Redis** async task queue — `/underwrite` & `/claims/score` return instant `task_id`; poll `/tasks/{id}` |
-| **v1.2** | 🔍 **Hybrid vector search** — ChromaDB replaced with Qdrant + BM25 + Cross-Encoder re-ranking |
-| **v1.1** | 🌐 Standalone prototype preserved under `/legacy/streamlit` |
-| **v1.0** | Full platform: ML ensemble, LangGraph copilot, HITL queue, IRDAI compliance, Prometheus |
+| **v1.7** | ⚡ **Real-Time SSE Streaming** — Server-Sent Events with Redis Pub/Sub (`GET /underwrite/stream/{task_id}`, `GET /claims/stream/{task_id}`); custom `useTaskStream` hook with animated live progress indicators. Dual-interface support (Next.js 14 primary + Streamlit runner). |
+| **v1.6** | 🖥️ **Next.js 14 Production Dashboard** — Next.js 14 App Router, Tailwind CSS, Shadcn UI, React Flow collusion canvas, JWT auth, and interactive analytics. |
+| **v1.5** | 📊 **MLflow + Evidently AI** — Experiment tracking (ROC-AUC, F1, artifacts) + data/concept drift detection exposed via Prometheus. |
+| **v1.4** | 🕸️ **Heterogeneous R-GCN GNN** — Two-stage collusion detection; GNN score attribution, ring severity upgrades, and graph centrality. |
+| **v1.3** | 🔄 **Celery + Redis Async Queue** — Non-blocking `/underwrite` & `/claims/score` endpoints with instant `task_id` dispatch and Redis result storage. |
+| **v1.2** | 🔍 **Hybrid Vector Search** — Qdrant + BM25 sparse search + Cross-Encoder re-ranking (`cross-encoder/ms-marco-MiniLM-L-6-v2`). |
+| **v1.0** | 🛡️ **Foundational InsurTech Platform** — ML ensemble, LangGraph Policy Copilot, HITL review queue, and IRDAI compliance engine. |
 
 ---
 
 ## 🏗️ Architecture
 
-```
-┌──────────────────────────────────────────────────────────────────────────────┐
-│                              ClaimGuard AI  v1.6                             │
-│                                                                              │
-│   ┌─────────────────────────────────────────────────────────────────────┐   │
-│   │               Next.js 14 App Router  (React + Tailwind)             │   │
-│   │  Explorer │ Underwriting │ Claims Fraud │ Graph Intel │ HITL Queue  │   │
-│   └─────────────────────────────┬───────────────────────────────────────┘   │
-│                                 │  HTTP (JWT Bearer / X-API-Key)            │
-│   ┌─────────────────────────────▼───────────────────────────────────────┐   │
-│   │                   FastAPI  (JWT Auth + RBAC + Rate Limit)           │   │
-│   │  POST /auth/token          POST /underwrite → 202 (async task)      │   │
-│   │  POST /claims/score → 202  GET  /tasks/{id}    POST /copilot/decide │   │
-│   │  GET  /graph/collusion-rings   GET /hitl/queue   GET /metrics        │   │
-│   └───┬─────────────────┬───────────────────────────────────────────────┘   │
-│       │  enqueue        │  inline                                           │
-│   ┌───▼──────────┐  ┌───▼──────────────────────────────────────────────┐   │
-│   │ Redis  +     │  │               Domain Modules                      │   │
-│   │ Celery Worker│  │  UnderwritingEngine  │  FraudDetectionEngine       │   │
-│   │              │  │  (XGBoost+LightGBM  │  (XGBoost+LightGBM          │   │
-│   │  ┌─────────┐ │  │   + SHAP + Optuna)  │   + SHAP + Optuna)          │   │
-│   │  │ score_  │ │  ├───────────────────────────────────────────────────┤   │
-│   │  │ uw_task │ │  │  GraphCollusionDetector (Neo4j / NetworkX)         │   │
-│   │  │ score_  │ │  ├───────────────────────────────────────────────────┤   │
-│   │  │ cl_task │ │  │  PolicyCopilot (LangGraph)                         │   │
-│   │  └─────────┘ │  │   RetrieverAgent → ToolAgent → WriterAgent → HITL  │   │
-│   └──────────────┘  └──────────┬───────────────────────────────────────┘   │
-│                                 │                                            │
-│   ┌─────────────────────────────▼───────────────────────────────────────┐   │
-│   │                      Data / Storage Layer                            │   │
-│   │  PostgreSQL  │  Qdrant (hybrid BM25+dense)  │  Neo4j  │  Redis      │   │
-│   │  HITL JSON   │  Prometheus / Grafana          │  Parquet Baselines   │   │
-│   └─────────────────────────────────────────────────────────────────────┘   │
-└──────────────────────────────────────────────────────────────────────────────┘
-```
+```mermaid
+flowchart TD
+    subgraph UI["Frontend Presentation Layer"]
+        A1["Next.js 14 App Router\n(:3000 / :3001)\nPrimary Production Dashboard"]
+        A2["Streamlit Interactive UI\n(:8501)\nstreamlit run streamlit_app.py"]
+    end
 
-### Async Inference Flow
+    subgraph API["Backend & Ingestion Layer (FastAPI :8000)"]
+        B1["JWT Auth & Role-Based Access Control"]
+        B2["POST /underwrite  (202 Async Enqueue)"]
+        B3["POST /claims/score (202 Async Enqueue)"]
+        B4["GET /underwrite/stream/{task_id} (SSE)"]
+        B5["GET /claims/stream/{task_id} (SSE)"]
+        B6["GET /tasks/{task_id} (Status Polling)"]
+        B7["POST /copilot/decide (LangGraph Inline)"]
+    end
 
-```
-Client (Next.js 14)
-  │
-  │  POST /underwrite  {features}  (Authorization: Bearer <JWT>)
-  ▼
-FastAPI  ──► assert_redis_reachable()  ──►  503 if Redis down
-  │
-  │  apply_async(score_underwriting_task, task_id=<uuid>)
-  ▼
-Redis Broker
-  │
-  │  pick up
-  ▼
-Celery Worker
-  ├─ assert_redis_reachable()    ──► RuntimeError (no retry)
-  ├─ assert_postgres_reachable() ──► RuntimeError (no retry)
-  └─ UnderwritingEngine().predict()  ──► retry ×3 on transient error
-  │
-  │  store result
-  ▼
-Redis Backend  ◄──── GET /tasks/{task_id}  ◄──── Client polls with useTaskPoller()
+    subgraph ASYNC["Async Worker & Pub/Sub (Redis 7 + Celery)"]
+        C1["Redis Broker & Result Store (:6379)"]
+        C2["Celery Concurrency Workers (4x)"]
+        C3["Redis Pub/Sub Event Dispatcher\n(claimguard:task_events:{task_id})"]
+    end
+
+    subgraph DOMAIN["Intelligence & Machine Learning Engines"]
+        D1["Underwriting Risk Engine\n(XGBoost + LightGBM + TreeSHAP)"]
+        D2["Claims Fraud Detection Engine\n(XGBoost + LightGBM + Optuna)"]
+        D3["Graph Collusion Detector\n(Neo4j / NetworkX + Heterogeneous R-GCN)"]
+        D4["Policy Copilot Agentic RAG\n(LangGraph + Qdrant + Cross-Encoder)"]
+        D5["IRDAI Compliance & Drift Monitor\n(Evidently AI + MLflow + Prometheus)"]
+    end
+
+    subgraph STORAGE["Data & Observability Tier"]
+        E1[("PostgreSQL 15")]
+        E2[("Qdrant Vector DB")]
+        E3[("Neo4j Graph DB")]
+        E4["Prometheus (:9090) & Grafana (:3002)"]
+    end
+
+    A1 -->|REST / SSE with Bearer JWT| B1
+    A2 -->|Direct Engine Execution| DOMAIN
+    B1 --> B2 & B3 & B4 & B5 & B6 & B7
+    B2 & B3 -->|Enqueue Task| C1
+    C1 --> C2
+    C2 --> D1 & D2
+    C2 -->|Publish STARTED, PROGRESS, SUCCESS, FAILURE| C3
+    C3 -->|Push Real-Time Events via SSE| B4 & B5
+    B7 --> D4
+    D3 --> E1 & E3
+    D4 --> E2
+    D5 --> E4
 ```
 
 ---
 
 ## 🚀 Quick Start
 
-### Option A — Docker Compose (Full production stack, recommended)
+### Option 1 — Docker Compose (Full Stack, Production Recommended)
+
+Launch the complete microservices stack (FastAPI backend, Next.js 14 frontend, Celery workers, Redis, PostgreSQL, Neo4j, Prometheus, Grafana) with a single command:
 
 ```bash
 # 1. Clone repository
@@ -117,44 +111,258 @@ cd claimguard-ai
 
 # 2. Configure environment
 cp .env.example .env
-# Edit .env — set GROQ_API_KEY (optional) and JWT_SECRET_KEY
 
-# 3. Launch full stack (FastAPI, Next.js 14, Redis, Celery, PostgreSQL, Neo4j, Prometheus, Grafana)
+# 3. Build and launch all containers
 docker compose up --build
-
-# Services
-#   Next.js 14 Web App → http://localhost:3000 (or http://localhost:3001)
-#   FastAPI backend    → http://localhost:8000/docs
-#   Grafana Dashboard  → http://localhost:3002 (admin/admin)
-#   Prometheus         → http://localhost:9090
 ```
 
-### Option B — Local Development
+#### Services & Ports:
+| Service | URL | Description |
+|---|---|---|
+| **Next.js 14 Frontend** | [`http://localhost:3000`](http://localhost:3000) (or `:3001`) | Primary InsurTech production web dashboard |
+| **FastAPI Backend & Docs** | [`http://localhost:8000/docs`](http://localhost:8000/docs) | OpenAPI interactive Swagger UI |
+| **Grafana Dashboard** | [`http://localhost:3002`](http://localhost:3002) | Real-time monitoring (`admin` / `admin`) |
+| **Prometheus** | [`http://localhost:9090`](http://localhost:9090) | Metrics scraper & alerting |
+| **Neo4j Browser** | [`http://localhost:7474`](http://localhost:7474) | Graph visualization (`neo4j` / `neo4jpass`) |
+
+---
+
+### Option 2 — Local Development (Next.js 14 + FastAPI + Celery)
 
 ```bash
-# Terminal 1 — Dependencies & Redis
+# Terminal 1 — Dependencies, Data & Redis
 pip install -r requirements.txt
 python data/synthetic_generator.py
 docker run -d -p 6379:6379 redis:7-alpine
 
-# Terminal 2 — Celery Worker
+# Terminal 2 — Celery Task Queue Worker
 celery -A src.worker worker --loglevel=info --concurrency=4
 
-# Terminal 3 — FastAPI Backend
+# Terminal 3 — FastAPI Backend (with SSE & Redis Pub/Sub)
 uvicorn api.main:app --reload --port 8000
 
-# Terminal 4 — Next.js 14 Production Frontend
+# Terminal 4 — Next.js 14 Frontend
 cd frontend
 npm install
 npm run dev
-# Opens on http://localhost:3001 (or http://localhost:3000)
+# Opens at http://localhost:3001
 ```
 
-### Option C — Streamlit Cloud (UI only, no Redis/Celery needed)
+---
 
-The app runs at **https://claimguard-ai-fdiafhzaeme9gr2lndxmv3.streamlit.app**
-All ML engines, HITL queue, and compliance dashboard work without any services.
-Celery-dependent features show graceful 503 messages.
+### Option 3 — Running the Interactive Streamlit Platform
+
+ClaimGuard AI includes a full-featured Streamlit platform with rich interactive Plotly gauges, tabular analyzers, and graph visualizers:
+
+```bash
+# Install dependencies
+pip install -r requirements.txt
+pip install -r legacy/streamlit/requirements.txt
+
+# Run directly from root:
+streamlit run streamlit_app.py
+# Or run legacy file directly:
+streamlit run legacy/streamlit/app.py
+```
+
+---
+
+## 📡 Real-Time SSE Streaming & API Reference
+
+### Real-Time Task Streaming via Server-Sent Events (SSE)
+
+ClaimGuard AI streams live task lifecycle events via Redis Pub/Sub directly to clients:
+
+```
+Celery Worker                   Redis Pub/Sub                     FastAPI SSE                     Next.js 14
+┌────────────┐               ┌─────────────────┐               ┌───────────────┐               ┌────────────┐
+│ Task Start │ ──publish───► │ claimguard:     │ ──receive────►│ EventSource   │ ──push stream►│ useTask-   │
+│ (25%)      │               │ task_events:    │               │ Response      │               │ Stream()   │
+│            │               │ {task_id}       │               │               │               │            │
+│ Inference  │ ──publish───► │                 │ ──receive────►│ (text/event-  │ ──push stream►│ Progress:  │
+│ (70%)      │               │                 │               │  stream)      │               │ 70% bar    │
+│            │               │                 │               │               │               │            │
+│ Completed  │ ──publish───► │                 │ ──receive────►│ Close Stream  │ ──push stream►│ Render ML  │
+│ (100%)     │               │                 │               │               │               │ Results    │
+└────────────┘               └─────────────────┘               └───────────────┘               └────────────┘
+```
+
+#### Streaming Endpoints:
+- `GET /underwrite/stream/{task_id}?token=<jwt>` — Real-time SSE stream for underwriting risk scoring.
+- `GET /claims/stream/{task_id}?token=<jwt>` — Real-time SSE stream for fraud detection.
+- `GET /tasks/stream/{task_id}?token=<jwt>` — Generic SSE stream for any enqueued Celery task.
+
+#### SSE Event Payload Example:
+```json
+{
+  "task_id": "c89b70b4-4b55-4674-8fa7-86c262adfc29",
+  "status": "PROGRESS",
+  "progress": {
+    "stage": "Evaluating underwriting risk features & SHAP attribution",
+    "percent": 70
+  }
+}
+```
+
+```json
+{
+  "task_id": "c89b70b4-4b55-4674-8fa7-86c262adfc29",
+  "status": "SUCCESS",
+  "progress": {
+    "stage": "Completed",
+    "percent": 100
+  },
+  "result": {
+    "risk_score": 0.245,
+    "risk_tier": "low",
+    "premium_adjustment": 0.95,
+    "shap_drivers": [
+      { "feature": "credit_score", "shap_value": -0.18, "direction": "decreases risk" },
+      { "feature": "annual_income", "shap_value": -0.12, "direction": "decreases risk" }
+    ],
+    "model_version": "1.0.0"
+  }
+}
+```
+
+---
+
+### Core REST Endpoints
+
+<details>
+<summary><b>1. POST /auth/token</b> — Obtain JWT Access Token</summary>
+
+```bash
+curl -X POST http://localhost:8000/auth/token \
+  -H "Content-Type: application/json" \
+  -d '{"username":"analyst","password":"analyst123"}'
+```
+```json
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "token_type": "bearer",
+  "role": "analyst",
+  "expires_in": 28800
+}
+```
+</details>
+
+<details>
+<summary><b>2. POST /underwrite</b> — Enqueue Underwriting Job (HTTP 202)</summary>
+
+```bash
+curl -X POST http://localhost:8000/underwrite \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "age": 35,
+    "annual_income": 800000,
+    "credit_score": 720,
+    "sum_insured": 1000000,
+    "coverage_type": "motor",
+    "num_dependents": 2,
+    "prior_claims_count": 0,
+    "region": "north",
+    "occupation": "salaried"
+  }'
+```
+```json
+{
+  "task_id": "c89b70b4-4b55-4674-8fa7-86c262adfc29",
+  "status": "PENDING",
+  "status_url": "http://localhost:8000/tasks/c89b70b4-4b55-4674-8fa7-86c262adfc29",
+  "message": "Underwriting job enqueued."
+}
+```
+</details>
+
+<details>
+<summary><b>3. POST /claims/score</b> — Enqueue Claims Fraud Scoring (HTTP 202)</summary>
+
+```bash
+curl -X POST http://localhost:8000/claims/score \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "claim_id": "CLM-001",
+    "claimant_id": "CLT-001",
+    "policy_id": "POL-001",
+    "claim_amount": 75000,
+    "days_since_policy_start": 45,
+    "num_prior_claims": 2,
+    "claim_type": "motor",
+    "claim_severity": "high",
+    "repair_shop_id": "SHOP-001"
+  }'
+```
+</details>
+
+<details>
+<summary><b>4. GET /graph/collusion-rings</b> — Collusion Ring Detection</summary>
+
+```bash
+curl http://localhost:8000/graph/collusion-rings \
+  -H "Authorization: Bearer <token>"
+```
+</details>
+
+<details>
+<summary><b>5. GET /hitl/queue & POST /hitl/review/{item_id}</b> — Human-in-the-Loop Review</summary>
+
+```bash
+curl http://localhost:8000/hitl/queue -H "Authorization: Bearer <token>"
+```
+</details>
+
+---
+
+## 🖥️ Next.js 14 Production Frontend
+
+The frontend is located in [`frontend/`](frontend/) and built on **Next.js 14 App Router**:
+
+```
+frontend/src/
+├── app/
+│   ├── (dashboard)/
+│   │   ├── layout.tsx         # Sidebar, live API connectivity monitor, JWT auth state
+│   │   ├── explorer/page.tsx  # Interactive claims explorer, filtering & charts
+│   │   ├── underwriting/page.tsx # Real-time SSE risk scoring & TreeSHAP breakdown
+│   │   ├── fraud/page.tsx     # Real-time SSE fraud probability prediction
+│   │   ├── claims/page.tsx    # Dedicated claims route alias
+│   │   ├── graph/page.tsx     # React Flow collusion ring network graph
+│   │   └── hitl/page.tsx      # IRDAI Human-in-the-Loop review queue
+│   ├── login/page.tsx         # JWT credentials login with demo auto-fill
+│   └── layout.tsx             # Root layout with AuthProvider context
+├── components/
+│   ├── charts/                # Recharts gauges, SHAP waterfall bars, scatter plots
+│   ├── graph/                 # React Flow canvas, node/edge custom layouts
+│   └── ui/                    # Badges, stat cards, dialogs, forms
+├── hooks/
+│   ├── useAuth.tsx            # Context provider for JWT auth & RBAC
+│   ├── useTaskStream.ts       # Native EventSource SSE streaming hook
+│   └── useTaskPoller.ts       # Fallback polling hook
+└── lib/
+    └── api.ts                 # Typed API client & exception wrappers
+```
+
+---
+
+## 🎈 Interactive Streamlit Platform
+
+To run the standalone Streamlit analytics platform:
+
+```bash
+streamlit run streamlit_app.py
+```
+
+### Streamlit Features:
+1. **Underwriting Intelligence Tab**: Real-time interactive parameter tweaking with dynamic risk dials and premium adjustment calculations.
+2. **Claims Fraud Scanner Tab**: Instant fraud scoring with probability gauges and SHAP waterfall contributions.
+3. **Policy Copilot (LangGraph RAG)**: Interactive natural language Q&A against policy wording documents using hybrid retrieval.
+4. **Collusion Network Tab**: Interactive network graphs highlighting shared garages, medical clinics, and claimant clusters.
+5. **HITL Review Queue Tab**: Analyst dashboard to approve, reject, or escalate decisions with audit notes.
+6. **Data Drift & Observability Tab**: Drift distribution curves and KS-test statistics.
+7. **IRDAI Compliance Tab**: Real-time compliance scorecards mapping to regulatory guidelines.
 
 ---
 
@@ -162,637 +370,39 @@ Celery-dependent features show graceful 503 messages.
 
 | Variable | Required | Default | Description |
 |---|---|---|---|
-| `GROQ_API_KEY` | No | — | Groq `llama3-8b-8192` for Policy Copilot writer; rule-based fallback if unset |
-| `REDIS_URL` | Yes (API/worker) | `redis://localhost:6379/0` | Celery broker + result backend |
-| `DATABASE_URL` | Yes (production) | — | asyncpg PostgreSQL DSN |
-| `SUPABASE_URL` | No | — | Supabase REST endpoint (tier-2 fallback) |
-| `SUPABASE_KEY` | No | — | Supabase anon/service key |
-| `NEO4J_URI` | No | — | Bolt URI for graph collusion (NetworkX fallback) |
-| `NEO4J_USER` | No | `neo4j` | Neo4j username |
-| `NEO4J_PASSWORD` | No | — | Neo4j password |
-| `ENCRYPTION_KEY` | No | auto-generated | Fernet key for PII encryption |
-| `API_KEYS` | No | demo keys | JSON `{"key":"role"}` map for RBAC |
-| `CELERY_TASK_TIMEOUT` | No | `300` | Hard time limit per Celery task (seconds) |
-| `CLAIMGUARD_VS_QDRANT_MODE` | No | `local` | `memory` / `local` / `remote` |
-| `CLAIMGUARD_VS_RERANKER_BACKEND` | No | `cross_encoder` | `none` / `cross_encoder` / `cohere` |
-| `CLAIMGUARD_VS_COHERE_API_KEY` | No | — | Cohere API key for rerank backend |
-
----
-
-## 📡 API Reference
-
-### Demo API Keys
-
-| Key | Role | Permissions |
-|---|---|---|
-| `admin-key-demo` | admin | All endpoints |
-| `analyst-key-demo` | analyst | All except `/metrics` |
-| `viewer-key-demo` | viewer | `/compliance`, `/health` |
-
-### Endpoints
-
-<details>
-<summary><b>GET /health</b> — Liveness probe (no auth)</summary>
-
-```bash
-curl http://localhost:8000/health
-```
-```json
-{ "status": "ok", "version": "1.0.0", "timestamp": "2026-10-05T10:00:00+00:00" }
-```
-</details>
-
-<details>
-<summary><b>POST /underwrite</b> — Enqueue underwriting job → HTTP 202</summary>
-
-```bash
-curl -X POST http://localhost:8000/underwrite \
-  -H "X-API-Key: analyst-key-demo" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "age": 35, "annual_income": 800000, "credit_score": 720,
-    "sum_insured": 1000000, "coverage_type": "motor",
-    "num_dependents": 2, "prior_claims_count": 0,
-    "region": "north", "occupation": "salaried"
-  }'
-```
-```json
-{
-  "task_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
-  "status": "PENDING",
-  "status_url": "http://localhost:8000/tasks/f47ac10b-58cc-4372-a567-0e02b2c3d479",
-  "message": "Underwriting job enqueued. Poll status_url for the result."
-}
-```
-</details>
-
-<details>
-<summary><b>POST /claims/score</b> — Enqueue fraud-scoring job → HTTP 202</summary>
-
-```bash
-curl -X POST http://localhost:8000/claims/score \
-  -H "X-API-Key: analyst-key-demo" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "claim_id": "CLM-001", "claimant_id": "CLT-001", "policy_id": "POL-001",
-    "claim_amount": 75000, "days_since_policy_start": 45,
-    "num_prior_claims": 2, "claim_type": "motor", "claim_severity": "high",
-    "repair_shop_id": "SHOP-001"
-  }'
-```
-```json
-{
-  "task_id": "a1b2c3d4-...",
-  "status": "PENDING",
-  "status_url": "http://localhost:8000/tasks/a1b2c3d4-..."
-}
-```
-</details>
-
-<details>
-<summary><b>GET /tasks/{task_id}</b> — Poll task status</summary>
-
-```bash
-curl http://localhost:8000/tasks/f47ac10b-... \
-  -H "X-API-Key: analyst-key-demo"
-```
-
-| `status` | Meaning |
-|---|---|
-| `PENDING` | Queued, worker has not started |
-| `STARTED` | Worker is running inference |
-| `SUCCESS` | Complete — `result` key has payload |
-| `FAILURE` | Failed — `error` and `error_type` explain why |
-| `RETRY` | Retrying after transient error |
-
-```json
-{
-  "task_id": "f47ac10b-...",
-  "status": "SUCCESS",
-  "result": {
-    "risk_tier": "low", "risk_score": 0.22,
-    "premium_adjustment": 0.95, "shap_drivers": [...],
-    "model_version": "xgb-lgbm-v1"
-  }
-}
-```
-</details>
-
-<details>
-<summary><b>POST /copilot/decide</b> — Run Policy Copilot inline</summary>
-
-```bash
-curl -X POST http://localhost:8000/copilot/decide \
-  -H "X-API-Key: analyst-key-demo" \
-  -H "Content-Type: application/json" \
-  -d '{"query": "Assess risk for motor policy applicant", "context_type": "underwriting", "features": {...}}'
-```
-</details>
-
-<details>
-<summary><b>GET /graph/collusion-rings</b> — Detect claim-ring collusion</summary>
-
-```bash
-curl http://localhost:8000/graph/collusion-rings \
-  -H "X-API-Key: analyst-key-demo"
-```
-> ⚠️ Requires PostgreSQL — returns 503 if `DATABASE_URL` is unset.
-</details>
-
-<details>
-<summary><b>GET /compliance</b> — IRDAI compliance report</summary>
-
-```bash
-curl http://localhost:8000/compliance -H "X-API-Key: viewer-key-demo"
-```
-</details>
-
-<details>
-<summary><b>GET /metrics</b> — Prometheus metrics (admin only)</summary>
-
-```bash
-curl http://localhost:8000/metrics -H "X-API-Key: admin-key-demo"
-```
-</details>
-
----
-
-## 🖥️ Next.js 14 Production Dashboard
-
-The primary production frontend is built with **Next.js 14 App Router**, **React**, **Tailwind CSS**, and **React Flow**:
-
-```bash
-cd frontend
-npm install
-npm run dev
-# Open http://localhost:3001 (or http://localhost:3000)
-```
-
-### Dashboard Modules
-
-| Route | Module | Key Features |
-|---|---|---|
-| `/explorer` | **Data Explorer** | Interactive claims records table with real-time search & pagination, claim type distribution bar charts, fraud ratio donut charts, severity charts, and multi-variable scatter plot |
-| `/underwriting` | **Underwriting Scorer** | Asynchronous Celery risk scoring form with automatic polling (`useTaskPoller`), interactive radial score gauge, and TreeSHAP waterfall feature attribution |
-| `/fraud` | **Claims Fraud Scanner** | Instant fraud probability prediction with Celery polling, high-risk alert banners, TreeSHAP contribution bars, and confidence tier indicators |
-| `/graph` | **Graph Intel Canvas** | Interactive **React Flow** network graph canvas: claimant nodes, shared entity nodes (repair shops/doctors), animated edges for high-severity rings, and claimant-level GNN score breakdowns |
-| `/hitl` | **HITL Review Queue** | IRDAI-mandated human-in-the-loop review console: filter by review status (pending, approved, rejected, escalated), decision draft inspection, inline analyst review notes, and one-click actions |
-| `/login` | **Authentication** | JWT Bearer authentication with token rehydration, role-based access control (Admin, Analyst, Viewer), and quick demo credential autofill |
-
-> 📁 **Legacy Streamlit Prototype:** The original Streamlit prototype has been archived in [`/legacy/streamlit/`](legacy/streamlit/) for reference. Run with `pip install -r legacy/streamlit/requirements.txt && streamlit run legacy/streamlit/app.py`.
-
----
-
-## 🧠 ML Layer
-
-### Ensemble Architecture
-
-```
-Input Features
-     │
-     ├──► XGBoost Classifier ──►┐
-     │                          ├──► Soft-vote average ──► Risk/Fraud Score
-     └──► LightGBM Classifier ──►┘
-                    │
-                    ▼
-               SHAP TreeExplainer
-                    │
-                    ▼
-           Top-5 feature drivers
-    [{feature, shap_value, direction}, ...]
-```
-
-### Underwriting Features
-
-`age` · `annual_income` · `credit_score` · `sum_insured` · `coverage_type` · `num_dependents` · `prior_claims_count` · `region` · `occupation`
-
-### Claims Features
-
-`claim_amount` · `days_since_policy_start` · `num_prior_claims` · `claim_type` · `claim_severity` · `repair_shop_id` · `medical_provider_id`
-
-### Fallback chain
-
-```
-XGBoost+LightGBM → scikit-learn RandomForest → Rule-based heuristic
-```
-
----
-
-## 🔍 Hybrid Vector Search (Qdrant)
-
-```
-Query
-  │
-  ├──► Dense: sentence-transformers/all-MiniLM-L6-v2
-  │         └──► Qdrant cosine similarity search  (top-10)
-  │
-  └──► Sparse: BM25Okapi (rank-bm25)               (top-10)
-                        │
-                        ▼
-              Reciprocal Rank Fusion (RRF, k=60)
-                        │
-                        ▼
-              CrossEncoder re-ranking
-              (cross-encoder/ms-marco-MiniLM-L-6-v2)
-                        │
-                        ▼
-               Final top-3 results
-    [{content, source, score}, ...]
-```
-
-Configure via `CLAIMGUARD_VS_*` env vars — see [Configuration](#️-configuration).
-
----
-
-## 🕸️ Graph Collusion Detection
-
-ClaimGuard AI uses a **two-stage pipeline** to detect claim-ring collusion:
-
-### Stage 1 — Structural ring detection (always runs)
-
-Builds a bipartite graph linking claimants to shared entities (repair shops, medical providers, witnesses). Suspicious rings are clusters where ≥ 3 claims share ≥ 2 entities.
-
-```
-Claimant A ──── SHOP-001 ──── Claimant B
-    │                              │
-    └──── SHOP-001, DR-042 ────────┘
-                                 ▲
-                            Ring detected (severity based on size)
-```
-
-Primary backend: **Neo4j**. Fallback: **NetworkX** (in-process, no server).
-
-### Stage 2 — R-GCN GNN re-scoring (optional)
-
-A **Relational Graph Convolutional Network** trained on the heterogeneous claims graph upgrades ring severity based on learned collusion signals.
-
-```
-Graph schema:
-
-  Node types          Features (dim)
-  ──────────          ──────────────────────────────────────────────
-  claimant            claim_amount, days_since_policy, prior_claims,
-                      claim_type, claim_severity, fraud_label   (6)
-  garage              avg_amount, claim_count, fraud_rate,
-                      severity_high_rate                        (4)
-  medical             same as garage                            (4)
-
-  Edge types (8 total, 4 + 4 reverse)
-  ─────────────────────────────────────────────
-  claimant ──filed_at_garage──► garage
-  claimant ──treated_by──────► medical
-  garage   ──co_used_by──────► garage
-  medical  ──co_used_by──────► medical
-```
-
-```
-R-GCN architecture:
-
-  Input projections (per node type → hidden_dim)
-       │
-  HeteroConv(SAGEConv per relation) → ReLU + Dropout
-       │
-  HeteroConv(SAGEConv per relation) → ReLU
-       │
-  claimant embeddings
-       │
-  Linear(hidden → hidden/2) → ReLU → Dropout → Linear(hidden/2 → 1)
-       │
-  sigmoid → collusion_score ∈ (0, 1)
-```
-
-**Severity upgrade rules** after GNN scoring:
-- `max_gnn_score ≥ 0.80` → ring severity forced to **high**
-- `max_gnn_score ≥ 0.60` + current severity `low` → upgraded to **medium**
-
-### Training the GNN
-
-```bash
-# Quick start (uses data/sample_claims.csv)
-python scripts/train_gnn_collusion.py
-
-# Full run with Neo4j export
-python scripts/train_gnn_collusion.py \
-  --claims-csv data/sample_claims.csv \
-  --epochs 100 --hidden-dim 64 --lr 1e-3 \
-  --write-neo4j \
-  --scores-out data/gnn_scores.json
-
-# Install PyG first (CPU)
-pip install torch --index-url https://download.pytorch.org/whl/cpu
-pip install torch_geometric
-```
-
-| Flag | Default | Description |
-|---|---|---|
-| `--claims-csv` | `data/sample_claims.csv` | Input data path |
-| `--db-url` | — | PostgreSQL DSN (overrides CSV) |
-| `--epochs` | 100 | Max training epochs |
-| `--hidden-dim` | 64 | GNN hidden dimension |
-| `--lr` | 1e-3 | Adam learning rate |
-| `--patience` | 15 | Early-stopping patience |
-| `--write-neo4j` | off | Write scores to Neo4j |
-| `--scores-out` | — | Export JSON score file |
-| `--resume` | off | Resume from checkpoint |
-
-**Exit codes**: `0` = success · `1` = data/model error · `2` = PyG absent (soft, not a CI blocker)
-
-
-
----
-
-## 🖥️ Next.js 14 Dashboard (v1.6)
-
-A production-quality React dashboard that runs alongside the Streamlit UI. Both coexist — Streamlit on `:8501`, Next.js on `:3001`.
-
-### Tech stack
-
-| Layer | Technology |
-|---|---|
-| Framework | Next.js 14 (App Router, `output: standalone`) |
-| Styling | Tailwind CSS v3 · dark navy/teal design system |
-| Components | Shadcn UI design tokens + custom Radix UI primitives |
-| Charts | Recharts — bar, pie, scatter, radial gauge, SHAP waterfall |
-| Graph | **React Flow v11** — interactive force-directed canvas with minimap |
-| Forms | react-hook-form + Zod validation |
-| Auth | JWT (`/auth/token` → `Authorization: Bearer <token>`) |
-| Async jobs | Task-ID polling (`/tasks/{id}`) with `useTaskPoller` hook |
-
-### Pages
-
-| Route | Description |
-|---|---|
-| `/login` | JWT login. Demo: `admin/admin123` · `analyst/analyst123` · `viewer/viewer123` |
-| `/explorer` | Claims data table (search + pagination) + 4 Recharts: type breakdown, fraud pie, severity, prior-claims scatter |
-| `/underwriting` | Feature form → `POST /underwrite` (202) → Celery poll → risk gauge + SHAP bar |
-| `/fraud` | Claim form → `POST /claims/score` (202) → Celery poll → fraud gauge + alert banner + SHAP |
-| `/graph` | `GET /graph/collusion-rings` → React Flow canvas — claimant/entity nodes, ring colour groups, animated high-severity edges |
-| `/hitl` | `GET /hitl/queue` + `POST /hitl/review/{id}` → analyst approve / reject / escalate cards |
-
-### JWT auth
-
-```bash
-# Get a token
-curl -X POST http://localhost:8000/auth/token \
-  -H "Content-Type: application/json" \
-  -d '{"username":"analyst","password":"analyst123"}'
-# → {"access_token":"<jwt>","role":"analyst","expires_in":28800}
-
-# Use on all subsequent requests
-Authorization: Bearer <access_token>
-
-# Legacy X-API-Key still works (no breaking change)
-X-API-Key: analyst-key-demo
-```
-
-Configure via env vars:
-- `JWT_SECRET_KEY` — signing secret (`openssl rand -hex 32` to generate)
-- `JWT_ACCESS_TOKEN_EXPIRE_MINUTES` — default 480 (8 h)
-
-### Quick start (local)
-
-```bash
-cd frontend
-npm install --legacy-peer-deps
-npm run dev          # → http://localhost:3001
-
-# FastAPI must be running for real data:
-uvicorn api.main:app --reload --port 8000
-```
-
-### Quick start (Docker Compose)
-
-```bash
-docker compose up --build
-# Next.js dashboard → http://localhost:3001
-# Streamlit UI      → http://localhost:8501
-# FastAPI + docs    → http://localhost:8000/docs
-```
-
----
-
-## 🔒 Security
-
-| Layer | Implementation |
-|---|---|
-| Authentication | `X-API-Key` header → role resolution (`admin` / `analyst` / `viewer`) |
-| Authorization | `require_roles([...])` FastAPI dependency per endpoint |
-| Rate limiting | Sliding-window `RateLimiter` (100 req/60 s per IP) |
-| PII encryption | Fernet symmetric encryption (`src/encryption.py`) |
-| Production routes | Hard infra checks — 503 if Redis/Postgres unreachable (no CSV fallback) |
-
----
-
-## 📈 Observability
-
-Prometheus metrics under `claimguard_copilot_*` namespace:
-
-| Metric | Type | Labels |
-|---|---|---|
-| `claimguard_copilot_agent_runs_total` | Counter | `agent_name` |
-| `claimguard_copilot_agent_latency_seconds` | Histogram | `agent_name` |
-| `claimguard_copilot_tool_calls_total` | Counter | `tool_name` |
-| `claimguard_copilot_retriever_hits_total` | Counter | — |
-| `claimguard_copilot_decisions_drafted_total` | Counter | — |
-| `claimguard_copilot_hitl_queue_depth` | Gauge | — |
-| `claimguard_copilot_graph_queries_total` | Counter | — |
-
-Grafana dashboard JSON available at `http://localhost:3000` after `docker compose up`.
-
----
-
-## 📊 MLflow Experiment Tracking
-
-Every `_train()` call in `UnderwritingEngine` and `FraudDetectionEngine` logs to MLflow:
-
-| Artifact | Description |
-|---|---|
-| **Parameters** | `n_estimators`, `max_depth`, `learning_rate`, `n_samples`, `n_features`, `fallback_chain` |
-| **Metrics** | `roc_auc_cv` (3-fold cross-val), `f1_cv`, `fraud_pos_rate` (fraud model only) |
-| **Model artifact** | Pickled ensemble as `model/<name>.pkl` |
-| **Feature importance** | Bar chart PNG at `plots/feature_importance.png` |
-| **Tags** | `model_type`, `framework`, `model_version`, `fraud_threshold` |
-
-```bash
-# Start MLflow tracking server (optional — defaults to ./mlruns)
-mlflow server --host 0.0.0.0 --port 5000
-
-# Point the engines at it
-export MLFLOW_TRACKING_URI=http://localhost:5000
-
-# Trigger a training run
-python -c "from src.underwriting import UnderwritingEngine; UnderwritingEngine(force_retrain=True)"
-
-# Open the UI
-open http://localhost:5000
-```
-
-Experiments: `claimguard_underwriting` · `claimguard_fraud_detection`
-
----
-
-## 🌊 Data & Concept Drift Monitoring
-
-`src/drift_monitor.py` implements two drift detection strategies:
-
-| Mode | Library | Numeric | Categorical | Concept Drift |
-|---|---|---|---|---|
-| Primary | Evidently AI | DataDriftPreset | DataDriftPreset | TargetDriftPreset |
-| Fallback | scipy / numpy | KS test | Chi-squared | PSI |
-
-```python
-from src.drift_monitor import DriftMonitor, save_baseline
-
-# 1. Save training distribution as baseline (called automatically in _train())
-save_baseline(train_df, model_name="fraud", prediction_col="fraud_label")
-
-# 2. Detect drift on incoming batch
-monitor = DriftMonitor("fraud")
-report  = monitor.detect(incoming_df, predictions=fraud_scores)
-
-print(report.data_drift_score)       # 0.0 – 1.0 share of drifted features
-print(report.drifted_features)       # ['claim_amount', ...]
-print(report.concept_drift_detected) # True / False
-print(report.concept_drift_score)    # PSI of prediction distribution
-```
-
-**Prometheus gauges** (updated after every `detect()` call):
-
-| Metric | Labels | Description |
-|---|---|---|
-| `claimguard_drift_data_score` | `model` | Share of drifted features |
-| `claimguard_drift_feature_score` | `model`, `feature` | Per-feature drift score |
-| `claimguard_drift_concept_score` | `model` | PSI of predictions |
-| `claimguard_drift_concept_detected` | `model` | 1.0 = drift detected |
-
-Configure thresholds via env vars:
-```bash
-CLAIMGUARD_DRIFT_DATA_THRESHOLD=0.10     # feature-level KS/chi2 threshold
-CLAIMGUARD_DRIFT_CONCEPT_THRESHOLD=0.25  # PSI threshold for concept drift
-```
-
----
-
-## ✅ IRDAI Compliance Module
-
-10 real IRDAI regulatory controls with evidence + remediation:
-
-| Control | Category | Default Status |
-|---|---|---|
-| IRDAI-001 · Claim settlement within 30 days | Claims Management | ⚠️ Partial |
-| IRDAI-002 · KYC verification | Customer Due Diligence | ✅ Compliant |
-| IRDAI-003 · Grievance redressal within 15 days | Customer Service | ⚠️ Partial |
-| IRDAI-004 · Policy issuance SLA | Operations | ✅ Compliant |
-| IRDAI-005 · Premium refund on cancellation | Financial | ✅ Compliant |
-| IRDAI-006 · Free-look period enforcement | Customer Rights | ✅ Compliant |
-| IRDAI-007 · Portability rights | Customer Rights | ⚠️ Partial |
-| IRDAI-008 · Anti-money-laundering checks | Fraud Prevention | ❌ Non-compliant |
-| IRDAI-009 · Fraud reporting to IRDAI | Regulatory Reporting | ⚠️ Partial |
-| IRDAI-010 · Data localization | Data Governance | ❌ Non-compliant |
+| `JWT_SECRET_KEY` | Yes (Production) | Auto-generated | Secret key for JWT signing (`openssl rand -hex 32`) |
+| `REDIS_URL` | Yes | `redis://localhost:6379/0` | Redis broker and Pub/Sub connection string |
+| `DATABASE_URL` | Yes (Production) | `postgresql://claimguard:claimguard_pass@localhost:5432/claimguard` | PostgreSQL asyncpg DSN |
+| `NEO4J_URI` | No | `bolt://localhost:7687` | Neo4j Bolt URI for graph collusion queries |
+| `NEO4J_USER` | No | `neo4j` | Neo4j database username |
+| `NEO4J_PASSWORD` | No | `neo4jpass` | Neo4j database password |
+| `GROQ_API_KEY` | No | — | Optional Groq API key for LLaMA 3 Policy Copilot generation |
+| `CLAIMGUARD_VS_QDRANT_MODE` | No | `local` | Qdrant vector store mode (`memory`, `local`, `remote`) |
 
 ---
 
 ## 🧪 Testing
 
+The repository features comprehensive unit, integration, and streaming test suites:
+
 ```bash
-# Run full suite (149 tests, ~20 s)
-pytest tests/ -v
+# Run complete test suite (268 tests)
+pytest -v
 
-# Run specific groups
-pytest tests/test_underwriting.py    # ML engine
-pytest tests/test_claims_fraud.py    # Fraud engine
-pytest tests/test_vector_store.py    # Qdrant hybrid search
-pytest tests/test_worker.py          # Celery tasks + API endpoints
-pytest tests/test_compliance.py      # IRDAI compliance
-pytest tests/test_agent_graph.py     # LangGraph copilot
+# Run SSE streaming test suite
+pytest tests/test_sse_stream.py -v
+
+# Run worker and Celery test suite
+pytest tests/test_worker.py -v
+
+# Run frontend type-check and production build
+cd frontend
+npm run type-check
+npm run build
 ```
-
-Current status: **260 passed · 18 skipped · 0 failed**
-
----
-
-## 📁 Project Structure
-
-```
-claimguard-ai/
-├── api/
-│   └── main.py              FastAPI app (async Celery enqueue, JWT auth, RBAC, rate-limit)
-├── frontend/                Next.js 14 App Router (Sole Production Frontend)
-│   ├── src/
-│   │   ├── app/             Pages: /login, /explorer, /underwriting, /fraud, /graph, /hitl
-│   │   ├── components/      React Flow collusion graph, Recharts score gauges, SHAP charts
-│   │   ├── hooks/           useAuth (JWT), useTaskPoller (Celery async polling)
-│   │   └── lib/api.ts       Typed API client with backend health checking
-│   ├── package.json
-│   └── Dockerfile
-├── legacy/                  Archived prototypes
-│   └── streamlit/           Legacy Streamlit 8-tab prototype & requirements
-├── src/
-│   ├── agent_graph.py        LangGraph Policy Copilot pipeline
-│   ├── claims_fraud.py       Fraud detection ML engine
-│   ├── compliance_irdai.py   IRDAI compliance reporting
-│   ├── copilot_metrics.py    Prometheus metrics helpers
-│   ├── database.py           DB manager + ProductionDatabaseManager (no fallback)
-│   ├── drift_monitor.py      Evidently AI + scipy drift detection, Prometheus export
-│   ├── encryption.py         Fernet PII encryption
-│   ├── gnn_collusion.py      Heterogeneous R-GCN GNN for collusion scoring
-│   ├── graph_collusion.py    Two-stage ring detector (structural + GNN)
-│   ├── hitl.py               Human-in-the-loop review queue
-│   ├── rate_limit.py         Sliding-window rate limiter
-│   ├── rbac.py               Role-based access control
-│   ├── shap_utils.py         SHAP explainability
-│   ├── underwriting.py       Underwriting risk-scoring engine
-│   ├── vector_store.py       Qdrant hybrid BM25+dense+rerank store
-│   ├── vector_store_settings.py  Pydantic settings (CLAIMGUARD_VS_*)
-│   └── worker.py             Celery app + background tasks
-├── scripts/
-│   └── train_gnn_collusion.py  R-GCN training pipeline (CLI)
-├── data/
-│   ├── synthetic_generator.py  Generate sample_claims.csv + sample_policies.csv
-│   ├── policy_docs/            Sample policy wording + IRDAI guidelines
-│   └── models/                 Persisted ML model artefacts
-├── tests/                    pytest test suite (260 tests)
-├── eval/
-│   └── ragas_eval.py         RAGAS retrieval quality evaluation
-├── docker-compose.yml        Full stack (FastAPI, Next.js 14, Redis, Celery, PG, Neo4j, Prom, Grafana)
-├── Dockerfile                FastAPI backend container
-├── requirements.txt          Backend & Celery worker dependencies
-├── requirements-full.txt     Full backend stack dependencies
-└── .env.example
-```
-
----
-
-## 🛠️ Tech Stack
-
-| Layer | Technology |
-|---|---|
-| **Experiment tracking** | MLflow 2.14 (params, metrics, artifacts, feature importance) |
-| **Drift monitoring** | Evidently AI 0.4 + scipy KS/chi² + PSI fallback |
-| **UI** | Streamlit 1.35 + Plotly 5 (dark theme, interactive) |
-| **Async tasks** | Celery 5.4 + Redis 7 |
-| **ML** | XGBoost 2.0 + LightGBM 4.3 + SHAP + Optuna |
-| **Agent / RAG** | LangGraph 0.1 + LangChain Core + Groq llama3-8b-8192 |
-| **Vector store** | Qdrant 1.9 (hybrid: dense + BM25 + CrossEncoder) |
-| **Graph** | Neo4j 5 / NetworkX 3.3 |
-| **Database** | PostgreSQL 15 via asyncpg |
-| **Security** | Fernet encryption + RBAC + rate limiting |
-| **Observability** | Prometheus + Grafana |
-| **Infra** | Docker Compose + GitHub Actions CI |
-| **Tests** | pytest 8 + httpx |
 
 ---
 
 ## 📄 License
 
-MIT © 2024 ClaimGuard AI — [Sumedh Patil](https://github.com/SumedhPatil1507)
-
----
-
-<div align="center">
-
-**[⬆ Back to top](#️-claimguard-ai)**
-
-Made with ☕ and 🛡️ for the InsurTech community
-
-</div>
+Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for details.

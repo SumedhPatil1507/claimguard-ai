@@ -16,7 +16,8 @@ import type {
   ClaimRecord,
 } from "@/types";
 
-const BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const BASE = API_BASE_URL;
 const TOKEN_KEY = "cg_access_token";
 
 // ── Token Storage ────────────────────────────────────────────────────────────

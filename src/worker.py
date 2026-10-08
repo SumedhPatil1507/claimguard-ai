@@ -9,7 +9,7 @@ Design decisions
   when Redis is unreachable (broker ping) or when PostgreSQL is unreachable
   (DATABASE_URL is set but the connection cannot be established).  There are
   no silent CSV/in-memory fallbacks inside tasks; those belong only in the
-  Streamlit UI layer.
+  frontend/client layer.
 
 * **Idempotency** — each task accepts a caller-supplied ``task_id`` (UUID)
   that is stored as the Celery task id via ``apply_async(task_id=...)``.
@@ -50,6 +50,7 @@ Usage
 
 from __future__ import annotations
 
+import json as _json
 import logging
 import os
 from typing import Any, Dict
@@ -198,8 +199,35 @@ def _assert_postgres_reachable() -> None:
 
 
 # ---------------------------------------------------------------------------
-# Task helpers
+# Task helpers & Redis Pub/Sub Event Dispatcher
 # ---------------------------------------------------------------------------
+
+def get_task_channel(task_id: str) -> str:
+    """Return the Redis Pub/Sub channel name for real-time task SSE streaming."""
+    return f"claimguard:task_events:{task_id}"
+
+
+def publish_task_event(task_id: str, event: Dict[str, Any]) -> None:
+    """Publish a real-time task lifecycle transition to Redis Pub/Sub."""
+    if not task_id:
+        return
+    channel = get_task_channel(task_id)
+    try:
+        import redis as _r
+        r = _r.from_url(REDIS_URL, socket_timeout=1.0)
+        r.publish(channel, _json.dumps(event))
+    except Exception as exc:
+        logger.debug("Failed to publish task event to Redis Pub/Sub: %s", exc)
+
+
+def _safe_update_state(task_self: Any, state: str, meta: Dict[str, Any]) -> None:
+    """Update Celery task state safely without breaking in test/eager execution modes."""
+    try:
+        if task_self and hasattr(task_self, "update_state"):
+            task_self.update_state(state=state, meta=meta)
+    except Exception as exc:
+        logger.debug("update_state ignored (e.g. offline backend/test mode): %s", exc)
+
 
 def _serialise(obj: Any) -> Any:
     """Convert a Pydantic v2/v1 model or arbitrary object to a JSON-safe dict."""
@@ -237,37 +265,76 @@ if HAS_CELERY and celery_app is not None:
         -------
         dict
             JSON-serialised ``UnderwritingResult``.
-
-        Raises
-        ------
-        RuntimeError
-            On hard infrastructure failures (Redis/Postgres unreachable).
-            These are NOT retried.
-        celery.exceptions.Retry
-            On transient ML errors — retried up to MAX_RETRIES times.
         """
+        task_id = self.request.id or ""
+
         # ── 1. Infrastructure checks ────────────────────────────────────────
         try:
             _assert_redis_reachable()
             _assert_postgres_reachable()
-        except RuntimeError:
+        except RuntimeError as exc:
+            publish_task_event(task_id, {
+                "task_id": task_id,
+                "status": "FAILURE",
+                "progress": {"stage": "Infrastructure error", "percent": 100},
+                "error": str(exc),
+                "error_type": "RuntimeError",
+            })
             raise     # hard failure — no retry
+
+        _safe_update_state(
+            self,
+            state="STARTED",
+            meta={"stage": "Validating infrastructure & applicant features", "percent": 25},
+        )
+        publish_task_event(task_id, {
+            "task_id": task_id,
+            "status": "STARTED",
+            "progress": {"stage": "Validating infrastructure & applicant features", "percent": 25},
+        })
 
         # ── 2. Import and run ML engine ─────────────────────────────────────
         try:
+            _safe_update_state(
+                self,
+                state="PROGRESS",
+                meta={"stage": "Evaluating underwriting risk features & SHAP attribution", "percent": 70},
+            )
+            publish_task_event(task_id, {
+                "task_id": task_id,
+                "status": "PROGRESS",
+                "progress": {"stage": "Evaluating underwriting risk features & SHAP attribution", "percent": 70},
+            })
+
             from src.underwriting import UnderwritingEngine, UnderwritingFeatures
 
             engine = UnderwritingEngine()
             parsed = UnderwritingFeatures(**features)
             result = engine.predict(parsed)
+            res_dict = _serialise(result)
+
             logger.info(
                 "score_underwriting_task: task_id=%s risk_tier=%s",
-                self.request.id,
+                task_id,
                 getattr(result, "risk_tier", "unknown"),
             )
-            return _serialise(result)
 
-        except SoftTimeLimitExceeded:
+            publish_task_event(task_id, {
+                "task_id": task_id,
+                "status": "SUCCESS",
+                "progress": {"stage": "Completed", "percent": 100},
+                "result": res_dict,
+            })
+            return res_dict
+
+        except SoftTimeLimitExceeded as exc:
+            publish_task_event(task_id, {
+                "task_id": task_id,
+                "status": "FAILURE",
+                "progress": {"stage": "Task timed out", "percent": 100},
+                "error": "Task execution timed out",
+                "error_type": "SoftTimeLimitExceeded",
+            })
             raise     # propagate timeout as failure
 
         except Exception as exc:
@@ -277,6 +344,13 @@ if HAS_CELERY and celery_app is not None:
                 self.request.retries + 1,
                 _MAX_RETRIES + 1,
             )
+            publish_task_event(task_id, {
+                "task_id": task_id,
+                "status": "RETRY" if self.request.retries < _MAX_RETRIES else "FAILURE",
+                "progress": {"stage": f"Error: {exc}", "percent": 100},
+                "error": str(exc),
+                "error_type": exc.__class__.__name__,
+            })
             raise self.retry(exc=exc, countdown=_RETRY_BACKOFF * (2 ** self.request.retries))
 
     @celery_app.task(
@@ -298,38 +372,77 @@ if HAS_CELERY and celery_app is not None:
         -------
         dict
             JSON-serialised ``FraudScoringResult``.
-
-        Raises
-        ------
-        RuntimeError
-            On hard infrastructure failures (Redis/Postgres unreachable).
-            These are NOT retried.
-        celery.exceptions.Retry
-            On transient ML errors — retried up to MAX_RETRIES times.
         """
+        task_id = self.request.id or ""
+
         # ── 1. Infrastructure checks ────────────────────────────────────────
         try:
             _assert_redis_reachable()
             _assert_postgres_reachable()
-        except RuntimeError:
+        except RuntimeError as exc:
+            publish_task_event(task_id, {
+                "task_id": task_id,
+                "status": "FAILURE",
+                "progress": {"stage": "Infrastructure error", "percent": 100},
+                "error": str(exc),
+                "error_type": "RuntimeError",
+            })
             raise     # hard failure — no retry
+
+        _safe_update_state(
+            self,
+            state="STARTED",
+            meta={"stage": "Validating infrastructure & claims payload", "percent": 25},
+        )
+        publish_task_event(task_id, {
+            "task_id": task_id,
+            "status": "STARTED",
+            "progress": {"stage": "Validating infrastructure & claims payload", "percent": 25},
+        })
 
         # ── 2. Import and run ML engine ─────────────────────────────────────
         try:
+            _safe_update_state(
+                self,
+                state="PROGRESS",
+                meta={"stage": "Scoring fraud probability & computing feature drivers", "percent": 70},
+            )
+            publish_task_event(task_id, {
+                "task_id": task_id,
+                "status": "PROGRESS",
+                "progress": {"stage": "Scoring fraud probability & computing feature drivers", "percent": 70},
+            })
+
             from src.claims_fraud import ClaimFeatures, FraudDetectionEngine
 
             engine = FraudDetectionEngine()
             parsed = ClaimFeatures(**features)
             result = engine.predict(parsed)
+            res_dict = _serialise(result)
+
             logger.info(
                 "score_claim_task: task_id=%s fraud_flag=%s fraud_score=%.3f",
-                self.request.id,
+                task_id,
                 getattr(result, "fraud_flag", "unknown"),
                 float(getattr(result, "fraud_score", 0)),
             )
-            return _serialise(result)
 
-        except SoftTimeLimitExceeded:
+            publish_task_event(task_id, {
+                "task_id": task_id,
+                "status": "SUCCESS",
+                "progress": {"stage": "Completed", "percent": 100},
+                "result": res_dict,
+            })
+            return res_dict
+
+        except SoftTimeLimitExceeded as exc:
+            publish_task_event(task_id, {
+                "task_id": task_id,
+                "status": "FAILURE",
+                "progress": {"stage": "Task timed out", "percent": 100},
+                "error": "Task execution timed out",
+                "error_type": "SoftTimeLimitExceeded",
+            })
             raise
 
         except Exception as exc:
@@ -339,6 +452,13 @@ if HAS_CELERY and celery_app is not None:
                 self.request.retries + 1,
                 _MAX_RETRIES + 1,
             )
+            publish_task_event(task_id, {
+                "task_id": task_id,
+                "status": "RETRY" if self.request.retries < _MAX_RETRIES else "FAILURE",
+                "progress": {"stage": f"Error: {exc}", "percent": 100},
+                "error": str(exc),
+                "error_type": exc.__class__.__name__,
+            })
             raise self.retry(exc=exc, countdown=_RETRY_BACKOFF * (2 ** self.request.retries))
 
 else:
@@ -371,6 +491,7 @@ def get_task_result(task_id: str) -> Dict[str, Any]:
     ------
     PENDING   — task queued, not yet started
     STARTED   — task is running on a worker
+    PROGRESS  — task is in progress with intermediate execution details
     SUCCESS   — task completed; ``result`` key contains the payload
     FAILURE   — task failed; ``error`` key contains the error message
     RETRY     — task is being retried after a transient error
@@ -394,12 +515,14 @@ def get_task_result(task_id: str) -> Dict[str, Any]:
 
     if state == "SUCCESS":
         payload["result"] = ar.result
+        payload["progress"] = {"stage": "Completed", "percent": 100}
     elif state == "FAILURE":
         exc = ar.result
         payload["error"] = str(exc) if exc else "Unknown error"
         # Scrub tracebacks that may contain sensitive path information
         payload["error_type"] = type(exc).__name__ if exc else "Unknown"
-    elif state in ("STARTED", "RETRY"):
+        payload["progress"] = {"stage": "Failed", "percent": 100}
+    elif state in ("STARTED", "PROGRESS", "RETRY"):
         info = ar.info or {}
         if isinstance(info, dict):
             payload["progress"] = info

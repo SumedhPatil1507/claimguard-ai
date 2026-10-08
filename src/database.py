@@ -7,7 +7,7 @@ Two classes are exported:
 
 ``DatabaseManager``
     Three-tier fallback chain: asyncpg → supabase → CSV/JSONL.
-    Used by the Streamlit UI and eval scripts where graceful degradation
+    Used by frontend data routes and eval scripts where graceful degradation
     is acceptable.
 
 ``ProductionDatabaseManager``
@@ -224,7 +224,7 @@ class DatabaseManager:
     Tier 2: supabase-py (via ``SUPABASE_URL`` + ``SUPABASE_KEY``)
     Tier 3: CSV / JSONL files in ``data/``
 
-    Appropriate for the Streamlit UI and evaluation scripts where graceful
+    Appropriate for frontend data routes and evaluation scripts where graceful
     degradation is acceptable.  **Not** appropriate for production API routes
     or Celery tasks — use ``ProductionDatabaseManager`` there.
     """

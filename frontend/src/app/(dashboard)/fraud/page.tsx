@@ -4,9 +4,19 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { AlertTriangle, Loader2, XCircle, CheckCircle2, RefreshCw, ShieldAlert, ShieldCheck } from "lucide-react";
+import {
+  AlertTriangle,
+  Loader2,
+  XCircle,
+  CheckCircle2,
+  RefreshCw,
+  ShieldAlert,
+  ShieldCheck,
+  Radio,
+  Sparkles,
+} from "lucide-react";
 import { enqueueFraudScore } from "@/lib/api";
-import { useTaskPoller } from "@/hooks/useTaskPoller";
+import { useTaskStream } from "@/hooks/useTaskStream";
 import { ScoreGauge } from "@/components/charts/score-gauge";
 import { ShapChart } from "@/components/charts/shap-chart";
 import { Badge } from "@/components/ui/badge";
@@ -31,7 +41,7 @@ const F = "w-full bg-background border border-border rounded-lg px-3 py-2 text-s
 
 export default function FraudPage() {
   const [enqueueError, setEnqueueError] = useState<string | null>(null);
-  const { taskResult, taskError, isPolling, startPolling, reset } = useTaskPoller();
+  const { taskResult, taskError, progress, isStreaming, startStream, reset } = useTaskStream();
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -48,7 +58,7 @@ export default function FraudPage() {
     reset();
     try {
       const resp = await enqueueFraudScore(data);
-      startPolling(resp.task_id);
+      startStream(resp.task_id, "claims");
     } catch (e: unknown) {
       setEnqueueError(e instanceof Error ? e.message : "Enqueue failed");
     }
@@ -65,7 +75,7 @@ export default function FraudPage() {
           <AlertTriangle className="w-6 h-6 text-primary" /> Claims Fraud Detection
         </h1>
         <p className="text-muted-foreground text-sm mt-1">
-          Score claims at filing time for fraud probability
+          Score claims at filing time for fraud probability · Live SSE Streaming via Redis Pub/Sub
         </p>
       </div>
 
@@ -123,10 +133,10 @@ export default function FraudPage() {
 
             <button
               type="submit"
-              disabled={isSubmitting || isPolling}
+              disabled={isSubmitting || isStreaming}
               className="w-full py-2.5 rounded-lg bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 transition disabled:opacity-60 flex items-center justify-center gap-2"
             >
-              {(isSubmitting || isPolling) ? <><Loader2 className="w-4 h-4 animate-spin" />{isPolling ? "Scoring…" : "Enqueueing…"}</> : "🚨 Score Claim"}
+              {(isSubmitting || isStreaming) ? <><Loader2 className="w-4 h-4 animate-spin" />{isStreaming ? "Streaming fraud scoring…" : "Enqueueing…"}</> : "🚨 Score Claim"}
             </button>
           </form>
         </div>
@@ -134,7 +144,14 @@ export default function FraudPage() {
         {/* Result */}
         <div className="bg-card border border-border rounded-xl p-6 flex flex-col">
           <div className="flex items-center justify-between mb-5">
-            <h2 className="text-sm font-semibold">Result</h2>
+            <h2 className="text-sm font-semibold flex items-center gap-2">
+              Result
+              {isStreaming && (
+                <span className="flex items-center gap-1 text-[11px] font-normal text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
+                  <Radio className="w-3 h-3 animate-pulse text-emerald-400" /> SSE Live
+                </span>
+              )}
+            </h2>
             {taskResult && (
               <button onClick={reset} className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1.5">
                 <RefreshCw className="w-3 h-3" /> Reset
@@ -142,14 +159,37 @@ export default function FraudPage() {
             )}
           </div>
 
-          {!isPolling && !taskResult && !taskError && (
+          {!isStreaming && !taskResult && !taskError && (
             <div className="flex-1 flex items-center justify-center text-muted-foreground text-sm">Submit the form to score a claim</div>
           )}
 
-          {isPolling && (
-            <div className="flex-1 flex flex-col items-center justify-center gap-3 text-muted-foreground">
-              <div className="w-12 h-12 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
-              <p className="text-sm">Running fraud detection…</p>
+          {/* Live Progress Streaming */}
+          {isStreaming && (
+            <div className="flex-1 flex flex-col items-center justify-center gap-5 p-6 text-center">
+              <div className="relative">
+                <div className="w-16 h-16 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
+                <Sparkles className="w-6 h-6 text-primary absolute inset-0 m-auto animate-pulse" />
+              </div>
+
+              <div className="w-full max-w-sm space-y-2">
+                <div className="flex justify-between text-xs text-muted-foreground font-medium">
+                  <span className="truncate">{progress?.stage ?? "Scoring claim in worker…"}</span>
+                  <span className="font-mono text-primary">{progress?.percent ?? 20}%</span>
+                </div>
+                {/* Progress bar */}
+                <div className="w-full bg-secondary/80 h-2.5 rounded-full overflow-hidden border border-border/50">
+                  <div
+                    className="bg-primary h-full rounded-full transition-all duration-500 ease-out relative"
+                    style={{ width: `${Math.max(5, progress?.percent ?? 20)}%` }}
+                  >
+                    <div className="absolute inset-0 bg-white/20 animate-[shimmer_2s_infinite]" />
+                  </div>
+                </div>
+              </div>
+
+              <p className="text-xs text-muted-foreground">
+                Receiving real-time updates over Server-Sent Events (SSE)
+              </p>
             </div>
           )}
 

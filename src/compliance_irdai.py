@@ -4,7 +4,7 @@ IRDAI compliance reporting module for ClaimGuard AI.
 Maps to real Insurance Regulatory and Development Authority of India (IRDAI)
 regulatory controls.  Each control carries current evidence and a remediation
 path.  The module produces a JSON-serialisable ComplianceReport that drives the
-Compliance tab score gauge and detail table in the Streamlit UI.
+Compliance score gauge and detail metrics in the application frontend.
 
 This module has no optional dependencies and never raises.
 """

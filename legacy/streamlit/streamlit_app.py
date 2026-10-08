@@ -17,4 +17,4 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 # Run the actual app
-runpy.run_path(str(_ROOT / "app" / "app.py"), run_name="__main__")
+runpy.run_path(str(_ROOT / "app.py"), run_name="__main__")

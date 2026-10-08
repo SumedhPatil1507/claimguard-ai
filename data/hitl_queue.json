@@ -1144,5 +1144,137 @@
     "status": "pending",
     "created_at": "2026-10-07T15:58:03.965826",
     "reviewed_at": null
+  },
+  {
+    "item_id": "b00141ba5c2c446d9b4aa5dd901b0164",
+    "session_id": "eafdba72e6514d3f9202ef9f6d64b767",
+    "context_type": "underwriting",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: Assess underwriting risk for new motor policy\nContext type: UNDERWRITING\n\n--- Relevant Policy / Regulatory Evidence ---\n[1] Source: sample_policy_wording.txt  (relevance: 0.010)\n    \"Motor) The insurer agrees to indemnify the policyholder against loss or damage to the insured vehicle arising from accidental collision, fire, explosion, self-ignition, lightning, theft, burglary, housebreaking, riot, strike, malicious act, flood, cyclone, storm, tempest, inundation, hailstorm, fros\"\n[2] Source: sample_policy_wording.txt  (relevance: 0.000)\n    \"clone, storm, tempest, inundation, hailstorm, frost, landslide, rockslide, or during transit by rail, road, inland waterway, lift, elevator, or air.  1.2 Third-Party Liability (Motor) The insurer shall indemnify the policyholder against any liability incurred in respect of death or bodily injury to\"\n[3] Source: sample_policy_wording.txt  (relevance: 0.000)\n    \"tic reports, prescriptions, and pharmacy receipts, treating doctor's certificate confirming diagnosis and necessity of hospitalisation.  3.3 Repair Authorisation For motor own-damage claims, the policyholder must obtain prior authorisation from the insurer's surveyor or the designated garage network\"\n\n--- Model Scoring Evidence ---\nRisk Score : 0.000424\nRisk Tier  : LOW\nPremium Adj: 0.8003\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.",
+    "model_result": {
+      "risk_tier": "low",
+      "risk_score": 0.000424,
+      "premium_adjustment": 0.8003,
+      "shap_drivers": [],
+      "model_version": "1.0.0",
+      "timestamp": "2026-10-08T03:41:49.253658"
+    },
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-08T03:41:49.257668",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "5926c1823a30467bbe1b6203acb3572a",
+    "session_id": "4d1b70b7214c4a81bd616a35ee41f0cf",
+    "context_type": "claims",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: Evaluate fraud risk for motor claim\nContext type: CLAIMS\n\n--- Relevant Policy / Regulatory Evidence ---\n[1] Source: sample_policy_wording.txt  (relevance: 0.014)\n    \"nt. For theft, an FIR must be lodged with the nearest police station and a copy submitted along with the claim intimation.  3.2 Documents Required Motor claim: duly completed claim form, copy of registration certificate, driving licence, insurance certificate, fitness certificate (commercial vehicle\"\n[2] Source: sample_policy_wording.txt  (relevance: 0.005)\n    \"tic reports, prescriptions, and pharmacy receipts, treating doctor's certificate confirming diagnosis and necessity of hospitalisation.  3.3 Repair Authorisation For motor own-damage claims, the policyholder must obtain prior authorisation from the insurer's surveyor or the designated garage network\"\n[3] Source: sample_policy_wording.txt  (relevance: 0.002)\n    \"Motor) The insurer agrees to indemnify the policyholder against loss or damage to the insured vehicle arising from accidental collision, fire, explosion, self-ignition, lightning, theft, burglary, housebreaking, riot, strike, malicious act, flood, cyclone, storm, tempest, inundation, hailstorm, fros\"\n\n--- Model Scoring Evidence ---\nFraud Score      : 0.360516\nFraud Flag       : False\nConfidence Tier  : LOW\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.",
+    "model_result": {
+      "claim_id": "CLM001",
+      "fraud_score": 0.360516,
+      "fraud_flag": false,
+      "confidence_tier": "low",
+      "shap_drivers": [],
+      "model_version": "1.0.0",
+      "timestamp": "2026-10-08T03:41:49.580841"
+    },
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-08T03:41:49.583523",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "90e07ec97da1442883c8575e78bebae1",
+    "session_id": "test-session-001",
+    "context_type": "underwriting",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: test query\nContext type: UNDERWRITING\n\n--- Relevant Policy / Regulatory Evidence ---\n[1] Source: sample_policy_wording.txt  (relevance: 0.000)\n    \"an independent surveyor's report at the policyholder's request.  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 SECTION 4 \u2014 WAITING PERIODS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500  4.1 General Waiting Period All health benefi\"\n[2] Source: irdai_guidelines.txt  (relevance: 0.000)\n    \"\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 3. KYC AND AML REQUIREMENTS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500  IRDAI mandates Know Your Customer (KYC) verification for all new policies where the annual premium exceeds INR 1,00,000 or the sum insured exceeds INR 10,00,000. Accep\"\n[3] Source: irdai_guidelines.txt  (relevance: 0.000)\n    \"d the premium paid after deducting a proportionate risk premium for the coverage period and any medical examination costs incurred.  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 6. FRAUD REPORTING OBLIGATIONS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n\n--- Model Scoring Evidence ---\nRisk Score : 0.000424\nRisk Tier  : LOW\nPremium Adj: 0.8003\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.",
+    "model_result": {
+      "risk_tier": "low",
+      "risk_score": 0.000424,
+      "premium_adjustment": 0.8003,
+      "shap_drivers": [],
+      "model_version": "1.0.0",
+      "timestamp": "2026-10-08T03:41:49.912811"
+    },
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-08T03:41:49.912811",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "7ccd12ff9e924c099136dc11f52202e5",
+    "session_id": "d0298ad045ee4feea0105439c59f38bd",
+    "context_type": "underwriting",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: test\nContext type: UNDERWRITING\n\n--- Relevant Policy / Regulatory Evidence ---\n[1] Source: irdai_guidelines.txt  (relevance: 0.001)\n    \"d the premium paid after deducting a proportionate risk premium for the coverage period and any medical examination costs incurred.  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 6. FRAUD REPORTING OBLIGATIONS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n[2] Source: irdai_guidelines.txt  (relevance: 0.000)\n    \"\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 3. KYC AND AML REQUIREMENTS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500  IRDAI mandates Know Your Customer (KYC) verification for all new policies where the annual premium exceeds INR 1,00,000 or the sum insured exceeds INR 10,00,000. Accep\"\n[3] Source: sample_policy_wording.txt  (relevance: 0.000)\n    \"an independent surveyor's report at the policyholder's request.  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 SECTION 4 \u2014 WAITING PERIODS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500  4.1 General Waiting Period All health benefi\"\n\nModel scoring data unavailable for this request.\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.",
+    "model_result": {},
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-08T03:41:50.201684",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "a280dca7496e472e817fd523926c94cc",
+    "session_id": "3bbbbb3509744446940d7dc0de3998d0",
+    "context_type": "underwriting",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: Assess underwriting risk for new motor policy\nContext type: UNDERWRITING\n\n--- Relevant Policy / Regulatory Evidence ---\n[1] Source: sample_policy_wording.txt  (relevance: 0.010)\n    \"Motor) The insurer agrees to indemnify the policyholder against loss or damage to the insured vehicle arising from accidental collision, fire, explosion, self-ignition, lightning, theft, burglary, housebreaking, riot, strike, malicious act, flood, cyclone, storm, tempest, inundation, hailstorm, fros\"\n[2] Source: sample_policy_wording.txt  (relevance: 0.000)\n    \"clone, storm, tempest, inundation, hailstorm, frost, landslide, rockslide, or during transit by rail, road, inland waterway, lift, elevator, or air.  1.2 Third-Party Liability (Motor) The insurer shall indemnify the policyholder against any liability incurred in respect of death or bodily injury to\"\n[3] Source: sample_policy_wording.txt  (relevance: 0.000)\n    \"tic reports, prescriptions, and pharmacy receipts, treating doctor's certificate confirming diagnosis and necessity of hospitalisation.  3.3 Repair Authorisation For motor own-damage claims, the policyholder must obtain prior authorisation from the insurer's surveyor or the designated garage network\"\n\n--- Model Scoring Evidence ---\nRisk Score : 0.000424\nRisk Tier  : LOW\nPremium Adj: 0.8003\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.",
+    "model_result": {
+      "risk_tier": "low",
+      "risk_score": 0.000424,
+      "premium_adjustment": 0.8003,
+      "shap_drivers": [],
+      "model_version": "1.0.0",
+      "timestamp": "2026-10-08T08:48:57.521036"
+    },
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-08T08:48:57.523985",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "0de810a33e1c464db2b03c75346b3a5e",
+    "session_id": "c7b1f8e15e9647b8b35c59f6e6c92541",
+    "context_type": "claims",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: Evaluate fraud risk for motor claim\nContext type: CLAIMS\n\n--- Relevant Policy / Regulatory Evidence ---\n[1] Source: sample_policy_wording.txt  (relevance: 0.014)\n    \"nt. For theft, an FIR must be lodged with the nearest police station and a copy submitted along with the claim intimation.  3.2 Documents Required Motor claim: duly completed claim form, copy of registration certificate, driving licence, insurance certificate, fitness certificate (commercial vehicle\"\n[2] Source: sample_policy_wording.txt  (relevance: 0.005)\n    \"tic reports, prescriptions, and pharmacy receipts, treating doctor's certificate confirming diagnosis and necessity of hospitalisation.  3.3 Repair Authorisation For motor own-damage claims, the policyholder must obtain prior authorisation from the insurer's surveyor or the designated garage network\"\n[3] Source: sample_policy_wording.txt  (relevance: 0.002)\n    \"Motor) The insurer agrees to indemnify the policyholder against loss or damage to the insured vehicle arising from accidental collision, fire, explosion, self-ignition, lightning, theft, burglary, housebreaking, riot, strike, malicious act, flood, cyclone, storm, tempest, inundation, hailstorm, fros\"\n\n--- Model Scoring Evidence ---\nFraud Score      : 0.360516\nFraud Flag       : False\nConfidence Tier  : LOW\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.",
+    "model_result": {
+      "claim_id": "CLM001",
+      "fraud_score": 0.360516,
+      "fraud_flag": false,
+      "confidence_tier": "low",
+      "shap_drivers": [],
+      "model_version": "1.0.0",
+      "timestamp": "2026-10-08T08:48:59.206310"
+    },
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-08T08:48:59.210662",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "51975cf8a503418ba095c892a6fb4eec",
+    "session_id": "test-session-001",
+    "context_type": "underwriting",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: test query\nContext type: UNDERWRITING\n\n--- Relevant Policy / Regulatory Evidence ---\n[1] Source: sample_policy_wording.txt  (relevance: 0.000)\n    \"an independent surveyor's report at the policyholder's request.  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 SECTION 4 \u2014 WAITING PERIODS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500  4.1 General Waiting Period All health benefi\"\n[2] Source: irdai_guidelines.txt  (relevance: 0.000)\n    \"\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 3. KYC AND AML REQUIREMENTS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500  IRDAI mandates Know Your Customer (KYC) verification for all new policies where the annual premium exceeds INR 1,00,000 or the sum insured exceeds INR 10,00,000. Accep\"\n[3] Source: irdai_guidelines.txt  (relevance: 0.000)\n    \"d the premium paid after deducting a proportionate risk premium for the coverage period and any medical examination costs incurred.  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 6. FRAUD REPORTING OBLIGATIONS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n\n--- Model Scoring Evidence ---\nRisk Score : 0.000424\nRisk Tier  : LOW\nPremium Adj: 0.8003\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.",
+    "model_result": {
+      "risk_tier": "low",
+      "risk_score": 0.000424,
+      "premium_adjustment": 0.8003,
+      "shap_drivers": [],
+      "model_version": "1.0.0",
+      "timestamp": "2026-10-08T08:49:01.166536"
+    },
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-08T08:49:01.166536",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "c40b139228064dd5b31d34a9485955e9",
+    "session_id": "11c4ba7ef5ba495ebb38c9730954f007",
+    "context_type": "underwriting",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: test\nContext type: UNDERWRITING\n\n--- Relevant Policy / Regulatory Evidence ---\n[1] Source: irdai_guidelines.txt  (relevance: 0.001)\n    \"d the premium paid after deducting a proportionate risk premium for the coverage period and any medical examination costs incurred.  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 6. FRAUD REPORTING OBLIGATIONS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\"\n[2] Source: irdai_guidelines.txt  (relevance: 0.000)\n    \"\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 3. KYC AND AML REQUIREMENTS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500  IRDAI mandates Know Your Customer (KYC) verification for all new policies where the annual premium exceeds INR 1,00,000 or the sum insured exceeds INR 10,00,000. Accep\"\n[3] Source: sample_policy_wording.txt  (relevance: 0.000)\n    \"an independent surveyor's report at the policyholder's request.  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 SECTION 4 \u2014 WAITING PERIODS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500  4.1 General Waiting Period All health benefi\"\n\nModel scoring data unavailable for this request.\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.",
+    "model_result": {},
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-08T08:49:03.076870",
+    "reviewed_at": null
   }
 ]

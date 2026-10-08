@@ -4,9 +4,9 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Shield, Loader2, RefreshCw, CheckCircle2, XCircle } from "lucide-react";
+import { Shield, Loader2, RefreshCw, CheckCircle2, XCircle, Radio, Sparkles } from "lucide-react";
 import { enqueueUnderwriting } from "@/lib/api";
-import { useTaskPoller } from "@/hooks/useTaskPoller";
+import { useTaskStream } from "@/hooks/useTaskStream";
 import { ScoreGauge } from "@/components/charts/score-gauge";
 import { ShapChart } from "@/components/charts/shap-chart";
 import { Badge } from "@/components/ui/badge";
@@ -36,7 +36,7 @@ const SELECT_OPTS: Record<string, string[]> = {
 
 export default function UnderwritingPage() {
   const [enqueueError, setEnqueueError] = useState<string | null>(null);
-  const { taskResult, taskError, isPolling, startPolling, reset } = useTaskPoller();
+  const { taskResult, taskError, progress, isStreaming, startStream, reset } = useTaskStream();
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -52,7 +52,7 @@ export default function UnderwritingPage() {
     reset();
     try {
       const resp = await enqueueUnderwriting(data);
-      startPolling(resp.task_id);
+      startStream(resp.task_id, "underwrite");
     } catch (e: unknown) {
       setEnqueueError(e instanceof Error ? e.message : "Enqueue failed");
     }
@@ -68,7 +68,7 @@ export default function UnderwritingPage() {
           <Shield className="w-6 h-6 text-primary" /> Underwriting Risk Scorer
         </h1>
         <p className="text-muted-foreground text-sm mt-1">
-          Score applicants at policy-issuance time · Results run asynchronously via Celery
+          Score applicants at policy-issuance time · Live SSE Streaming via Redis Pub/Sub
         </p>
       </div>
 
@@ -129,10 +129,10 @@ export default function UnderwritingPage() {
 
             <button
               type="submit"
-              disabled={isSubmitting || isPolling}
+              disabled={isSubmitting || isStreaming}
               className="w-full py-2.5 rounded-lg bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 transition disabled:opacity-60 flex items-center justify-center gap-2"
             >
-              {(isSubmitting || isPolling) ? <><Loader2 className="w-4 h-4 animate-spin" />{isPolling ? "Running inference…" : "Enqueueing…"}</> : "🔍 Score Risk"}
+              {(isSubmitting || isStreaming) ? <><Loader2 className="w-4 h-4 animate-spin" />{isStreaming ? "Streaming live inference…" : "Enqueueing…"}</> : "🔍 Score Risk"}
             </button>
           </form>
         </div>
@@ -140,7 +140,14 @@ export default function UnderwritingPage() {
         {/* Result */}
         <div className="bg-card border border-border rounded-xl p-6 flex flex-col">
           <div className="flex items-center justify-between mb-5">
-            <h2 className="text-sm font-semibold">Result</h2>
+            <h2 className="text-sm font-semibold flex items-center gap-2">
+              Result
+              {isStreaming && (
+                <span className="flex items-center gap-1 text-[11px] font-normal text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
+                  <Radio className="w-3 h-3 animate-pulse text-emerald-400" /> SSE Live
+                </span>
+              )}
+            </h2>
             {taskResult && (
               <button onClick={reset} className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1.5">
                 <RefreshCw className="w-3 h-3" /> Reset
@@ -149,19 +156,39 @@ export default function UnderwritingPage() {
           </div>
 
           {/* Idle */}
-          {!isPolling && !taskResult && !taskError && (
+          {!isStreaming && !taskResult && !taskError && (
             <div className="flex-1 flex items-center justify-center text-muted-foreground text-sm">
               Submit the form to score an applicant
             </div>
           )}
 
-          {/* Polling */}
-          {isPolling && (
-            <div className="flex-1 flex flex-col items-center justify-center gap-3 text-muted-foreground">
+          {/* Live Progress Streaming */}
+          {isStreaming && (
+            <div className="flex-1 flex flex-col items-center justify-center gap-5 p-6 text-center">
               <div className="relative">
-                <div className="w-12 h-12 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
+                <div className="w-16 h-16 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
+                <Sparkles className="w-6 h-6 text-primary absolute inset-0 m-auto animate-pulse" />
               </div>
-              <p className="text-sm">Running inference via Celery…</p>
+
+              <div className="w-full max-w-sm space-y-2">
+                <div className="flex justify-between text-xs text-muted-foreground font-medium">
+                  <span className="truncate">{progress?.stage ?? "Executing Celery task…"}</span>
+                  <span className="font-mono text-primary">{progress?.percent ?? 20}%</span>
+                </div>
+                {/* Progress bar */}
+                <div className="w-full bg-secondary/80 h-2.5 rounded-full overflow-hidden border border-border/50">
+                  <div
+                    className="bg-primary h-full rounded-full transition-all duration-500 ease-out relative"
+                    style={{ width: `${Math.max(5, progress?.percent ?? 20)}%` }}
+                  >
+                    <div className="absolute inset-0 bg-white/20 animate-[shimmer_2s_infinite]" />
+                  </div>
+                </div>
+              </div>
+
+              <p className="text-xs text-muted-foreground">
+                Receiving real-time updates over Server-Sent Events (SSE)
+              </p>
             </div>
           )}
 
