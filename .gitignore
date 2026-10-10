@@ -1,1 +1,6 @@
-(empty)
+# Python bytecode and caches
+__pycache__/
+*.pyc
+
+# Model artifacts (binary serialized objects)
+data/models/*.pkl

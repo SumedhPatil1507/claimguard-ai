@@ -606,8 +606,15 @@ class TestReranking:
         ]
         results = store._hits_to_results([(0, 0.9), (1, 0.7)])
         assert len(results) == 2
-        assert results[0] == {"content": "Alpha", "source": "a.txt", "score": 0.9}
-        assert results[1] == {"content": "Beta",  "source": "b.txt", "score": 0.7}
+        # chunk_id is mandated by the Guardrails zero-hallucination citation policy
+        assert results[0]["chunk_id"]
+        assert results[1]["chunk_id"]
+        assert {k: v for k, v in results[0].items() if k != "chunk_id"} == {
+            "content": "Alpha", "source": "a.txt", "score": 0.9
+        }
+        assert {k: v for k, v in results[1].items() if k != "chunk_id"} == {
+            "content": "Beta", "source": "b.txt", "score": 0.7
+        }
 
     def test_hits_to_results_out_of_bounds_skipped(self) -> None:
         store = _make_store()
