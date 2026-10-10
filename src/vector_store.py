@@ -47,7 +47,9 @@ Usage
 from __future__ import annotations
 
 import logging
+import hashlib
 import math
+import re
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -56,6 +58,30 @@ from src.vector_store_settings import (
     RerankerBackend,
     VectorStoreSettings,
 )
+
+# OpenTelemetry instrumentation — always safe (no-op fallback built in).
+try:
+    from src.otel_config import get_tracer as _otel_get_tracer
+
+    _tracer = _otel_get_tracer("claimguard.vector_store")
+except Exception:  # pragma: no cover - defensive
+    class _FallbackSpan:
+        def set_attribute(self, k: str, v: Any) -> None: ...
+        def set_attributes(self, attrs: dict) -> None: ...
+        def record_exception(self, exc: BaseException, attributes: dict | None = None) -> None: ...
+        def add_event(self, name: str, attributes: dict | None = None) -> None: ...
+        def set_status(self, status: Any = None, description: str | None = None) -> None: ...
+
+    class _FallbackTracer:
+        class _Ctx:
+            def __enter__(self) -> "_FallbackTracer._Ctx":
+                return self
+            def __exit__(self, *exc_info: Any) -> bool:
+                return False
+        def start_as_current_span(self, name: str, **kw: Any) -> "_FallbackTracer._Ctx":
+            return self._Ctx()
+
+    _tracer = _FallbackTracer()  # type: ignore[assignment]
 
 logger = logging.getLogger(__name__)
 
@@ -111,7 +137,70 @@ except ImportError:
 _Chunk = Dict[str, str]          # {"content": str, "source": str}
 
 # A ranked hit returned to callers.
-SearchResult = Dict[str, Any]    # {"content", "source", "score"}
+SearchResult = Dict[str, Any]    # {"content", "source", "score", "chunk_id"}
+
+
+# ---------------------------------------------------------------------------
+# Chunk identity helpers
+# ---------------------------------------------------------------------------
+
+def _stable_chunk_id(source: str, content: str) -> str:
+    """Deterministic, citation-ready chunk ID (safe for Qdrant payloads)."""
+    digest = hashlib.sha1(content.encode("utf-8")).hexdigest()[:12]
+    slug = re.sub(r"[^a-zA-Z0-9]+", "_", Path(source).stem).strip("_").lower()[:40]
+    return f"{slug or 'doc'}_{digest}"
+
+
+def split_markdown_h1_h3(text: str, max_chars: int = 1500) -> List[Dict[str, str]]:
+    """
+    Markdown H1–H3 heading splitter used by the file-ingestion engine.
+
+    Splits extracted document text on ``#``, ``##`` and ``###`` headings so
+    each section (policy wording clause, invoice block, medical-receipt
+    group) becomes an independently citable vector chunk.  Oversized
+    sections are further divided on paragraph boundaries; preamble before
+    the first heading is preserved as its own chunk.
+
+    Returns a list of ``{"heading": ..., "content": ...}`` dicts.
+    """
+    heading_re = re.compile(r"^(#{1,3})\s+(.+?)\s*$", re.MULTILINE)
+    matches = list(heading_re.finditer(text))
+
+    segments: List[Dict[str, str]] = []
+
+    def _emit(heading: str, body: str) -> None:
+        body = body.strip()
+        if not body:
+            return
+        if len(body) <= max_chars:
+            segments.append({"heading": heading, "content": body})
+            return
+        # Sub-divide oversized sections on blank-line paragraph boundaries.
+        buf = ""
+        for para in re.split(r"\n\s*\n", body):
+            para = para.strip()
+            if not para:
+                continue
+            if len(buf) + len(para) + 2 > max_chars and buf:
+                segments.append({"heading": heading, "content": buf.strip()})
+                buf = ""
+            buf += para + "\n\n"
+        if buf.strip():
+            segments.append({"heading": heading, "content": buf.strip()})
+
+    if not matches:
+        _emit("(document)", text)
+        return segments
+
+    preamble = text[: matches[0].start()]
+    if preamble.strip():
+        _emit("(preamble)", preamble)
+
+    for i, m in enumerate(matches):
+        end = matches[i + 1].start() if i + 1 < len(matches) else len(text)
+        _emit(m.group(2), text[m.end():end])
+
+    return segments
 
 
 # ---------------------------------------------------------------------------
@@ -209,15 +298,49 @@ class PolicyVectorStore:
 
         k = top_k if top_k is not None else self._cfg.top_k_rerank
 
-        try:
-            dense_hits = self._dense_search(query, self._cfg.top_k_dense)
-            bm25_hits  = self._bm25_search(query, self._cfg.top_k_bm25)
-            fused      = self._rrf_fuse(dense_hits, bm25_hits)
-            reranked   = self._rerank(query, fused, k)
-            return reranked[:k]
-        except Exception as exc:
-            logger.error("vector_store: search failed — %s", exc, exc_info=True)
-            return []
+        # ── OpenTelemetry: hybrid search span (parent of every retrieval stage)
+        with _tracer.start_as_current_span("qdrant.hybrid_search") as root_span:
+            root_span.set_attribute("query.length", len(query))
+            root_span.set_attribute("top_k", k)
+            root_span.set_attribute("corpus_size", len(self._corpus))
+            root_span.set_attribute("qdrant.collection", self._cfg.qdrant_collection)
+            try:
+                # Dense leg (Qdrant ANN)
+                with _tracer.start_as_current_span("qdrant.dense_search") as d_span:
+                    d_span.set_attribute("top_k_dense", self._cfg.top_k_dense)
+                    dense_hits = self._dense_search(query, self._cfg.top_k_dense)
+                    d_span.set_attribute("hits", len(dense_hits))
+
+                # Sparse leg (BM25)
+                with _tracer.start_as_current_span("bm25.sparse_search") as b_span:
+                    b_span.set_attribute("top_k_bm25", self._cfg.top_k_bm25)
+                    bm25_hits = self._bm25_search(query, self._cfg.top_k_bm25)
+                    b_span.set_attribute("hits", len(bm25_hits))
+
+                # Reciprocal Rank Fusion
+                with _tracer.start_as_current_span("retrieval.rrf_fusion") as f_span:
+                    fused = self._rrf_fuse(dense_hits, bm25_hits)
+                    f_span.set_attribute("rrf_k", self._cfg.rrf_k)
+                    f_span.set_attribute("candidates", len(fused))
+
+                # Cross-encoder / Cohere re-ranking
+                with _tracer.start_as_current_span("rerank.cross_encoder") as r_span:
+                    r_span.set_attribute("reranker_backend", self._cfg.reranker_backend.value)
+                    r_span.set_attribute("reranker_active", self.has_reranker)
+                    reranked = self._rerank(query, fused, k)
+                    r_span.set_attribute("final_results", len(reranked))
+                    if reranked:
+                        r_span.set_attribute("top_score", float(reranked[0]["score"]))
+
+                root_span.set_attribute("results_returned", len(reranked[:k]))
+                return reranked[:k]
+            except Exception as exc:
+                try:
+                    root_span.record_exception(exc)
+                except Exception:
+                    pass
+                logger.error("vector_store: search failed — %s", exc, exc_info=True)
+                return []
 
     # ------------------------------------------------------------------
     # Chunking helpers
@@ -553,16 +676,95 @@ class PolicyVectorStore:
     def _hits_to_results(
         self, hits: List[Tuple[int, float]]
     ) -> List[SearchResult]:
-        """Convert (corpus_index, score) pairs into SearchResult dicts."""
+        """Convert (corpus_index, score) pairs into SearchResult dicts.
+
+        Every result carries a deterministic ``chunk_id`` derived from its
+        source file and content hash — this is the citation identifier that
+        Guardrails AI mandates on all Policy Copilot outputs.
+        """
         results = []
         for idx, score in hits:
             if 0 <= idx < len(self._corpus):
+                chunk = self._corpus[idx]
                 results.append({
-                    "content": self._corpus[idx]["content"],
-                    "source":  self._corpus[idx]["source"],
-                    "score":   round(float(score), 6),
+                    "content":  chunk["content"],
+                    "source":   chunk["source"],
+                    "score":    round(float(score), 6),
+                    "chunk_id": chunk.get(
+                        "chunk_id", _stable_chunk_id(chunk["source"], chunk["content"])
+                    ),
                 })
         return results
+
+    # ------------------------------------------------------------------
+    # Dynamic ingestion (used by POST /ingest/file → Celery pipeline)
+    # ------------------------------------------------------------------
+
+    def add_chunks(self, chunks: List[Dict[str, str]]) -> int:
+        """
+        Append externally-produced chunks (e.g. OCR-extracted policy wording,
+        invoices, medical receipts already split on Markdown H1–H3 headings)
+        to the live corpus and re-index BM25 + Qdrant so they become
+        immediately searchable.
+
+        Each chunk dict must contain ``content`` and ``source``; a stable
+        ``chunk_id`` is generated when absent.
+
+        Returns the number of chunks added.
+        """
+        with _tracer.start_as_current_span("vector_store.add_chunks") as sp:
+            added = 0
+            next_idx = len(self._corpus)
+            new_points: List[Any] = []
+            for chunk in chunks:
+                content = (chunk.get("content") or "").strip()
+                if not content:
+                    continue
+                source = chunk.get("source", "uploaded_document")
+                cid = chunk.get("chunk_id") or _stable_chunk_id(source, content)
+                record: Dict[str, str] = {
+                    "content": content, "source": source, "chunk_id": cid,
+                }
+                self._corpus.append(record)
+                self._tokenised_corpus.append(self._tokenise(content))
+                if HAS_QDRANT and self._qdrant is not None and self._embedder is not None:
+                    new_points.append(next_idx)
+                next_idx += 1
+                added += 1
+
+            if added:
+                # Rebuild sparse index over the enlarged corpus.
+                self._init_bm25()
+                # Upsert embeddings into the Qdrant hybrid collection.
+                if new_points and self._embedder is not None and self._qdrant is not None:
+                    try:
+                        texts = [self._corpus[i]["content"] for i in new_points]
+                        embs = self._embedder.encode(texts, show_progress_bar=False).tolist()
+                        points = [
+                            PointStruct(
+                                id=i,
+                                vector=emb,
+                                payload={
+                                    "content":  self._corpus[i]["content"],
+                                    "source":   self._corpus[i]["source"],
+                                    "chunk_id": self._corpus[i].get("chunk_id", ""),
+                                },
+                            )
+                            for i, emb in zip(new_points, embs)
+                        ]
+                        self._qdrant.upsert(
+                            collection_name=self._cfg.qdrant_collection, points=points,
+                        )
+                    except Exception as exc:
+                        logger.warning("vector_store: Qdrant upsert failed (%s); "
+                                       "chunks remain BM25-searchable.", exc)
+                self._built = True
+
+            sp.set_attribute("chunks_added", added)
+            sp.set_attribute("corpus_size", len(self._corpus))
+            logger.info("vector_store: ingested %d dynamic chunks (corpus=%d)",
+                        added, len(self._corpus))
+            return added
 
     # ------------------------------------------------------------------
     # Introspection helpers (useful in tests / observability)
