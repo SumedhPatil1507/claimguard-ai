@@ -609,7 +609,7 @@ Review the working tree first, then commit and push the completed changes to the
 ```bash
 git status --short
 git diff --check
-git add -- README.md api/main.py config.rail eval/ragas_eval.py eval/reports docs frontend/src/lib/api.ts "frontend/src/app/(dashboard)/ingest/page.tsx" frontend/src/components/upload/file-upload.tsx requirements.txt src/agent_graph.py src/decision_json.py src/guardrails_config.py src/ingestion.py src/otel_config.py src/vector_store.py src/worker.py tests/test_sse_stream.py tests/test_guardrails.py tests/test_guardrails_integration.py tests/test_ingestion.py
+git add -- README.md legacy/streamlit/README.md api/main.py config.rail eval/ragas_eval.py eval/reports docs frontend/src/lib/api.ts "frontend/src/app/(dashboard)/ingest/page.tsx" frontend/src/components/upload/file-upload.tsx requirements.txt src/agent_graph.py src/decision_json.py src/guardrails_config.py src/ingestion.py src/otel_config.py src/vector_store.py src/worker.py tests/test_sse_stream.py tests/test_guardrails.py tests/test_guardrails_integration.py tests/test_ingestion.py
 git diff --cached --check
 git status --short
 git commit -m "Upgrade ClaimGuard AI ingestion, streaming, and compliance"
