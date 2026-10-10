@@ -1276,5 +1276,108 @@
     "status": "pending",
     "created_at": "2026-10-08T08:49:03.076870",
     "reviewed_at": null
+  },
+  {
+    "item_id": "2c33d71cff63436e90caf71b6c5223e2",
+    "session_id": "de54a85ddf6940f4aceffad0d2460b49",
+    "context_type": "underwriting",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: Assess underwriting risk for new motor policy\nContext type: UNDERWRITING\n\nNo matching policy / regulatory documents retrieved.\n\n--- Model Scoring Evidence ---\nRisk Score : 0.01\nRisk Tier  : LOW\nPremium Adj: 0.807\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.\n\n[COMPLIANCE NOTE: This draft failed IRDAI compliance validation. Details: See validation result]",
+    "model_result": {
+      "risk_tier": "low",
+      "risk_score": 0.01,
+      "premium_adjustment": 0.807,
+      "shap_drivers": [],
+      "model_version": "1.0.0",
+      "timestamp": "2026-10-10T05:04:13.377983"
+    },
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-10T05:04:13.379054",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "720abf9e587c4ce28d465c96ca81a9bb",
+    "session_id": "7a9480a572df48639d387797614a96c0",
+    "context_type": "claims",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: Evaluate fraud risk for motor claim\nContext type: CLAIMS\n\nNo matching policy / regulatory documents retrieved.\n\n--- Model Scoring Evidence ---\nFraud Score      : 0.48\nFraud Flag       : False\nConfidence Tier  : MEDIUM\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.\n\n[COMPLIANCE NOTE: This draft failed IRDAI compliance validation. Details: See validation result]",
+    "model_result": {
+      "claim_id": "CLM001",
+      "fraud_score": 0.48,
+      "fraud_flag": false,
+      "confidence_tier": "medium",
+      "shap_drivers": [],
+      "model_version": "1.0.0",
+      "timestamp": "2026-10-10T05:04:13.392649"
+    },
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-10T05:04:13.392981",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "2e3f3a72813a49ccb9fa1b0a21db78b0",
+    "session_id": "test-session-001",
+    "context_type": "underwriting",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: test query\nContext type: UNDERWRITING\n\nNo matching policy / regulatory documents retrieved.\n\n--- Model Scoring Evidence ---\nRisk Score : 0.01\nRisk Tier  : LOW\nPremium Adj: 0.807\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.\n\n[COMPLIANCE NOTE: This draft failed IRDAI compliance validation. Details: See validation result]",
+    "model_result": {
+      "risk_tier": "low",
+      "risk_score": 0.01,
+      "premium_adjustment": 0.807,
+      "shap_drivers": [],
+      "model_version": "1.0.0",
+      "timestamp": "2026-10-10T05:04:13.418604"
+    },
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-10T05:04:13.418913",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "33df0d7f70d24e22a66e2257f1fa01bb",
+    "session_id": "db60aee7d6e04d3abe6fcb2243a50a7a",
+    "context_type": "underwriting",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: test\nContext type: UNDERWRITING\n\nNo matching policy / regulatory documents retrieved.\n\nModel scoring data unavailable for this request.\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.\n\n[COMPLIANCE NOTE: This draft failed IRDAI compliance validation. Details: See validation result]",
+    "model_result": {},
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-10T05:04:13.423761",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "f5ae35ba1e2446f7879163b2da8a325f",
+    "session_id": "ecb8e81be4a9400080c2fec19176445d",
+    "context_type": "claims",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: Evaluate fraud risk for motor claim with suspicious early inception\nContext type: CLAIMS\n\nNo matching policy / regulatory documents retrieved.\n\n--- Model Scoring Evidence ---\nFraud Score      : 0.24\nFraud Flag       : False\nConfidence Tier  : LOW\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.\n\n[COMPLIANCE NOTE: This draft failed IRDAI compliance validation. Details: See validation result]",
+    "model_result": {
+      "claim_id": "CLM900",
+      "fraud_score": 0.24,
+      "fraud_flag": false,
+      "confidence_tier": "low",
+      "shap_drivers": [],
+      "model_version": "1.0.0",
+      "timestamp": "2026-10-10T05:05:12.809759"
+    },
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-10T05:05:12.810233",
+    "reviewed_at": null
+  },
+  {
+    "item_id": "dfa39a36b5994650bb7103f0435d2ad3",
+    "session_id": "cbe387d761e64dfea39f8b41bbc91034",
+    "context_type": "underwriting",
+    "decision_draft": "=== ClaimGuard AI \u2014 Policy Copilot Decision Draft ===\n\nQuery: Assess underwriting risk for new motor policy\nContext type: UNDERWRITING\n\nNo matching policy / regulatory documents retrieved.\n\n--- Model Scoring Evidence ---\nRisk Score : 0.01\nRisk Tier  : LOW\nPremium Adj: 0.807\n\nThis draft has been queued for mandatory human analyst review per IRDAI guidelines.\n\n[COMPLIANCE NOTE: This draft failed IRDAI compliance validation. Details: See validation result]",
+    "model_result": {
+      "risk_tier": "low",
+      "risk_score": 0.01,
+      "premium_adjustment": 0.807,
+      "shap_drivers": [],
+      "model_version": "1.0.0",
+      "timestamp": "2026-10-10T05:05:12.829641"
+    },
+    "analyst_review": null,
+    "status": "pending",
+    "created_at": "2026-10-10T05:05:12.830011",
+    "reviewed_at": null
   }
 ]

@@ -1,63 +1,6 @@
-# Python
+# Python bytecode and caches
 __pycache__/
-*.py[cod]
-*.pyo
-*.pyd
-.Python
-*.egg-info/
-dist/
-build/
-*.egg
-.eggs/
+*.pyc
 
-# Virtual environments
-.venv/
-venv/
-env/
-ENV/
-
-# Environment variables
-.env
-.env.*
-
-# Secrets / encryption keys
-data/.encryption_key
-*.key
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Pytest
-.pytest_cache/
-.coverage
-htmlcov/
-coverage.xml
-
-# MyPy
-.mypy_cache/
-
-# Jupyter
-.ipynb_checkpoints/
-
-# Docker
-*.log
-
-# Data (generated, not source)
-data/claims_data.csv
-data/policies_data.csv
-data/chroma_db/
-data/qdrant_db/
-mlruns/
-
-# Next.js frontend
-frontend/node_modules/
-frontend/.next/
-frontend/out/
-frontend/.env.local
+# Model artifacts (binary serialized objects)
+data/models/*.pkl

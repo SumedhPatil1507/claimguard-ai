@@ -120,6 +120,7 @@ try:
         celery_app,
         get_task_channel,
         get_task_result,
+        publish_task_event,
         score_claim_task,
         score_underwriting_task,
     )
@@ -130,6 +131,7 @@ except Exception as _e:
     get_task_result = None          # type: ignore[assignment]
     score_underwriting_task = None  # type: ignore[assignment]
     score_claim_task = None         # type: ignore[assignment]
+    publish_task_event = lambda tid, ev: None  # type: ignore[assignment]
     get_task_channel = lambda tid: f"claimguard:task_events:{tid}"  # type: ignore[assignment]
 
 try:
@@ -217,6 +219,25 @@ except Exception as _e:
     logger.warning("compliance_irdai unavailable: %s", _e)
     _HAS_COMPLIANCE = False
     generate_compliance_report = None  # type: ignore[assignment]
+
+try:
+    from src.ingestion import (
+        MAX_FILE_BYTES,
+        classify_file,
+        ingest_document_bytes,
+        save_upload_tmp,
+    )
+    _HAS_INGESTION = True
+except Exception as _e:
+    logger.warning("ingestion engine unavailable: %s", _e)
+    _HAS_INGESTION = False
+
+try:
+    from fastapi import UploadFile, File, Form
+    from fastapi.responses import StreamingResponse
+    _HAS_MULTIPART = True
+except Exception:
+    _HAS_MULTIPART = False
 
 # ---------------------------------------------------------------------------
 # Demo API key → role mapping
@@ -931,6 +952,206 @@ async def stream_generic_task(
             detail="sse-starlette is not installed for SSE streaming.",
         )
     return EventSourceResponse(_stream_task_events(task_id, request))
+
+
+# ===========================================================================
+# Dual Ingestion Engine — POST /ingest/file  (CSV batches + PDF/Image OCR→RAG)
+# ===========================================================================
+
+def _decision_json(verdict: str, reasoning: str, recommendation: str,
+                   next_steps: list[str]) -> dict:
+    """Standardized Explainable Decision JSON envelope used platform-wide."""
+    return {
+        "verdict": verdict,
+        "reasoning": reasoning,
+        "recommendation": recommendation,
+        "next_steps": next_steps,
+    }
+
+
+if _HAS_MULTIPART and _HAS_INGESTION:
+
+    @app.post(
+        "/ingest/file",
+        status_code=202,
+        tags=["Ingestion"],
+        summary="Drag-and-drop file ingestion: CSV batch scoring or PDF/Image OCR → Qdrant RAG",
+    )
+    async def ingest_file(
+        request: Request,
+        file: UploadFile = File(..., description="CSV, PDF, image or text upload"),
+        mode: str = Form("auto", description="'auto' | 'documents' | 'batch'"),
+        role: str = Depends(require_roles(["analyst", "admin"])),
+    ):
+        """
+        Enterprise file-ingestion engine.
+
+        * **CSV** → every row is validated and enqueued to the Celery workers
+          as an individual claims/underwriting scoring job (parent task id is
+          returned; stream it via ``GET /tasks/stream/{task_id}``).
+
+        * **PDF / Image / TXT / MD** → OCR + text extraction, Markdown H1–H3
+          chunking, then direct upsert into the Qdrant hybrid vector store.
+          Returns a standardized Explainable Decision JSON with the new
+          chunk IDs so analysts can immediately cite them.
+
+        Responses always include the four canonical keys:
+        ``verdict``, ``reasoning``, ``recommendation``, ``next_steps``.
+        """
+        # Parent SSE channel exists for *every* upload so the dashboard can
+        # render a live streaming progress bar regardless of worker availability.
+        parent_task_id = str(uuid.uuid4())
+        publish_task_event(parent_task_id, {
+            "task_id": parent_task_id, "status": "STARTED",
+            "progress": {"stage": f"Upload received — classifying {file.filename}",
+                         "percent": 5},
+        })
+
+        filename = file.filename or "upload.bin"
+        data = await file.read()
+        if not data:
+            raise HTTPException(status_code=400, detail="Uploaded file is empty.")
+        if len(data) > MAX_FILE_BYTES:
+            raise HTTPException(
+                status_code=413,
+                detail=f"File exceeds the {MAX_FILE_BYTES // (1024 * 1024)} MB ingestion limit.",
+            )
+
+        kind = classify_file(filename, file.content_type or "")
+        if kind == "unsupported":
+            raise HTTPException(
+                status_code=415,
+                detail=(
+                    f"Unsupported file type for '{filename}'. "
+                    "Accepted: .csv, .pdf, .png/.jpg/.tiff/.webp (OCR), .txt/.md."
+                ),
+            )
+
+        # ── Path A: documents → synchronous OCR + Markdown-chunked Qdrant upsert
+        if kind in ("pdf", "image", "text") and mode != "batch":
+            publish_task_event(parent_task_id, {
+                "task_id": parent_task_id, "status": "PROGRESS",
+                "progress": {"stage": f"{kind.upper()} extraction + Markdown H1–H3 chunking",
+                             "percent": 45},
+            })
+            try:
+                summary = ingest_document_bytes(data, filename, kind)
+            except RuntimeError as exc:      # missing OCR stack etc.
+                raise HTTPException(status_code=503, detail=str(exc))
+            except Exception as exc:
+                logger.error("ingest/file: document pipeline failed — %s", exc, exc_info=True)
+                raise HTTPException(status_code=500, detail=f"Ingestion failed: {exc}")
+
+            publish_task_event(parent_task_id, {
+                "task_id": parent_task_id, "status": "SUCCESS",
+                "result": summary,
+                "progress": {"stage": "Chunks upserted into Qdrant hybrid index",
+                             "percent": 100},
+            })
+            chunks = summary.get("chunks", 0)
+            chunk_ids = ", ".join(summary.get("chunk_ids", [])[:3]) or "n/a"
+            decision = _decision_json(
+                verdict=(
+                    "INGESTION COMPLETE — DOCUMENT INDEXED FOR RAG RETRIEVAL"
+                    if summary["status"] == "indexed"
+                    else "INGESTION INCONCLUSIVE — NO EXTRACTABLE TEXT (ESCALATE TO FIELD AUDIT)"
+                ),
+                reasoning=(
+                    f"{kind.upper()} extraction produced {summary.get('characters', 0)} characters, "
+                    f"split on Markdown H1–H3 headings into {chunks} citable vector chunks "
+                    f"(e.g. {chunk_ids}) and upserted into the Qdrant hybrid collection. "
+                    "Cross-encoder re-ranking will apply at query time."
+                ),
+                recommendation=(
+                    "Auto-Ingest — chunks are live in the Policy Copilot index"
+                    if summary["status"] == "indexed"
+                    else "Request Field Audit — re-upload a clearer scan or enable the OCR stack"
+                ),
+                next_steps=[
+                    "Step 1: Verify extracted preview against the physical document before citing in decisions.",
+                    f"Step 2: Run GET /copilot/decide to confirm the new chunks ({chunk_ids}) are retrievable.",
+                    "Step 3: Statutory limit audit check — confirm document class (policy wording vs invoice) is within IRDAI record-retention scope.",
+                ],
+            )
+            return {
+                "task_id": parent_task_id,
+                "stream_url": f"{str(request.base_url).rstrip('/')}/tasks/stream/{parent_task_id}",
+                "ingestion": summary,
+                "decision": decision,
+            }
+
+        # ── Path B: CSV → Celery fan-out under a streamable parent task id
+        if kind == "csv" or mode == "batch":
+            if not HAS_CELERY:
+                raise HTTPException(
+                    status_code=503,
+                    detail="Celery worker stack unavailable — CSV batch ingestion requires Redis + workers.",
+                )
+            try:
+                assert_redis_reachable()
+            except InfrastructureError as exc:
+                raise _infra_503(exc)
+
+            from src.ingestion import ingest_csv_bytes, ingest_file_task
+
+            tmp_path = save_upload_tmp(data, filename)
+            try:
+                if kind == "csv":
+                    # Parse synchronously for immediate schema feedback,
+                    # enqueue rows asynchronously under the parent task.
+                    result = ingest_csv_bytes(
+                        data, filename, batch_id=parent_task_id,
+                        parent_task_id=parent_task_id,
+                    )
+                else:
+                    ingest_file_task.apply_async(
+                        kwargs={"path": tmp_path, "filename": filename,
+                                "kind": kind, "parent_task_id": parent_task_id},
+                        task_id=parent_task_id,
+                    )
+                    result = {"status": "dispatched", "mode": kind, "rows": 0,
+                              "jobs_enqueued": 1, "batch_id": parent_task_id}
+            except Exception as exc:
+                logger.error("ingest/file: CSV dispatch failed — %s", exc)
+                raise HTTPException(status_code=500, detail=f"Batch dispatch failed: {exc}")
+
+            if result.get("status") == "rejected":
+                decision = _decision_json(
+                    verdict="REJECT — CSV SCHEMA VALIDATION FAILED",
+                    reasoning=result.get("reason", "Unknown schema error"),
+                    recommendation="Return file to originator for correction (HITL Review)",
+                    next_steps=[
+                        "Step 1: Correct the header row to match the claims or policy template.",
+                        "Step 2: Re-upload via drag-and-drop or POST /ingest/file.",
+                        "Step 3: Statutory limit audit check — confirm batch size < 10,000 rows per IRDAI processing SLA guidance.",
+                    ],
+                )
+                return {"task_id": parent_task_id, "ingestion": result, "decision": decision}
+
+            n = result.get("jobs_enqueued", 0)
+            decision = _decision_json(
+                verdict="BATCH ACCEPTED — QUEUED FOR DISTRIBUTED SCORING",
+                reasoning=(
+                    f"{result.get('rows', 0)} rows parsed; {n} "
+                    f"{result.get('mode', 'scoring')} jobs dispatched to Celery workers. "
+                    "Live progress streams over Redis Pub/Sub."
+                ),
+                recommendation="Monitor stream and triage HIGH-risk scored rows on completion",
+                next_steps=[
+                    f"Step 1: Stream live progress via GET /tasks/stream/{parent_task_id}.",
+                    "Step 2: Verification — reconcile child_task_ids count against source row count.",
+                    "Step 3: Statutory limit audit check — flag any payout above IRDAI category caps for FIU escalation.",
+                ],
+            )
+            return {
+                "task_id": parent_task_id,
+                "status_url": _status_url(request, parent_task_id),
+                "stream_url": f"{str(request.base_url).rstrip('/')}/tasks/stream/{parent_task_id}",
+                "ingestion": result,
+                "decision": decision,
+            }
+
+        raise HTTPException(status_code=415, detail="Unsupported ingestion path.")
 
 
 @app.post("/copilot/decide", tags=["Policy Copilot"])
