@@ -24,13 +24,24 @@ logger = logging.getLogger(__name__)
 # Optional: Guardrails AI
 # ---------------------------------------------------------------------------
 try:
-    from guardrails import Guard, OnFailAction
-    from guardrails.hub import ToxicLanguage, PIIFilter
+    from guardrails import Guard
     HAS_GUARDRAILS = True
 except ImportError:
     HAS_GUARDRAILS = False
     Guard = None  # type: ignore[assignment]
+
+# Optional hub validators — available only when the validator is installed
+# (`guardrails hub install ...`) and exposed by the installed API version.
+try:
+    from guardrails import OnFailAction  # type: ignore
+except ImportError:
     OnFailAction = None  # type: ignore[assignment]
+
+try:
+    from guardrails.hub import ToxicLanguage, PIIFilter  # type: ignore
+except ImportError:
+    ToxicLanguage = None  # type: ignore[assignment]
+    PIIFilter = None      # type: ignore[assignment]
 
 
 # ---------------------------------------------------------------------------
@@ -157,10 +168,38 @@ def extract_confidence_score(text: str) -> Optional[float]:
 
 def extract_chunk_ids(text: str) -> List[str]:
     """Extract chunk IDs from decision text."""
-    # Look for patterns like chunk_123, policy_section_4_2_chunk_1, etc.
-    pattern = r'(chunk[_\-\d]+|policy[_\w]+chunk[_\d]+)'
-    matches = re.findall(pattern, text, re.IGNORECASE)
-    return matches
+    # Prefer explicit [Chunk ID: ...] citations so IDs such as
+    # ``policy_wording::h2::p1`` survive punctuation and heading separators.
+    explicit = re.findall(r"\[\s*chunk\s*id\s*:\s*([^\]\r\n]+)\]", text, re.IGNORECASE)
+    if explicit:
+        return [value.strip() for value in explicit if value.strip()]
+    # Backward compatible short IDs used by older generated drafts.
+    return re.findall(r"(chunk[_\-\w]+|policy[_\w]+chunk[_\w]+)", text, re.IGNORECASE)
+
+
+def _validate_citations_against_retrieval(
+    draft: str, retrieved_docs: Optional[List[Dict[str, Any]]]
+) -> List[str]:
+    """Return citation failures, requiring citations to resolve to retrieved IDs."""
+    cited = extract_chunk_ids(draft)
+    if not retrieved_docs:
+        return ["No retrieved documents to ground assertions"]
+
+    available = set()
+    for doc in retrieved_docs:
+        if not isinstance(doc, dict):
+            continue
+        payload = doc.get("payload") if isinstance(doc.get("payload"), dict) else {}
+        chunk_id = doc.get("chunk_id") or payload.get("chunk_id")
+        if chunk_id:
+            available.add(str(chunk_id))
+
+    if not cited:
+        return ["Missing chunk IDs for policy citations"]
+    unknown = sorted(set(cited) - available)
+    if unknown:
+        return ["Citation IDs were not present in retrieved evidence: " + ", ".join(unknown)]
+    return []
 
 
 def validate_statutory_limits(payout: float, claim_type: str) -> Dict[str, Any]:
@@ -183,9 +222,11 @@ def validate_statutory_limits(payout: float, claim_type: str) -> Dict[str, Any]:
         - description: str
     """
     claim_type_key = claim_type.lower()
-    if claim_type_key.startswith("motor"):
-        # Default to motor_tp if not specified
-        limit_config = _IRDAI_STATUTORY_LIMITS.get("motor_tp", _IRDAI_STATUTORY_LIMITS["motor_od"])
+    if claim_type_key in {"motor_od", "motor own damage", "motor own-damage"}:
+        limit_config = _IRDAI_STATUTORY_LIMITS["motor_od"]
+    elif claim_type_key.startswith("motor"):
+        # Third-party claims use the motor_tp policy limit by default.
+        limit_config = _IRDAI_STATUTORY_LIMITS["motor_tp"]
     else:
         limit_config = _IRDAI_STATUTORY_LIMITS.get(claim_type_key, _IRDAI_STATUTORY_LIMITS["motor_od"])
 
@@ -263,10 +304,15 @@ class IRDAIComplianceValidator:
             return
 
         try:
-            # Try to load from config.rail if it exists
+            # Try to load from config.rail if it exists.
+            # guardrails-ai >= 0.10 exposes Guard.for_rail(); older versions
+            # expose Guard.from_rail().  Support both APIs.
             rail_path = Path(__file__).parent.parent / "config.rail"
             if rail_path.exists():
-                self._guard = Guard.from_rail(rail_path)
+                if hasattr(Guard, "for_rail"):
+                    self._guard = Guard.for_rail(str(rail_path))
+                else:
+                    self._guard = Guard.from_rail(rail_path)
                 logger.info("Guardrails AI IRDAI validator initialized from config.rail")
             else:
                 # Fallback to schema-based guard
@@ -383,14 +429,12 @@ class IRDAIComplianceValidator:
             is_valid = False
             hitl_reasons.append("Missing regulatory citations")
 
-        # Check 4: Must include chunk IDs for citations
-        has_chunk_citations = validation_data.get("has_chunk_citations", False)
-        if not has_chunk_citations:
-            chunk_ids = extract_chunk_ids(draft)
-            has_chunk_citations = len(chunk_ids) > 0
-        if not has_chunk_citations:
+        # Check 4: Every cited chunk ID must resolve to the retrieved evidence.
+        citation_errors = _validate_citations_against_retrieval(draft, retrieved_docs)
+        has_chunk_citations = not citation_errors
+        if citation_errors:
             is_valid = False
-            hitl_reasons.append("Missing chunk IDs for policy citations")
+            hitl_reasons.extend(citation_errors)
 
         # Check 5: Validate payout against statutory limits
         payout = extract_payout_amount(draft)
@@ -411,10 +455,6 @@ class IRDAIComplianceValidator:
             hitl_reasons.append(f"Confidence score {confidence:.2f} below threshold {_HITL_CONFIDENCE_THRESHOLD}")
 
         # Check 7: Zero-hallucination - assertions must be grounded
-        if retrieved_docs and len(retrieved_docs) == 0:
-            is_valid = False
-            hitl_reasons.append("No retrieved documents to ground assertions")
-
         # Determine HITL requirement
         hitl_required = len(hitl_reasons) > 0 or not is_valid
         hitl_reason = "; ".join(hitl_reasons) if hitl_reasons else "Routine compliance check"
@@ -471,11 +511,11 @@ class IRDAIComplianceValidator:
         if not has_regulation:
             hitl_reasons.append("Missing regulatory citations")
 
-        # Check for chunk IDs
+        # Require every citation to refer to a real retrieved chunk.
         chunk_ids = extract_chunk_ids(decision_draft)
-        has_chunk_citations = len(chunk_ids) > 0
-        if not has_chunk_citations:
-            hitl_reasons.append("Missing chunk IDs for policy citations")
+        citation_errors = _validate_citations_against_retrieval(decision_draft, retrieved_docs)
+        has_chunk_citations = not citation_errors
+        hitl_reasons.extend(citation_errors)
 
         # Validate payout against statutory limits
         payout = extract_payout_amount(decision_draft)
@@ -491,10 +531,6 @@ class IRDAIComplianceValidator:
         confidence = extract_confidence_score(decision_draft)
         if confidence is not None and confidence < _HITL_CONFIDENCE_THRESHOLD:
             hitl_reasons.append(f"Confidence score {confidence:.2f} below threshold {_HITL_CONFIDENCE_THRESHOLD}")
-
-        # Check for retrieved documents
-        if retrieved_docs and len(retrieved_docs) == 0:
-            hitl_reasons.append("No retrieved documents to ground assertions")
 
         # Determine validity
         is_valid = len(hitl_reasons) == 0

@@ -60,6 +60,20 @@ from src.vector_store_settings import (
 logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
+# Optional: OpenTelemetry instrumentation
+# ---------------------------------------------------------------------------
+try:
+    from opentelemetry import trace
+    from opentelemetry.trace import Status, StatusCode
+    HAS_OPENTELEMETRY = True
+    _tracer = trace.get_tracer(__name__)
+except ImportError:
+    HAS_OPENTELEMETRY = False
+    _tracer = None  # type: ignore[assignment]
+    Status = None  # type: ignore[assignment]
+    StatusCode = None  # type: ignore[assignment]
+
+# ---------------------------------------------------------------------------
 # Optional dependency guards
 # ---------------------------------------------------------------------------
 
@@ -201,22 +215,38 @@ class PolicyVectorStore:
         list of dicts with keys: content, source, score
         Empty list if nothing is indexed or an error occurs.
         """
+        if HAS_OPENTELEMETRY and _tracer:
+            with _tracer.start_as_current_span("vector_store.search") as span:
+                span.set_attribute("query", query[:200])  # Truncate long queries
+                span.set_attribute("top_k", top_k if top_k is not None else self._cfg.top_k_rerank)
+                return self._search_impl(query, top_k, span)
+        else:
+            return self._search_impl(query, top_k, None)
+
+    def _search_impl(self, query: str, top_k: Optional[int], span: Optional[Any]) -> List[SearchResult]:
+        """Internal implementation of search with optional span context."""
         if not self._built:
             self.build_index()
 
         if not self._corpus:
+            if span:
+                span.set_status(Status(StatusCode.ERROR, "No corpus indexed"))
             return []
 
         k = top_k if top_k is not None else self._cfg.top_k_rerank
 
         try:
-            dense_hits = self._dense_search(query, self._cfg.top_k_dense)
-            bm25_hits  = self._bm25_search(query, self._cfg.top_k_bm25)
-            fused      = self._rrf_fuse(dense_hits, bm25_hits)
-            reranked   = self._rerank(query, fused, k)
+            dense_hits = self._dense_search(query, self._cfg.top_k_dense, span)
+            bm25_hits  = self._bm25_search(query, self._cfg.top_k_bm25, span)
+            fused      = self._rrf_fuse(dense_hits, bm25_hits, span)
+            reranked   = self._rerank(query, fused, k, span)
+            if span:
+                span.set_attribute("result_count", len(reranked[:k]))
             return reranked[:k]
         except Exception as exc:
             logger.error("vector_store: search failed — %s", exc, exc_info=True)
+            if span:
+                span.set_status(Status(StatusCode.ERROR, str(exc)))
             return []
 
     # ------------------------------------------------------------------
@@ -253,9 +283,93 @@ class PolicyVectorStore:
         while start < len(text):
             chunk = text[start : start + size].strip()
             if chunk:
-                chunks.append({"content": chunk, "source": source})
+                chunks.append({
+                    "content": chunk,
+                    "source": source,
+                    "chunk_id": f"{source}::chunk_{len(chunks)}",
+                })
             start += step
         return chunks
+
+    def add_documents(self, chunks: List[_Chunk]) -> int:
+        """
+        Incrementally upsert additional chunks (e.g. uploaded policy wording,
+        invoices, medical receipts) into the hybrid store.
+
+        * Ensures the base index exists (lazily built from ``docs_dir``).
+        * Appends chunks to the in-memory corpus and rebuilds the BM25 index.
+        * Embeds and upserts new points into Qdrant with stable integer IDs
+          offset past the existing corpus so IDs always map to corpus rows.
+
+        Parameters
+        ----------
+        chunks : list of dicts with ``content`` and ``source`` keys
+            (``section`` / ``chunk_id`` metadata is preserved in the payload
+            when present).
+
+        Returns
+        -------
+        int — number of chunks upserted (0 on failure; never raises).
+        """
+        if not chunks:
+            return 0
+
+        def _do_add(span: Any) -> int:
+            if not self._built:
+                self.build_index()
+
+            offset = len(self._corpus)
+            self._corpus.extend(chunks)
+            self._tokenised_corpus = [self._tokenise(c["content"]) for c in self._corpus]
+            self._init_bm25()   # rebuild sparse index over the full corpus
+
+            if self._qdrant is not None and self._embedder is not None:
+                texts      = [c["content"] for c in chunks]
+                embeddings = self._embedder.encode(texts, show_progress_bar=False).tolist()
+                points = []
+                for i, emb in enumerate(embeddings):
+                    meta = chunks[i]
+                    payload = {"content": meta["content"], "source": meta.get("source", "upload")}
+                    if "section" in meta:
+                        payload["section"] = meta["section"]
+                    if "chunk_id" in meta:
+                        payload["chunk_id"] = meta["chunk_id"]
+                    points.append(
+                        PointStruct(id=offset + i, vector=emb, payload=payload)
+                    )
+                batch_size = 256
+                for i in range(0, len(points), batch_size):
+                    self._qdrant.upsert(
+                        collection_name=self._cfg.qdrant_collection,
+                        points=points[i : i + batch_size],
+                    )
+
+            if span:
+                span.set_attribute("corpus_size", len(self._corpus))
+                span.set_attribute("upserted_count", len(chunks))
+            logger.info(
+                "vector_store: add_documents upserted %d chunks (corpus=%d)",
+                len(chunks),
+                len(self._corpus),
+            )
+            return len(chunks)
+
+        if HAS_OPENTELEMETRY and _tracer:
+            with _tracer.start_as_current_span("vector_store.add_documents") as span:
+                span.set_attribute("chunks_count", len(chunks))
+                try:
+                    return _do_add(span)
+                except Exception as exc:
+                    logger.error("vector_store: add_documents failed — %s", exc, exc_info=True)
+                    span.set_status(Status(StatusCode.ERROR, str(exc)))
+                    return 0
+        try:
+            return _do_add(None)
+        except Exception as exc:
+            logger.error("vector_store: add_documents failed — %s", exc, exc_info=True)
+            return 0
+
+
 
     # ------------------------------------------------------------------
     # BM25 initialisation & search
@@ -279,20 +393,40 @@ class PolicyVectorStore:
         except Exception as exc:
             logger.error("vector_store: BM25 init failed — %s", exc)
 
-    def _bm25_search(self, query: str, top_k: int) -> List[Tuple[int, float]]:
+    def _bm25_search(self, query: str, top_k: int, span: Optional[Any] = None) -> List[Tuple[int, float]]:
         """
         Returns list of (corpus_index, bm25_score) sorted descending.
         Empty list if BM25 not available.
         """
+        if HAS_OPENTELEMETRY and _tracer and span:
+            with _tracer.start_as_current_span(
+                "vector_store.bm25_search",
+                context=trace.set_span_in_context(span),
+            ) as bm25_span:
+                bm25_span.set_attribute("query", query[:200])
+                bm25_span.set_attribute("top_k", top_k)
+                return self._bm25_search_impl(query, top_k, bm25_span)
+        else:
+            return self._bm25_search_impl(query, top_k, None)
+
+    def _bm25_search_impl(self, query: str, top_k: int, span: Optional[Any]) -> List[Tuple[int, float]]:
+        """Internal implementation of BM25 search with optional span context."""
         if self._bm25_index is None:
+            if span:
+                span.set_status(Status(StatusCode.ERROR, "BM25 index not available"))
             return []
         try:
             tokens = self._tokenise(query)
             scores: List[float] = self._bm25_index.get_scores(tokens).tolist()
             indexed = sorted(enumerate(scores), key=lambda x: x[1], reverse=True)
-            return indexed[:top_k]
+            result = indexed[:top_k]
+            if span:
+                span.set_attribute("result_count", len(result))
+            return result
         except Exception as exc:
             logger.error("vector_store: BM25 search failed — %s", exc)
+            if span:
+                span.set_status(Status(StatusCode.ERROR, str(exc)))
             return []
 
     # ------------------------------------------------------------------
@@ -351,7 +485,11 @@ class PolicyVectorStore:
             PointStruct(
                 id=idx,
                 vector=emb,
-                payload={"content": chunks[idx]["content"], "source": chunks[idx]["source"]},
+                payload={
+                    "content": chunks[idx]["content"],
+                    "source": chunks[idx]["source"],
+                    "chunk_id": chunks[idx].get("chunk_id", f"{chunks[idx]['source']}::chunk_{idx}"),
+                },
             )
             for idx, emb in enumerate(embeddings)
         ]
@@ -363,12 +501,28 @@ class PolicyVectorStore:
                 points=points[i : i + batch_size],
             )
 
-    def _dense_search(self, query: str, top_k: int) -> List[Tuple[int, float]]:
+    def _dense_search(self, query: str, top_k: int, span: Optional[Any] = None) -> List[Tuple[int, float]]:
         """
         Returns list of (corpus_index, cosine_similarity) sorted descending.
         Empty list if Qdrant/embedder not available.
         """
+        if HAS_OPENTELEMETRY and _tracer and span:
+            with _tracer.start_as_current_span(
+                "vector_store.dense_search",
+                context=trace.set_span_in_context(span),
+            ) as dense_span:
+                dense_span.set_attribute("query", query[:200])
+                dense_span.set_attribute("top_k", top_k)
+                dense_span.set_attribute("collection", self._cfg.qdrant_collection)
+                return self._dense_search_impl(query, top_k, dense_span)
+        else:
+            return self._dense_search_impl(query, top_k, None)
+
+    def _dense_search_impl(self, query: str, top_k: int, span: Optional[Any]) -> List[Tuple[int, float]]:
+        """Internal implementation of dense search with optional span context."""
         if self._qdrant is None or self._embedder is None:
+            if span:
+                span.set_status(Status(StatusCode.ERROR, "Qdrant or embedder not available"))
             return []
         try:
             q_emb = self._embedder.encode([query], show_progress_bar=False).tolist()[0]
@@ -379,9 +533,14 @@ class PolicyVectorStore:
                 with_payload=False,
             )
             # Each hit.id corresponds to the chunk index in self._corpus.
-            return [(int(h.id), float(h.score)) for h in hits]
+            result = [(int(h.id), float(h.score)) for h in hits]
+            if span:
+                span.set_attribute("result_count", len(result))
+            return result
         except Exception as exc:
             logger.error("vector_store: dense search failed — %s", exc)
+            if span:
+                span.set_status(Status(StatusCode.ERROR, str(exc)))
             return []
 
     # ------------------------------------------------------------------
@@ -392,6 +551,7 @@ class PolicyVectorStore:
         self,
         dense_hits: List[Tuple[int, float]],
         bm25_hits:  List[Tuple[int, float]],
+        span: Optional[Any] = None,
     ) -> List[Tuple[int, float]]:
         """
         Merge two ranked lists using Reciprocal Rank Fusion.
@@ -399,6 +559,25 @@ class PolicyVectorStore:
         RRF score = Σ  1 / (k + rank_i)   where k = cfg.rrf_k
         Returns (corpus_index, rrf_score) sorted descending.
         """
+        if HAS_OPENTELEMETRY and _tracer and span:
+            with _tracer.start_as_current_span(
+                "vector_store.rrf_fusion",
+                context=trace.set_span_in_context(span),
+            ) as rrf_span:
+                rrf_span.set_attribute("dense_hits_count", len(dense_hits))
+                rrf_span.set_attribute("bm25_hits_count", len(bm25_hits))
+                rrf_span.set_attribute("rrf_k", self._cfg.rrf_k)
+                return self._rrf_fuse_impl(dense_hits, bm25_hits, rrf_span)
+        else:
+            return self._rrf_fuse_impl(dense_hits, bm25_hits, None)
+
+    def _rrf_fuse_impl(
+        self,
+        dense_hits: List[Tuple[int, float]],
+        bm25_hits:  List[Tuple[int, float]],
+        span: Optional[Any],
+    ) -> List[Tuple[int, float]]:
+        """Internal implementation of RRF fusion with optional span context."""
         k = self._cfg.rrf_k
         scores: Dict[int, float] = {}
 
@@ -409,6 +588,8 @@ class PolicyVectorStore:
             scores[idx] = scores.get(idx, 0.0) + 1.0 / (k + rank)
 
         if not scores:
+            if span:
+                span.set_attribute("fused_count", 0)
             return []
 
         # Normalise to [0, 1] relative to the max observed RRF score.
@@ -417,7 +598,10 @@ class PolicyVectorStore:
             idx: score / max_score
             for idx, score in scores.items()
         }
-        return sorted(normalised.items(), key=lambda x: x[1], reverse=True)
+        result = sorted(normalised.items(), key=lambda x: x[1], reverse=True)
+        if span:
+            span.set_attribute("fused_count", len(result))
+        return result
 
     # ------------------------------------------------------------------
     # Re-ranking
@@ -469,6 +653,7 @@ class PolicyVectorStore:
         query: str,
         fused: List[Tuple[int, float]],
         top_k: int,
+        span: Optional[Any] = None,
     ) -> List[SearchResult]:
         """
         Score the top candidates from RRF fusion using the configured re-ranker
@@ -476,22 +661,49 @@ class PolicyVectorStore:
 
         Falls back to RRF scores if the re-ranker is unavailable.
         """
+        if HAS_OPENTELEMETRY and _tracer and span:
+            with _tracer.start_as_current_span(
+                "vector_store.rerank",
+                context=trace.set_span_in_context(span),
+            ) as rerank_span:
+                rerank_span.set_attribute("query", query[:200])
+                rerank_span.set_attribute("top_k", top_k)
+                rerank_span.set_attribute("reranker_backend", self._cfg.reranker_backend.value)
+                return self._rerank_impl(query, fused, top_k, rerank_span)
+        else:
+            return self._rerank_impl(query, fused, top_k, None)
+
+    def _rerank_impl(
+        self,
+        query: str,
+        fused: List[Tuple[int, float]],
+        top_k: int,
+        span: Optional[Any],
+    ) -> List[SearchResult]:
+        """Internal implementation of re-ranking with optional span context."""
         if not fused:
+            if span:
+                span.set_status(Status(StatusCode.ERROR, "No fused results to rerank"))
             return []
 
         # Take up to max(top_k_dense, top_k_bm25) candidates into the re-ranker.
         max_candidates = max(self._cfg.top_k_dense, self._cfg.top_k_bm25)
         candidates: List[Tuple[int, float]] = fused[:max_candidates]
 
+        if span:
+            span.set_attribute("candidates_count", len(candidates))
+
         # ── Cohere re-rank ────────────────────────────────────────────────
         if self._cohere_client is not None:
-            return self._rerank_cohere(query, candidates, top_k)
+            return self._rerank_cohere(query, candidates, top_k, span)
 
         # ── Cross-encoder re-rank ─────────────────────────────────────────
         if self._cross_encoder is not None:
-            return self._rerank_cross_encoder(query, candidates, top_k)
+            return self._rerank_cross_encoder(query, candidates, top_k, span)
 
         # ── RRF scores only ───────────────────────────────────────────────
+        if span:
+            span.set_attribute("rerank_method", "rrf_only")
         return self._hits_to_results(candidates[:top_k])
 
     def _rerank_cross_encoder(
@@ -499,7 +711,27 @@ class PolicyVectorStore:
         query: str,
         candidates: List[Tuple[int, float]],
         top_k: int,
+        span: Optional[Any] = None,
     ) -> List[SearchResult]:
+        if HAS_OPENTELEMETRY and _tracer and span:
+            with _tracer.start_as_current_span(
+                "vector_store.rerank_cross_encoder",
+                context=trace.set_span_in_context(span),
+            ) as ce_span:
+                ce_span.set_attribute("model", self._cfg.cross_encoder_model)
+                ce_span.set_attribute("candidates_count", len(candidates))
+                return self._rerank_cross_encoder_impl(query, candidates, top_k, ce_span)
+        else:
+            return self._rerank_cross_encoder_impl(query, candidates, top_k, None)
+
+    def _rerank_cross_encoder_impl(
+        self,
+        query: str,
+        candidates: List[Tuple[int, float]],
+        top_k: int,
+        span: Optional[Any],
+    ) -> List[SearchResult]:
+        """Internal implementation of cross-encoder re-ranking with optional span context."""
         try:
             texts   = [self._corpus[idx]["content"] for idx, _ in candidates]
             pairs   = [(query, t) for t in texts]
@@ -518,9 +750,13 @@ class PolicyVectorStore:
                 for i in range(len(candidates))
             ]
             scored.sort(key=lambda x: x[1], reverse=True)
+            if span:
+                span.set_attribute("reranked_count", len(scored[:top_k]))
             return self._hits_to_results(scored[:top_k])
         except Exception as exc:
             logger.error("vector_store: CrossEncoder rerank failed — %s", exc)
+            if span:
+                span.set_status(Status(StatusCode.ERROR, str(exc)))
             return self._hits_to_results(candidates[:top_k])
 
     def _rerank_cohere(
@@ -528,7 +764,27 @@ class PolicyVectorStore:
         query: str,
         candidates: List[Tuple[int, float]],
         top_k: int,
+        span: Optional[Any] = None,
     ) -> List[SearchResult]:
+        if HAS_OPENTELEMETRY and _tracer and span:
+            with _tracer.start_as_current_span(
+                "vector_store.rerank_cohere",
+                context=trace.set_span_in_context(span),
+            ) as cohere_span:
+                cohere_span.set_attribute("model", self._cfg.cohere_rerank_model)
+                cohere_span.set_attribute("candidates_count", len(candidates))
+                return self._rerank_cohere_impl(query, candidates, top_k, cohere_span)
+        else:
+            return self._rerank_cohere_impl(query, candidates, top_k, None)
+
+    def _rerank_cohere_impl(
+        self,
+        query: str,
+        candidates: List[Tuple[int, float]],
+        top_k: int,
+        span: Optional[Any],
+    ) -> List[SearchResult]:
+        """Internal implementation of Cohere re-ranking with optional span context."""
         try:
             docs = [self._corpus[idx]["content"] for idx, _ in candidates]
             response = self._cohere_client.rerank(
@@ -545,9 +801,13 @@ class PolicyVectorStore:
                     "source":  self._corpus[idx]["source"],
                     "score":   round(float(hit.relevance_score), 4),
                 })
+            if span:
+                span.set_attribute("reranked_count", len(results))
             return results
         except Exception as exc:
             logger.error("vector_store: Cohere rerank failed — %s", exc)
+            if span:
+                span.set_status(Status(StatusCode.ERROR, str(exc)))
             return self._hits_to_results(candidates[:top_k])
 
     def _hits_to_results(
@@ -561,6 +821,9 @@ class PolicyVectorStore:
                     "content": self._corpus[idx]["content"],
                     "source":  self._corpus[idx]["source"],
                     "score":   round(float(score), 6),
+                    "chunk_id": self._corpus[idx].get(
+                        "chunk_id", f"{self._corpus[idx]['source']}::chunk_{idx}"
+                    ),
                 })
         return results
 

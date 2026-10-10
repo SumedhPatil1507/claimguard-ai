@@ -226,6 +226,21 @@ streamlit run streamlit_app.py
 streamlit run legacy/streamlit/app.py
 ```
 
+#### Windows / VS Code terminal
+
+Open **Terminal → New Terminal** in VS Code at the repository root and run these PowerShell commands. The dashboard uses Plotly charts with hover details, zoom, pan, and legend toggles.
+
+```powershell
+py -3.11 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+pip install -r legacy/streamlit/requirements.txt
+streamlit run streamlit_app.py --server.port 8501
+```
+
+Then open [http://localhost:8501](http://localhost:8501). If `py -3.11` is unavailable, install Python 3.11 and select `.venv` with **Ctrl+Shift+P → Python: Select Interpreter** in VS Code. To use the newer production dashboard, start the API and Next.js services instead; the Streamlit interface is kept as a standalone interactive dashboard.
+
 ---
 
 ## 📡 Real-Time SSE Streaming & API Reference
@@ -584,6 +599,24 @@ cd frontend
 npm run type-check
 npm run build
 ```
+
+---
+
+## 🚀 Publish Changes to GitHub
+
+Review the working tree first, then commit and push the completed changes to the current branch:
+
+```bash
+git status --short
+git diff --check
+git add -- README.md api/main.py config.rail eval/ragas_eval.py eval/reports docs frontend/src/lib/api.ts "frontend/src/app/(dashboard)/ingest/page.tsx" frontend/src/components/upload/file-upload.tsx requirements.txt src/agent_graph.py src/decision_json.py src/guardrails_config.py src/ingestion.py src/otel_config.py src/vector_store.py src/worker.py tests/test_sse_stream.py tests/test_guardrails.py tests/test_guardrails_integration.py tests/test_ingestion.py
+git diff --cached --check
+git status --short
+git commit -m "Upgrade ClaimGuard AI ingestion, streaming, and compliance"
+git push -u origin HEAD
+```
+
+The staging command includes the platform code, documentation, evaluation report, and tests while leaving local data changes and scratch output files out of the commit. Review the staged list before committing.
 
 ---
 

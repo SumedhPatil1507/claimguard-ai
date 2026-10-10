@@ -80,3 +80,41 @@ def test_stream_claims_failure_event(client, auth_headers):
         assert res.status_code == 200
         assert "text/event-stream" in res.headers.get("content-type", "")
         assert "Model computation failed" in res.text
+
+
+def test_stream_csv_ingest_batch_event(client, auth_headers):
+    """CSV batch ingestion results (POST /ingest/file) stream via /tasks/stream."""
+    batch_payload = {
+        "task_id": "fake-4",
+        "status": "SUCCESS",
+        "result": {
+            "filename": "claims.csv",
+            "kind": "claims",
+            "rows_received": 2,
+            "processed": 2,
+            "flagged": 1,
+            "errors": 0,
+            "decision": {
+                "verdict": "ESCALATE — 1 FLAGGED FOR MANUAL REVIEW",
+                "reasoning": "TreeSHAP feature drivers: claim_amount → +0.4100 [increases_risk].",
+                "recommendation": "Request Field Audit",
+                "next_steps": [
+                    "Step 1: Review flagged rows",
+                    "Step 2: Request supporting documents",
+                    "Step 3: Statutory limit audit check",
+                ],
+            },
+        },
+    }
+    with patch("api.main.get_task_result", return_value=batch_payload):
+        res = client.get("/tasks/stream/fake-4", headers=auth_headers)
+        assert res.status_code == 200
+        assert "text/event-stream" in res.headers.get("content-type", "")
+        assert "rows_received" in res.text
+        assert "ESCALATE" in res.text
+
+
+def test_ingest_file_endpoint_registered():
+    from api.main import app
+    paths = [r.path for r in app.routes]
+    assert "/ingest/file" in paths

@@ -311,8 +311,9 @@ def _rule_based_narrative(state: CopilotState) -> str:
         for i, doc in enumerate(docs[:3], start=1):
             source = doc.get("source", "unknown")
             score = doc.get("score", 0.0)
+            chunk_id = doc.get("chunk_id", "unknown")
             snippet = doc.get("content", "")[:300].replace("\n", " ")
-            lines.append(f"[{i}] Source: {source}  (relevance: {score:.3f})")
+            lines.append(f"[{i}] [Chunk ID: {chunk_id}] Source: {source}  (relevance: {score:.3f})")
             lines.append(f"    \"{snippet}\"")
         lines.append("")
     else:
@@ -418,8 +419,15 @@ def writer_node(state: CopilotState) -> dict:
             if HAS_GUARDRAILS and get_irdai_validator is not None:
                 try:
                     # Get validator with claim type
-                    context = state.get("context_type", "underwriting")
-                    claim_type = "motor" if context == "underwriting" else "motor"  # Can be enhanced
+                    model_result = state.get("model_result", {})
+                    features = state.get("features", {})
+                    claim_type = str(
+                        model_result.get("claim_type")
+                        or features.get("claim_type")
+                        or model_result.get("insurance_type")
+                        or features.get("insurance_type")
+                        or "motor"
+                    ).lower()
                     validator = get_irdai_validator(claim_type=claim_type)
 
                     # Validate with retrieved docs and model result
@@ -440,10 +448,11 @@ def writer_node(state: CopilotState) -> dict:
                             validation_result["validation_result"]
                         )
                         # Append compliance warning to the draft
-                        draft = (
-                            f"{draft}\n\n"
-                            f"[COMPLIANCE NOTE: This draft failed IRDAI compliance validation. "
-                            f"Details: {validation_result['validation_result'].get('validation_notes', 'See validation result')}]\n"
+                        draft = str(validation_result.get("filtered_output") or draft)
+                        draft += (
+                            "\n\n[COMPLIANCE HOLD: This draft did not pass validation and "
+                            "must not be used for an automated decision. Route to a human analyst. "
+                            f"Details: {validation_result.get('hitl_reason', 'Validation failed')} ]"
                         )
                     else:
                         logger.info("writer_node: IRDAI compliance validation passed")
@@ -455,6 +464,11 @@ def writer_node(state: CopilotState) -> dict:
                 except Exception as exc:
                     logger.warning("writer_node: Guardrails validation failed: %s", exc)
                     span.set_status(Status(StatusCode.ERROR, f"Guardrails validation failed: {exc}"))
+                    state["requires_human_review"] = True
+                    draft += (
+                        "\n\n[COMPLIANCE HOLD: Validation could not be completed. "
+                        "Do not use this draft for an automated decision; route to a human analyst.]"
+                    )
 
             record_decision_drafted()
             record_agent_run("writer", time.monotonic() - t0)
@@ -506,8 +520,15 @@ def writer_node(state: CopilotState) -> dict:
         if HAS_GUARDRAILS and get_irdai_validator is not None:
             try:
                 # Get validator with claim type
-                context = state.get("context_type", "underwriting")
-                claim_type = "motor" if context == "underwriting" else "motor"
+                model_result = state.get("model_result", {})
+                features = state.get("features", {})
+                claim_type = str(
+                    model_result.get("claim_type")
+                    or features.get("claim_type")
+                    or model_result.get("insurance_type")
+                    or features.get("insurance_type")
+                    or "motor"
+                ).lower()
                 validator = get_irdai_validator(claim_type=claim_type)
 
                 # Validate with retrieved docs and model result
@@ -524,10 +545,11 @@ def writer_node(state: CopilotState) -> dict:
                         validation_result["validation_result"]
                     )
                     # Append compliance warning to the draft
-                    draft = (
-                        f"{draft}\n\n"
-                        f"[COMPLIANCE NOTE: This draft failed IRDAI compliance validation. "
-                        f"Details: {validation_result['validation_result'].get('validation_notes', 'See validation result')}]\n"
+                    draft = str(validation_result.get("filtered_output") or draft)
+                    draft += (
+                        "\n\n[COMPLIANCE HOLD: This draft did not pass validation and "
+                        "must not be used for an automated decision. Route to a human analyst. "
+                        f"Details: {validation_result.get('hitl_reason', 'Validation failed')} ]"
                     )
                 else:
                     logger.info("writer_node: IRDAI compliance validation passed")
@@ -538,6 +560,11 @@ def writer_node(state: CopilotState) -> dict:
 
             except Exception as exc:
                 logger.warning("writer_node: Guardrails validation failed: %s", exc)
+                state["requires_human_review"] = True
+                draft += (
+                    "\n\n[COMPLIANCE HOLD: Validation could not be completed. "
+                    "Do not use this draft for an automated decision; route to a human analyst.]"
+                )
 
         record_decision_drafted()
         record_agent_run("writer", time.monotonic() - t0)

@@ -133,6 +133,55 @@ export async function enqueueFraudScore(
   });
 }
 
+// ── Data Ingestion (Dual Ingestion Engine) ───────────────────────────────────
+
+export interface IngestFileResponse {
+  status: "ENQUEUED" | "INGESTED" | "EXTRACTED";
+  filename: string;
+  kind: "csv" | "pdf" | "image" | "markdown";
+  /** CSV batch path — Celery task identifiers */
+  task_id?: string;
+  status_url?: string;
+  stream_url?: string;
+  dataset?: "claims" | "policies" | "generic";
+  rows?: number;
+  message?: string;
+  /** Document path — chunking / vector-store stats */
+  chars?: number;
+  chunks?: number;
+  upserted?: number;
+  sections?: string[];
+  chunk_ids?: string[];
+  vector_store?: string;
+}
+
+/** Upload a file to `POST /ingest/file` (multipart/form-data). */
+export async function ingestFile(file: File): Promise<IngestFileResponse> {
+  const token = getToken();
+  if (!token) throw new ApiError(401, "Not authenticated. Please log in.");
+
+  const form = new FormData();
+  form.append("file", file);
+
+  let res: Response;
+  try {
+    res = await fetch(`${BASE}/ingest/file`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+      body: form,
+    });
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : "Network error";
+    throw new ApiError(503, `API connection failed: ${msg}`);
+  }
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({ detail: res.statusText }));
+    throw new ApiError(res.status, body?.detail ?? res.statusText);
+  }
+  return res.json() as Promise<IngestFileResponse>;
+}
+
 // ── Task Polling ─────────────────────────────────────────────────────────────
 
 export async function getTaskStatus(taskId: string): Promise<TaskStatusResponse> {

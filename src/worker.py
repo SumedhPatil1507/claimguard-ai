@@ -53,7 +53,7 @@ from __future__ import annotations
 import json as _json
 import logging
 import os
-from typing import Any, Dict
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -241,6 +241,73 @@ def _serialise(obj: Any) -> Any:
 
 
 # ---------------------------------------------------------------------------
+# Standardized ExplainableDecision attachment (v1.9 output contract)
+# ---------------------------------------------------------------------------
+
+def _inline_similarity_scores(features: Optional[Dict[str, Any]]) -> Optional[List[Dict[str, Any]]]:
+    """
+    Optional Qdrant hybrid retrieval for scoring responses.
+
+    Opt-in via ``CLAIMGUARD_INLINE_RETRIEVAL=1`` (enabled in docker-compose,
+    disabled by default so tests / offline workers never load embedding
+    models).  Returns ``[{source, score, chunk_id}, ...]`` or ``None``.
+    """
+    if not features or os.environ.get("CLAIMGUARD_INLINE_RETRIEVAL", "0") != "1":
+        return None
+    try:
+        from src.vector_store import policy_store
+        query = " ".join(
+            str(v) for v in features.values() if isinstance(v, (str, int, float))
+        )[:300]
+        if not query.strip():
+            return None
+        hits = policy_store.search(query, top_k=3)
+        return [
+            {
+                "source": h.get("source", "policy_doc"),
+                "score": h.get("score", 0.0),
+                "chunk_id": h.get("chunk_id") or (
+                    (h.get("payload") or {}).get("chunk_id")
+                    if isinstance(h.get("payload"), dict)
+                    else None
+                ),
+            }
+            for h in hits
+        ]
+    except Exception as exc:
+        logger.debug("inline retrieval unavailable: %s", exc)
+        return None
+
+
+def _attach_decision(
+    kind: str,
+    res_dict: Dict[str, Any],
+    features: Optional[Dict[str, Any]] = None,
+) -> Dict[str, Any]:
+    """
+    Attach the standardized ``decision`` ExplainableDecision JSON
+    (verdict / reasoning / recommendation / next_steps) to a scoring result.
+    Failures are logged and never break the scoring pipeline.
+    """
+    try:
+        from src.decision_json import build_fraud_decision, build_underwriting_decision
+        similarity = _inline_similarity_scores(features)
+        if kind == "underwriting":
+            res_dict["decision"] = build_underwriting_decision(
+                res_dict, similarity
+            ).model_dump()
+        else:
+            claim_type = str((features or {}).get("claim_type", "motor"))
+            res_dict["decision"] = build_fraud_decision(
+                res_dict, similarity, claim_type=claim_type
+            ).model_dump()
+    except Exception as exc:
+        logger.warning("_attach_decision failed (%s): %s", kind, exc)
+    return res_dict
+
+
+
+# ---------------------------------------------------------------------------
 # Celery tasks
 # ---------------------------------------------------------------------------
 
@@ -312,6 +379,7 @@ if HAS_CELERY and celery_app is not None:
             parsed = UnderwritingFeatures(**features)
             result = engine.predict(parsed)
             res_dict = _serialise(result)
+            _attach_decision("underwriting", res_dict, features)
 
             logger.info(
                 "score_underwriting_task: task_id=%s risk_tier=%s",
@@ -419,6 +487,7 @@ if HAS_CELERY and celery_app is not None:
             parsed = ClaimFeatures(**features)
             result = engine.predict(parsed)
             res_dict = _serialise(result)
+            _attach_decision("claims", res_dict, features)
 
             logger.info(
                 "score_claim_task: task_id=%s fraud_flag=%s fraud_score=%.3f",
@@ -461,6 +530,179 @@ if HAS_CELERY and celery_app is not None:
             })
             raise self.retry(exc=exc, countdown=_RETRY_BACKOFF * (2 ** self.request.retries))
 
+    # -----------------------------------------------------------------------
+    # CSV batch ingestion task (POST /ingest/file → Celery)
+    # -----------------------------------------------------------------------
+
+    @celery_app.task(
+        name="claimguard.ingest_csv_batch",
+        bind=True,
+        max_retries=_MAX_RETRIES,
+        default_retry_delay=_RETRY_BACKOFF,
+    )
+    def ingest_csv_batch(
+        self,
+        *,
+        rows: List[Dict[str, Any]],
+        kind: str = "generic",
+        filename: str = "upload.csv",
+    ) -> Dict[str, Any]:
+        """
+        Background task: batch-process an uploaded CSV.
+
+        * ``kind='claims'``   — score every row with the fraud engine.
+        * ``kind='policies'`` — score every row with the underwriting engine.
+        * ``kind='generic'``  — validate/archive only (no scoring engine).
+
+        Publishes STARTED / PROGRESS / SUCCESS / FAILURE events to Redis
+        Pub/Sub so ``GET /tasks/stream/{task_id}`` can stream live progress.
+
+        Returns
+        -------
+        dict — ``{filename, kind, rows_received, processed, flagged, errors,
+        items, decision}`` where ``decision`` is the standardized
+        ExplainableDecision JSON summary of the batch.
+        """
+        task_id = self.request.id or ""
+
+        # ── 1. Infrastructure checks ────────────────────────────────────────
+        try:
+            _assert_redis_reachable()
+        except RuntimeError as exc:
+            publish_task_event(task_id, {
+                "task_id": task_id,
+                "status": "FAILURE",
+                "progress": {"stage": "Infrastructure error", "percent": 100},
+                "error": str(exc),
+                "error_type": "RuntimeError",
+            })
+            raise     # hard failure — no retry
+
+        total = len(rows or [])
+        publish_task_event(task_id, {
+            "task_id": task_id,
+            "status": "STARTED",
+            "progress": {"stage": f"Parsing {total} rows from {filename}", "percent": 10},
+        })
+        _safe_update_state(
+            self,
+            state="STARTED",
+            meta={"stage": f"Parsing {total} rows from {filename}", "percent": 10},
+        )
+        # ── 2. Score rows with the appropriate engine ───────────────────────
+        items: List[Dict[str, Any]] = []
+        errors = 0
+        flagged = 0
+        processed = 0
+        step = max(1, total // 10)
+
+        try:
+            engine = None
+            features_cls = None
+            if kind == "claims":
+                from src.claims_fraud import ClaimFeatures, FraudDetectionEngine
+                engine, features_cls = FraudDetectionEngine(), ClaimFeatures
+            elif kind == "policies":
+                from src.underwriting import UnderwritingEngine, UnderwritingFeatures
+                engine, features_cls = UnderwritingEngine(), UnderwritingFeatures
+
+            for idx, row in enumerate(rows or []):
+                try:
+                    if engine is not None and features_cls is not None:
+                        parsed = features_cls(**row)
+                        result = engine.predict(parsed)
+                        res_dict = _serialise(result)
+                        res_dict = _attach_decision(kind, res_dict, row)
+                        decision = res_dict.get("decision") or {}
+                        is_flagged = (
+                            bool(res_dict.get("fraud_flag"))
+                            or str(res_dict.get("risk_tier", "")).lower() == "high"
+                            or str(decision.get("recommendation", "")) != "Auto-Approve"
+                        )
+                        items.append({
+                            "row": idx,
+                            "score": res_dict,
+                            "id": res_dict.get("claim_id") or idx,
+                        })
+                        processed += 1
+                        if is_flagged:
+                            flagged += 1
+                    else:
+                        items.append({"row": idx, "score": None})
+                        processed += 1
+                except Exception as row_exc:      # per-row validation failure
+                    errors += 1
+                    items.append({"row": idx, "error": str(row_exc)})
+
+                if (idx + 1) % step == 0 or (idx + 1) == total:
+                    pct = 10 + int(80 * (idx + 1) / max(total, 1))
+                    publish_task_event(task_id, {
+                        "task_id": task_id,
+                        "status": "PROGRESS",
+                        "progress": {
+                            "stage": f"Scoring row {idx + 1}/{total} "
+                                     f"({flagged} flagged, {errors} errors)",
+                            "percent": pct,
+                        },
+                    })
+                    _safe_update_state(
+                        self,
+                        state="PROGRESS",
+                        meta={
+                            "stage": f"Scoring row {idx + 1}/{total}",
+                            "percent": pct,
+                        },
+                    )
+
+            # ── 3. Standardized batch decision summary ──────────────────────
+            from src.decision_json import build_batch_decision
+            summary: Dict[str, Any] = {
+                "filename": filename,
+                "kind": kind,
+                "rows_received": total,
+                "processed": processed,
+                "flagged": flagged,
+                "errors": errors,
+                "items": items[:1000],
+            }
+            try:
+                summary["decision"] = build_batch_decision(
+                    kind, processed, flagged, errors
+                ).model_dump()
+            except Exception as exc:
+                logger.warning("ingest_csv_batch: decision build failed: %s", exc)
+
+            logger.info(
+                "ingest_csv_batch: task_id=%s kind=%s processed=%d flagged=%d errors=%d",
+                task_id, kind, processed, flagged, errors,
+            )
+            publish_task_event(task_id, {
+                "task_id": task_id,
+                "status": "SUCCESS",
+                "progress": {"stage": "Completed", "percent": 100},
+                "result": summary,
+            })
+            return summary
+
+        except SoftTimeLimitExceeded:
+            publish_task_event(task_id, {
+                "task_id": task_id,
+                "status": "FAILURE",
+                "progress": {"stage": "Task timed out", "percent": 100},
+                "error": "Batch ingestion timed out",
+                "error_type": "SoftTimeLimitExceeded",
+            })
+            raise
+        except Exception as exc:
+            publish_task_event(task_id, {
+                "task_id": task_id,
+                "status": "FAILURE" if self.request.retries >= _MAX_RETRIES else "RETRY",
+                "progress": {"stage": f"Error: {exc}", "percent": 100},
+                "error": str(exc),
+                "error_type": exc.__class__.__name__,
+            })
+            raise self.retry(exc=exc, countdown=_RETRY_BACKOFF * (2 ** self.request.retries))
+
 else:
     # ── Stubs when Celery is not installed ───────────────────────────────────
     # These exist so that ``from src.worker import score_underwriting_task``
@@ -473,6 +715,12 @@ else:
         )
 
     def score_claim_task(**kwargs: Any) -> None:  # type: ignore[misc]
+        raise RuntimeError(
+            "celery package is not installed.  "
+            "Install it with:  pip install 'celery[redis]'"
+        )
+
+    def ingest_csv_batch(**kwargs: Any) -> None:  # type: ignore[misc]
         raise RuntimeError(
             "celery package is not installed.  "
             "Install it with:  pip install 'celery[redis]'"

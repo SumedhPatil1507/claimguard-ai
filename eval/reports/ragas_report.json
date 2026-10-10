@@ -1,0 +1,525 @@
+{
+  "generated_at": "2026-10-10T04:02:30.465517+00:00",
+  "project": "claimguard-ai",
+  "suite": "policy_copilot_rag_retrieval",
+  "num_scenarios": 50,
+  "engine": "lexical_proxy",
+  "ragas_installed": false,
+  "copilot_available": true,
+  "metrics": {
+    "context_precision": 0.4242,
+    "context_recall": 0.5583,
+    "faithfulness": 0.0985,
+    "answer_relevancy": 1.0
+  },
+  "metric_definitions": {
+    "context_precision": "relevance of retrieved chunks to ground truth",
+    "context_recall": "coverage of ground-truth evidence by retrieved chunks",
+    "faithfulness": "degree to which answers are grounded in retrieved context",
+    "answer_relevancy": "degree to which answers address the question"
+  },
+  "error": null,
+  "per_scenario": [
+    {
+      "id": "scenario_01",
+      "question": "What is the IRDAI-mandated timeline for settling a claim?",
+      "scores": {
+        "context_precision": 0.48,
+        "context_recall": 0.6667,
+        "faithfulness": 0.0488,
+        "answer_relevancy": 1.0
+      }
+    },
+    {
+      "id": "scenario_02",
+      "question": "How long does an insurer take to settle a claim under IRDAI regulations?",
+      "scores": {
+        "context_precision": 0.48,
+        "context_recall": 0.6667,
+        "faithfulness": 0.1163,
+        "answer_relevancy": 1.0
+      }
+    },
+    {
+      "id": "scenario_03",
+      "question": "What damage is excluded from a standard motor insurance policy?",
+      "scores": {
+        "context_precision": 0.68,
+        "context_recall": 0.8095,
+        "faithfulness": 0.0952,
+        "answer_relevancy": 1.0
+      }
+    },
+    {
+      "id": "scenario_04",
+      "question": "Which losses are not covered under a motor own-damage policy?",
+      "scores": {
+        "context_precision": 0.68,
+        "context_recall": 0.8095,
+        "faithfulness": 0.093,
+        "answer_relevancy": 1.0
+      }
+    },
+    {
+      "id": "scenario_05",
+      "question": "What is the waiting period for health insurance claims?",
+      "scores": {
+        "context_precision": 0.28,
+        "context_recall": 0.3182,
+        "faithfulness": 0.1463,
+        "answer_relevancy": 1.0
+      }
+    },
+    {
+      "id": "scenario_06",
+      "question": "How long must a policyholder wait before claiming health insurance?",
+      "scores": {
+        "context_precision": 0.28,
+        "context_recall": 0.3182,
+        "faithfulness": 0.0909,
+        "answer_relevancy": 1.0
+      }
+    },
+    {
+      "id": "scenario_07",
+      "question": "What portability rights does a policyholder have under IRDAI guidelines?",
+      "scores": {
+        "context_precision": 0.3939,
+        "context_recall": 0.4483,
+        "faithfulness": 0.122,
+        "answer_relevancy": 1.0
+      }
+    },
+    {
+      "id": "scenario_08",
+      "question": "Can a health insurance policy be transferred to another insurer?",
+      "scores": {
+        "context_precision": 0.3939,
+        "context_recall": 0.4483,
+        "faithfulness": 0.1667,
+        "answer_relevancy": 1.0
+      }
+    },
+    {
+      "id": "scenario_09",
+      "question": "What happens if an insurer fails to settle a claim within 30 days?",
+      "scores": {
+        "context_precision": 0.5333,
+        "context_recall": 0.6957,
+        "faithfulness": 0.0667,
+        "answer_relevancy": 1.0
+      }
+    },
+    {
+      "id": "scenario_10",
+      "question": "Is interest payable when claim settlement is delayed?",
+      "scores": {
+        "context_precision": 0.5333,
+        "context_recall": 0.6957,
+        "faithfulness": 0.0952,
+        "answer_relevancy": 1.0
+      }
+    },
+    {
+      "id": "scenario_11",
+      "question": "What is the free-look period for an insurance policy?",
+      "scores": {
+        "context_precision": 0.4839,
+        "context_recall": 0.5769,
+        "faithfulness": 0.122,
+        "answer_relevancy": 1.0
+      }
+    },
+    {
+      "id": "scenario_12",
+      "question": "Can a policyholder cancel a newly purchased policy and get a refund?",
+      "scores": {
+        "context_precision": 0.4839,
+        "context_recall": 0.5769,
+        "faithfulness": 0.093,
+        "answer_relevancy": 1.0
+      }
+    },
+    {
+      "id": "scenario_13",
+      "question": "What documents are required to file a motor insurance claim?",
+      "scores": {
+        "context_precision": 0.5517,
+        "context_recall": 0.8421,
+        "faithfulness": 0.0952,
+        "answer_relevancy": 1.0
+      }
+    },
+    {
+      "id": "scenario_14",
+      "question": "Which supporting papers must accompany a motor claim?",
+      "scores": {
+        "context_precision": 0.5517,
+        "context_recall": 0.8421,
+        "faithfulness": 0.0952,
+        "answer_relevancy": 1.0
+      }
+    },
+    {
+      "id": "scenario_15",
+      "question": "How does a cashless claim settlement work?",
+      "scores": {
+        "context_precision": 0.5172,
+        "context_recall": 0.75,
+        "faithfulness": 0.0732,
+        "answer_relevancy": 1.0
+      }
+    },
+    {
+      "id": "scenario_16",
+      "question": "What is the cashless facility in motor and health insurance?",
+      "scores": {
+        "context_precision": 0.5172,
+        "context_recall": 0.75,
+        "faithfulness": 0.0476,
+        "answer_relevancy": 1.0
+      }
+    },
+    {
+      "id": "scenario_17",
+      "question": "What is the maximum third-party liability for property damage under motor insurance?",
+      "scores": {
+        "context_precision": 0.5667,
+        "context_recall": 0.7727,
+        "faithfulness": 0.2,
+        "answer_relevancy": 1.0
+      }
+    },
+    {
+      "id": "scenario_18",
+      "question": "What cap applies to third-party property damage claims?",
+      "scores": {
+        "context_precision": 0.5667,
+        "context_recall": 0.7727,
+        "faithfulness": 0.1628,
+        "answer_relevancy": 1.0
+      }
+    },
+    {
+      "id": "scenario_19",
+      "question": "How are insurance grievances escalated under IRDAI?",
+      "scores": {
+        "context_precision": 0.3704,
+        "context_recall": 0.5,
+        "faithfulness": 0.1,
+        "answer_relevancy": 1.0
+      }
+    },
+    {
+      "id": "scenario_20",
+      "question": "Where can a policyholder complain if a claim is denied?",
+      "scores": {
+        "context_precision": 0.3704,
+        "context_recall": 0.5,
+        "faithfulness": 0.0238,
+        "answer_relevancy": 1.0
+      }
+    },
+    {
+      "id": "scenario_21",
+      "question": "What is the grace period for renewing a health insurance policy?",
+      "scores": {
+        "context_precision": 0.48,
+        "context_recall": 0.5217,
+        "faithfulness": 0.119,
+        "answer_relevancy": 1.0
+      }
+    },
+    {
+      "id": "scenario_22",
+      "question": "How long after expiry can a premium still be paid?",
+      "scores": {
+        "context_precision": 0.48,
+        "context_recall": 0.5217,
+        "faithfulness": 0.0698,
+        "answer_relevancy": 1.0
+      }
+    },
+    {
+      "id": "scenario_23",
+      "question": "What duty of disclosure applies when buying an insurance policy?",
+      "scores": {
+        "context_precision": 0.32,
+        "context_recall": 0.3478,
+        "faithfulness": 0.0238,
+        "answer_relevancy": 1.0
+      }
+    },
+    {
+      "id": "scenario_24",
+      "question": "What must an applicant declare on the proposal form?",
+      "scores": {
+        "context_precision": 0.32,
+        "context_recall": 0.3478,
+        "faithfulness": 0.0,
+        "answer_relevancy": 1.0
+      }
+    },
+    {
+      "id": "scenario_25",
+      "question": "How long can an insurer contest a policy after issuance?",
+      "scores": {
+        "context_precision": 0.25,
+        "context_recall": 0.4667,
+        "faithfulness": 0.119,
+        "answer_relevancy": 1.0
+      }
+    },
+    {
+      "id": "scenario_26",
+      "question": "What is the contestability period for an insurance policy?",
+      "scores": {
+        "context_precision": 0.25,
+        "context_recall": 0.4667,
+        "faithfulness": 0.125,
+        "answer_relevancy": 1.0
+      }
+    },
+    {
+      "id": "scenario_27",
+      "question": "What is insurable interest and when must it exist?",
+      "scores": {
+        "context_precision": 0.5,
+        "context_recall": 0.5556,
+        "faithfulness": 0.075,
+        "answer_relevancy": 1.0
+      }
+    },
+    {
+      "id": "scenario_28",
+      "question": "Why must an insured party have a stake in the subject matter?",
+      "scores": {
+        "context_precision": 0.5,
+        "context_recall": 0.5556,
+        "faithfulness": 0.0909,
+        "answer_relevancy": 1.0
+      }
+    },
+    {
+      "id": "scenario_29",
+      "question": "How does the contribution clause operate with multiple policies?",
+      "scores": {
+        "context_precision": 0.3704,
+        "context_recall": 0.5,
+        "faithfulness": 0.0714,
+        "answer_relevancy": 1.0
+      }
+    },
+    {
+      "id": "scenario_30",
+      "question": "What happens when the same risk is insured with two insurers?",
+      "scores": {
+        "context_precision": 0.3704,
+        "context_recall": 0.5,
+        "faithfulness": 0.0698,
+        "answer_relevancy": 1.0
+      }
+    },
+    {
+      "id": "scenario_31",
+      "question": "What rights of subrogation does an insurer have after settling a claim?",
+      "scores": {
+        "context_precision": 0.2917,
+        "context_recall": 0.5,
+        "faithfulness": 0.1136,
+        "answer_relevancy": 1.0
+      }
+    },
+    {
+      "id": "scenario_32",
+      "question": "Can the insurer sue the responsible third party after paying out?",
+      "scores": {
+        "context_precision": 0.2917,
+        "context_recall": 0.5,
+        "faithfulness": 0.0889,
+        "answer_relevancy": 1.0
+      }
+    },
+    {
+      "id": "scenario_33",
+      "question": "Is no-claim discount retained when porting a motor policy?",
+      "scores": {
+        "context_precision": 0.5,
+        "context_recall": 0.7059,
+        "faithfulness": 0.1429,
+        "answer_relevancy": 1.0
+      }
+    },
+    {
+      "id": "scenario_34",
+      "question": "Do NCB benefits transfer between insurers?",
+      "scores": {
+        "context_precision": 0.5,
+        "context_recall": 0.7059,
+        "faithfulness": 0.0952,
+        "answer_relevancy": 1.0
+      }
+    },
+    {
+      "id": "scenario_35",
+      "question": "What does motor own-damage cover include?",
+      "scores": {
+        "context_precision": 0.4333,
+        "context_recall": 0.5417,
+        "faithfulness": 0.0952,
+        "answer_relevancy": 1.0
+      }
+    },
+    {
+      "id": "scenario_36",
+      "question": "What risks are insured under an own-damage motor policy?",
+      "scores": {
+        "context_precision": 0.4333,
+        "context_recall": 0.5417,
+        "faithfulness": 0.0952,
+        "answer_relevancy": 1.0
+      }
+    },
+    {
+      "id": "scenario_37",
+      "question": "What is the claim intimation timeline after an incident?",
+      "scores": {
+        "context_precision": 0.2593,
+        "context_recall": 0.3889,
+        "faithfulness": 0.0952,
+        "answer_relevancy": 1.0
+      }
+    },
+    {
+      "id": "scenario_38",
+      "question": "How quickly must a loss be reported to the insurer?",
+      "scores": {
+        "context_precision": 0.2593,
+        "context_recall": 0.3889,
+        "faithfulness": 0.0976,
+        "answer_relevancy": 1.0
+      }
+    },
+    {
+      "id": "scenario_39",
+      "question": "What is the proportionate refund if a policy is cancelled mid-term?",
+      "scores": {
+        "context_precision": 0.375,
+        "context_recall": 0.5,
+        "faithfulness": 0.119,
+        "answer_relevancy": 1.0
+      }
+    },
+    {
+      "id": "scenario_40",
+      "question": "How is unearned premium calculated on cancellation?",
+      "scores": {
+        "context_precision": 0.375,
+        "context_recall": 0.5,
+        "faithfulness": 0.122,
+        "answer_relevancy": 1.0
+      }
+    },
+    {
+      "id": "scenario_41",
+      "question": "How are claim proceeds paid — cash, cheque, or bank transfer?",
+      "scores": {
+        "context_precision": 0.4,
+        "context_recall": 0.5882,
+        "faithfulness": 0.1591,
+        "answer_relevancy": 1.0
+      }
+    },
+    {
+      "id": "scenario_42",
+      "question": "In what form are claim settlements disbursed?",
+      "scores": {
+        "context_precision": 0.4,
+        "context_recall": 0.5882,
+        "faithfulness": 0.0488,
+        "answer_relevancy": 1.0
+      }
+    },
+    {
+      "id": "scenario_43",
+      "question": "What role does the TPA play in health insurance claim processing?",
+      "scores": {
+        "context_precision": 0.4444,
+        "context_recall": 0.5455,
+        "faithfulness": 0.0909,
+        "answer_relevancy": 1.0
+      }
+    },
+    {
+      "id": "scenario_44",
+      "question": "Who administers cashless health claims?",
+      "scores": {
+        "context_precision": 0.4444,
+        "context_recall": 0.5455,
+        "faithfulness": 0.0976,
+        "answer_relevancy": 1.0
+      }
+    },
+    {
+      "id": "scenario_45",
+      "question": "What is the IDV in motor insurance and how is it determined?",
+      "scores": {
+        "context_precision": 0.4231,
+        "context_recall": 0.55,
+        "faithfulness": 0.0976,
+        "answer_relevancy": 1.0
+      }
+    },
+    {
+      "id": "scenario_46",
+      "question": "How is the insured declared value of a vehicle calculated?",
+      "scores": {
+        "context_precision": 0.4231,
+        "context_recall": 0.55,
+        "faithfulness": 0.119,
+        "answer_relevancy": 1.0
+      }
+    },
+    {
+      "id": "scenario_47",
+      "question": "Can a claim be rejected after investigation by the insurer?",
+      "scores": {
+        "context_precision": 0.2857,
+        "context_recall": 0.32,
+        "faithfulness": 0.119,
+        "answer_relevancy": 1.0
+      }
+    },
+    {
+      "id": "scenario_48",
+      "question": "On what grounds may an insurer repudiate a claim?",
+      "scores": {
+        "context_precision": 0.2857,
+        "context_recall": 0.32,
+        "faithfulness": 0.0732,
+        "answer_relevancy": 1.0
+      }
+    },
+    {
+      "id": "scenario_49",
+      "question": "What is the claim settlement TAT for health insurance policies?",
+      "scores": {
+        "context_precision": 0.4138,
+        "context_recall": 0.5455,
+        "faithfulness": 0.1628,
+        "answer_relevancy": 1.0
+      }
+    },
+    {
+      "id": "scenario_50",
+      "question": "How quickly must health claims be paid out?",
+      "scores": {
+        "context_precision": 0.4138,
+        "context_recall": 0.5455,
+        "faithfulness": 0.0732,
+        "answer_relevancy": 1.0
+      }
+    }
+  ],
+  "report_path": "C:\\Users\\Sumedh\\projects\\claimguard-ai\\eval\\reports\\ragas_report.json"
+}

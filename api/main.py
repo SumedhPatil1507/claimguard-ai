@@ -7,7 +7,12 @@ Endpoint summary
 GET  /health                     Liveness probe (no auth)
 POST /underwrite                 Enqueue underwriting job → {task_id, status_url}
 POST /claims/score               Enqueue fraud-scoring job → {task_id, status_url}
+POST /ingest/file                Dual ingestion: CSV batch (Celery) or
+                                 PDF/Image/Markdown → OCR + H1–H3 chunking → Qdrant
 GET  /tasks/{task_id}            Poll Celery task status
+GET  /underwrite/stream/{task_id} SSE stream for underwriting jobs (Redis Pub/Sub)
+GET  /claims/stream/{task_id}    SSE stream for claims jobs (Redis Pub/Sub)
+GET  /tasks/stream/{task_id}     SSE stream for any Celery task (Redis Pub/Sub)
 POST /copilot/decide             Run Policy Copilot pipeline inline
 GET  /graph/collusion-rings      Detect collusion rings (PostgreSQL required)
 GET  /compliance                 IRDAI compliance report
@@ -75,7 +80,7 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 # FastAPI core (always available)
 # ---------------------------------------------------------------------------
-from fastapi import Depends, FastAPI, Header, HTTPException, Request
+from fastapi import Depends, FastAPI, File, Header, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, PlainTextResponse
 from pydantic import BaseModel, Field
@@ -120,6 +125,7 @@ try:
         celery_app,
         get_task_channel,
         get_task_result,
+        ingest_csv_batch,
         score_claim_task,
         score_underwriting_task,
     )
@@ -130,7 +136,31 @@ except Exception as _e:
     get_task_result = None          # type: ignore[assignment]
     score_underwriting_task = None  # type: ignore[assignment]
     score_claim_task = None         # type: ignore[assignment]
+    ingest_csv_batch = None         # type: ignore[assignment]
     get_task_channel = lambda tid: f"claimguard:task_events:{tid}"  # type: ignore[assignment]
+
+# ---------------------------------------------------------------------------
+# Dual Ingestion Engine (CSV batch → Celery, PDF/Image → Qdrant upsert)
+# ---------------------------------------------------------------------------
+try:
+    from src.ingestion import (
+        IngestionError,
+        MAX_FILE_BYTES,
+        classify_csv,
+        detect_kind,
+        ingest_document,
+        parse_csv,
+    )
+    _HAS_INGESTION = True
+except Exception as _e:
+    logger.warning("ingestion import failed: %s", _e)
+    _HAS_INGESTION = False
+    IngestionError = None           # type: ignore[assignment,misc]
+    MAX_FILE_BYTES = 25 * 1024 * 1024  # type: ignore[assignment]
+    classify_csv = None             # type: ignore[assignment]
+    detect_kind = None              # type: ignore[assignment]
+    ingest_document = None          # type: ignore[assignment]
+    parse_csv = None                # type: ignore[assignment]
 
 try:
     from src.database import (
@@ -704,6 +734,130 @@ async def claims_score(
             f"Poll {_status_url(request, task_id)} for the result."
         ),
     )
+
+
+# ── POST /ingest/file (dual ingestion engine) ─────────────────────────────────
+
+@app.post(
+    "/ingest/file",
+    tags=["Ingestion"],
+    summary="Upload a CSV batch (Celery) or a PDF/Image/Markdown document (Qdrant)",
+)
+async def ingest_file(
+    request: Request,
+    file: UploadFile = File(..., description="CSV, PDF, image or Markdown file"),
+    role: str = Depends(require_roles(["analyst", "admin"])),
+):
+    """
+    **Dual Ingestion Engine**
+
+    * **CSV** — rows are parsed and classified (`claims` / `policies` /
+      `generic`), then enqueued to the Celery worker as
+      ``claimguard.ingest_csv_batch``.  Returns **202** with a ``task_id`` —
+      stream live progress via ``GET /tasks/stream/{task_id}`` (SSE).
+    * **PDF / Image / Markdown** — text is extracted (pypdf / OCR), split on
+      Markdown H1–H3 headings, and upserted directly into the Qdrant hybrid
+      vector store (dense + BM25 + cross-encoder).  Returns **200** with the
+      chunk summary and ``chunk_ids`` for citation enforcement.
+
+    Raises **400** for empty/unsupported files, **413** when the upload
+    exceeds the size cap, **501** when an extraction dependency is missing,
+    **503** when Redis/Celery is unavailable for CSV batches.
+    """
+    if not _HAS_INGESTION or detect_kind is None:
+        raise HTTPException(
+            status_code=503,
+            detail="Ingestion engine is unavailable (src.ingestion failed to import).",
+        )
+
+    data = await file.read()
+    filename = file.filename or "upload"
+
+    if not data:
+        raise HTTPException(status_code=400, detail="Uploaded file is empty.")
+    if len(data) > MAX_FILE_BYTES:
+        raise HTTPException(
+            status_code=413,
+            detail=f"File exceeds the {MAX_FILE_BYTES // (1024 * 1024)} MB upload cap.",
+        )
+
+    kind = detect_kind(filename, file.content_type)
+
+    # ── CSV → Celery batch enqueue ──────────────────────────────────────────
+    if kind == "csv":
+        if not HAS_CELERY or ingest_csv_batch is None:
+            raise HTTPException(
+                status_code=503,
+                detail=(
+                    "Celery worker is not available for CSV batch ingestion.  "
+                    "Install it with: pip install 'celery[redis]' "
+                    "and ensure a Redis broker is running."
+                ),
+            )
+        try:
+            assert_redis_reachable()
+        except InfrastructureError as exc:
+            raise _infra_503(exc)
+
+        try:
+            rows = parse_csv(data)
+        except IngestionError as exc:
+            raise HTTPException(status_code=exc.status_code, detail=str(exc))
+
+        dataset = classify_csv(list(rows[0].keys()) if rows else [])
+        task_id = str(uuid.uuid4())
+        try:
+            ingest_csv_batch.apply_async(
+                kwargs={"rows": rows, "kind": dataset, "filename": filename},
+                task_id=task_id,
+            )
+        except Exception as exc:
+            logger.error("ingest/file: failed to enqueue CSV batch — %s", exc)
+            raise HTTPException(
+                status_code=503,
+                detail=f"Failed to enqueue CSV batch task: {exc}",
+            )
+
+        logger.info(
+            "ingest/file: enqueued CSV batch task_id=%s rows=%d dataset=%s role=%s",
+            task_id, len(rows), dataset, role,
+        )
+        return JSONResponse(status_code=202, content={
+            "status": "ENQUEUED",
+            "task_id": task_id,
+            "status_url": _status_url(request, task_id),
+            "stream_url": f"{str(request.base_url).rstrip('/')}/tasks/stream/{task_id}",
+            "filename": filename,
+            "kind": kind,
+            "dataset": dataset,
+            "rows": len(rows),
+            "message": (
+                f"CSV batch ({dataset}) with {len(rows)} rows enqueued.  "
+                f"Stream progress via SSE at /tasks/stream/{task_id}."
+            ),
+        })
+
+    # ── PDF / Image / Markdown → extract + chunk + Qdrant upsert ────────────
+    if kind == "unsupported":
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                f"Unsupported file type for '{filename}'.  "
+                "Accepted: .csv, .pdf, .md, .txt, and image formats."
+            ),
+        )
+
+    try:
+        stats = ingest_document(filename, data, file.content_type)
+    except IngestionError as exc:
+        raise HTTPException(status_code=exc.status_code, detail=str(exc))
+
+    logger.info(
+        "ingest/file: ingested %s kind=%s chunks=%d upserted=%d role=%s",
+        filename, stats.get("kind"), stats.get("chunks", 0),
+        stats.get("upserted", 0), role,
+    )
+    return {"status": stats.get("status", "INGESTED"), **stats}
 
 
 # ── GET /tasks/{task_id} (poll) ─────────────────────────────────────────────

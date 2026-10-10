@@ -1,258 +1,192 @@
-"""
-ClaimGuard AI - IRDAI Compliance Guardrails RAIL Specification
-===================================================================
+<!--
+  ClaimGuard AI - IRDAI Compliance Guardrails RAIL Specification
 
-This RAIL (Reliable AI for Language) specification enforces zero-hallucination
-policies on coverage claims, payout amounts, and regulatory statutory limits
-for ClaimGuard AI's Policy Copilot.
+  This RAIL (Reliable AI for Language) specification enforces zero-hallucination
+  policies on coverage claims, payout amounts, and regulatory statutory limits
+  for ClaimGuard AI's Policy Copilot.
 
-Key Enforcement Rules:
-1. Coverage claim validation - No unverified coverage approvals
-2. Payout amount validation - Must not exceed IRDAI statutory limits
-3. Regulatory citation enforcement - Must cite specific policy clauses with chunk IDs
-4. Confidence-based routing - Confidence < 0.85 routes to Human-In-The-Loop
-5. Zero-hallucination policy - All assertions must be grounded in retrieved documents
-"""
+  Key Enforcement Rules:
+  1. Coverage claim validation - No unverified coverage approvals
+  2. Payout amount validation - Must not exceed IRDAI statutory limits
+  3. Regulatory citation enforcement - Must cite policy clauses with chunk IDs
+  4. Confidence-based routing - Confidence below 0.85 routes to Human-In-The-Loop
+  5. Zero-hallucination policy - All assertions must be grounded in retrieved documents
+-->
+<rail version="0.1.0">
 
-rail_version = "0.1.0"
+  <output>
+    <object name="copilot_decision"
+            description="Structured decision output from Policy Copilot with IRDAI compliance enforcement">
 
-<output>
-  object name="copilot_decision"
-    description="Structured decision output from Policy Copilot with IRDAI compliance enforcement"
-
-    <string
-      name="decision_type"
-      description="Type of decision: 'recommendation', 'escalation', or 'information_only'"
-      required="true"
-      enum="['recommendation', 'escalation', 'information_only']"
-    />
-
-    <string
-      name="coverage_status"
-      description="Coverage determination: 'covered', 'not_covered', 'partially_covered', or 'requires_review'"
-      required="true"
-      enum="['covered', 'not_covered', 'partially_covered', 'requires_review']"
-    />
-
-    <string
-      name="recommended_payout"
-      description="Recommended payout amount as string (e.g., '75000.00'). Must be 0 if coverage is not_covered"
-      required="true"
-      format="decimal"
-      format-min="0.0"
-      format-max="10000000.0"
-    />
-
-    <float
-      name="confidence_score"
-      description="Model confidence score (0.0 to 1.0). Values < 0.85 require mandatory HITL routing"
-      required="true"
-      min="0.0"
-      max="1.0"
-    />
-
-    <bool
-      name="requires_human_review"
-      description="Mandatory flag: must be true if confidence_score < 0.85 or coverage_status is 'requires_review'"
-      required="true"
-    />
-
-    <object
-      name="citations"
-      description="Policy clause and regulatory citations with chunk IDs"
-      required="true"
-
-      <list
-        name="policy_clauses"
-        description="List of policy clause citations"
+      <string
+        name="decision_type"
+        description="Type of decision: 'recommendation', 'escalation', or 'information_only'"
         required="true"
+        enum="['recommendation', 'escalation', 'information_only']"
+      />
 
-        <object
-          name="clause"
-          description="Single policy clause citation"
-
-          <string
-            name="clause_id"
-            description="Unique chunk ID from vector store (e.g., 'policy_section_4_2_chunk_1')"
-            required="true"
-          />
-
-          <string
-            name="section"
-            description="Policy section number (e.g., 'Section 4.2')"
-            required="true"
-          />
-
-          <string
-            name="title"
-            description="Title of the policy clause"
-            required="true"
-          />
-
-          <string
-            name="excerpt"
-            description="Relevant excerpt from the policy clause (max 500 chars)"
-            required="true"
-            max-length="500"
-          />
-
-          <float
-            name="relevance_score"
-            description="Retrieval relevance score from vector search (0.0 to 1.0)"
-            required="true"
-            min="0.0"
-            max="1.0"
-          />
-        />
-      </list>
-
-      <list
-        name="regulatory_references"
-        description="List of IRDAI regulatory references"
-
-        <object
-          name="regulation"
-          description="Single regulatory reference"
-
-          <string
-            name="regulation_id"
-            description="IRDAI regulation identifier (e.g., 'IRDAI-Motor-Claims-Guidelines-Cl-7')"
-            required="true"
-          />
-
-          <string
-            name="citation"
-            description="Full regulatory citation text"
-            required="true"
-          />
-
-          <string
-            name="applicability"
-            description="Explanation of how this regulation applies to the current case"
-            required="true"
-          />
-        />
-      </list>
-    </object>
-
-    <object
-      name="statutory_limits"
-      description="IRDAI statutory limit validations"
-      required="true"
+      <string
+        name="coverage_status"
+        description="Coverage determination: 'covered', 'not_covered', 'partially_covered', or 'requires_review'"
+        required="true"
+        enum="['covered', 'not_covered', 'partially_covered', 'requires_review']"
+      />
 
       <float
-        name="max_allowed_payout"
-        description="Maximum payout allowed per IRDAI regulations for this claim type"
+        name="recommended_payout"
+        description="Recommended payout amount in INR. Must be 0.0 if coverage_status is not_covered and must never exceed IRDAI statutory limits"
         required="true"
         min="0.0"
+        max="10000000.0"
+      />
+
+      <float
+        name="confidence_score"
+        description="Model confidence score (0.0 to 1.0). Values below 0.85 require mandatory HITL routing"
+        required="true"
+        min="0.0"
+        max="1.0"
       />
 
       <bool
-        name="within_limits"
-        description="True if recommended_payout does not exceed max_allowed_payout"
+        name="requires_human_review"
+        description="Mandatory flag: must be true if confidence_score is below 0.85 or coverage_status is requires_review"
         required="true"
       />
 
-      <string
-        name="limit_source"
-        description="Source of the statutory limit (e.g., 'IRDAI Motor TP Guidelines 2023')"
+      <object
+        name="citations"
+        description="Policy clause and regulatory citations with vector-store chunk IDs"
         required="true"
-      />
-    </object>
+      >
+        <list
+          name="policy_clauses"
+          description="List of policy clause citations. Every assertion must cite at least one chunk ID (zero-hallucination policy)"
+          required="true"
+        >
+          <object name="clause" description="Single policy clause citation">
+            <string
+              name="clause_id"
+              description="Unique chunk ID from vector store (e.g. 'policy_section_4_2_chunk_1')"
+              required="true"
+            />
+            <string
+              name="section"
+              description="Policy section number (e.g. 'Section 4.2')"
+              required="true"
+            />
+            <string
+              name="title"
+              description="Title of the policy clause"
+              required="true"
+            />
+            <string
+              name="excerpt"
+              description="Relevant excerpt of the policy clause, max 500 characters"
+              required="true"
+              max-length="500"
+            />
+            <float
+              name="relevance_score"
+              description="Retrieval relevance score from hybrid vector search (0.0 to 1.0)"
+              required="true"
+              min="0.0"
+              max="1.0"
+            />
+          </object>
+        </list>
+      </object>
 
-    <object
-      name="reasoning"
-      description="Decision reasoning with evidence"
-
-      <string
-        name="summary"
-        description="Executive summary of the decision (max 300 chars)"
+      <object
+        name="statutory_limits"
+        description="IRDAI statutory payout limits validated for this decision"
         required="true"
-        max-length="300"
-      />
-
-      <list
-        name="key_factors"
-        description="List of key factors influencing the decision"
-
-        <object
-          name="factor"
-          description="Single decision factor"
-
-          <string
-            name="factor_name"
-            description="Name of the factor (e.g., 'days_since_policy_start')"
-            required="true"
-          />
-
-          <string
-            name="value"
-            description="Value of the factor"
-            required="true"
-          />
-
-          <string
-            name="impact"
-            description="Impact on decision (e.g., 'increases_risk', 'decreases_risk', 'neutral')"
-            required="true"
-            enum="['increases_risk', 'decreases_risk', 'neutral']"
-          />
+      >
+        <float
+          name="max_allowed_payout"
+          description="Maximum payout allowed by the applicable IRDAI regulation"
+          required="true"
+          min="0.0"
         />
-      </list>
+        <bool
+          name="within_limits"
+          description="True when recommended_payout is within the statutory limit"
+          required="true"
+        />
+        <string
+          name="limit_source"
+          description="The specific IRDAI regulation or policy section backing the limit"
+          required="true"
+        />
+      </object>
+
+      <object
+        name="reasoning"
+        description="Evidence summary grounding every assertion (zero-hallucination)"
+        required="true"
+      >
+        <string
+          name="summary"
+          description="Short summary of the evidence from retrieved documents and model scoring"
+          required="true"
+        />
+        <list
+          name="key_factors"
+          description="TreeSHAP feature drivers or regulatory factors behind the decision"
+        >
+          <string
+            name="factor"
+            description="Single feature driver or regulatory factor with its contribution"
+          />
+        </list>
+        <string
+          name="evidence_summary"
+          description="Summary of evidence from retrieved documents and model scoring"
+          required="true"
+        />
+      </object>
+
+      <object
+        name="compliance_checks"
+        description="IRDAI compliance validation results"
+      >
+        <bool
+          name="hallucination_check_passed"
+          description="True if all assertions are grounded in retrieved documents"
+          required="true"
+        />
+        <bool
+          name="citation_check_passed"
+          description="True if at least one policy clause with chunk ID is cited"
+          required="true"
+        />
+        <bool
+          name="limit_check_passed"
+          description="True if payout does not exceed statutory limits"
+          required="true"
+        />
+        <bool
+          name="language_check_passed"
+          description="True if language is professional and regulatory-compliant"
+          required="true"
+        />
+        <string
+          name="compliance_notes"
+          description="Any compliance issues or warnings"
+          required="false"
+        />
+      </object>
 
       <string
-        name="evidence_summary"
-        description="Summary of evidence from retrieved documents and model scoring"
-        required="true"
-      />
-    </object>
-
-    <object
-      name="compliance_checks"
-      description="IRDAI compliance validation results"
-
-      <bool
-        name="hallucination_check_passed"
-        description="True if all assertions are grounded in retrieved documents"
-        required="true"
-      />
-
-      <bool
-        name="citation_check_passed"
-        description="True if at least one policy clause with chunk ID is cited"
-        required="true"
-      />
-
-      <bool
-        name="limit_check_passed"
-        description="True if payout does not exceed statutory limits"
-        required="true"
-      />
-
-      <bool
-        name="language_check_passed"
-        description="True if language is professional and regulatory-compliant"
-        required="true"
-      />
-
-      <string
-        name="compliance_notes"
-        description="Any compliance issues or warnings"
+        name="hitl_routing_reason"
+        description="Reason for routing to Human-in-the-Loop (if requires_human_review is true)"
         required="false"
       />
+
     </object>
+  </output>
 
-    <string
-      name="hitl_routing_reason"
-      description="Reason for routing to Human-in-the-Loop (if requires_human_review is true)"
-      required="false"
-    />
-
-  </object>
-
-</output>
-
-<instructions>
+  <instructions>
 You are the ClaimGuard AI Policy Copilot output validator.
 
 Your role is to ensure that all decision outputs comply with IRDAI regulations and ClaimGuard AI's zero-hallucination policy.
@@ -270,18 +204,18 @@ Validation Rules:
    - recommended_payout must not exceed max_allowed_payout in statutory_limits
 
 3. Confidence-Based HITL Routing:
-   - If confidence_score < 0.85, requires_human_review MUST be true
+   - If confidence_score is below 0.85, requires_human_review MUST be true
    - If coverage_status is 'requires_review', requires_human_review MUST be true
    - hitl_routing_reason must explain why HITL is required
 
 4. Citation Requirements:
    - policy_clauses list must contain at least one citation with valid chunk_id
    - Each citation must include: clause_id, section, title, excerpt, relevance_score
-   - relevance_score must be >= 0.70 for primary citations
+   - relevance_score must be at least 0.70 for primary citations
 
 5. Statutory Limit Enforcement:
    - statutory_limits.max_allowed_payout must be defined based on claim type
-   - within_limits must be true if recommended_payout <= max_allowed_payout
+   - within_limits must be true if recommended_payout is within max_allowed_payout
    - limit_source must cite the specific IRDAI regulation or policy section
 
 6. Compliance Checks:
@@ -291,9 +225,12 @@ Validation Rules:
    - language_check_passed requires professional, regulatory-compliant language
 
 Output Format:
-- Return the structured object defined in the <output> section
+- Return the structured object defined in the output section
 - Ensure all required fields are populated
 - Use precise, professional language
 - Include all relevant citations with chunk IDs
 - Flag any compliance issues in compliance_notes
-</instructions>
+  </instructions>
+
+</rail>
+
