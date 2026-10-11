@@ -192,7 +192,7 @@ docker compose up --build
 
 ```bash
 # Terminal 1 — Dependencies, Data & Redis
-pip install -r requirements.txt
+pip install -r requirements-backend.txt
 python data/synthetic_generator.py
 docker run -d -p 6379:6379 redis:7-alpine
 
@@ -237,9 +237,13 @@ pip install -r legacy/streamlit/requirements.txt
 streamlit run streamlit_app.py --server.port 8501
 ```
 
-Then open [http://localhost:8501](http://localhost:8501). If `py -3.11` reports that no Python is installed, install 64-bit Python 3.11, enable the Python launcher / PATH option, restart VS Code, then select `.venv` with **Ctrl+Shift+P → Python: Select Interpreter**. The Streamlit dashboard has its own dependency set; the backend `requirements.txt` is only needed when running the API and workers too.
+Then open [http://localhost:8501](http://localhost:8501). If `py -3.11` reports that no Python is installed, install 64-bit Python 3.11, enable the Python launcher / PATH option, restart VS Code, then select `.venv` with **Ctrl+Shift+P → Python: Select Interpreter**. The root `requirements.txt` is the lightweight Streamlit Cloud dependency entry and the backend/API dependencies are in `requirements-backend.txt`.
 
 **PyArrow / CMake error:** If installation reports a setuptools warning about `pyarrow.vendored` followed by `command 'cmake' failed`, pip is attempting a source build. PyArrow is not required by the standalone Streamlit dashboard, so use the dashboard-only commands above. For API/workers, update pip first and request a PyArrow wheel explicitly with `python -m pip install --only-binary=pyarrow "pyarrow>=14.0.0"` before installing backend requirements. If no wheel matches, confirm the environment is 64-bit CPython 3.11 (`python --version` and `python -c "import platform; print(platform.architecture())"`).
+
+#### Deploy on Streamlit Community Cloud
+
+Create the app using `streamlit_app.py` as the entrypoint. The repository root `requirements.txt` now points to the minimal dashboard dependencies, while `requirements-backend.txt` is reserved for Docker, API, workers, and CI. In Community Cloud, select Python 3.11 in **Advanced settings** when creating the app; changing the Python version after deployment requires recreating the app. After pushing dependency changes, use **Manage app → Reboot** to rebuild the environment.
 
 ---
 

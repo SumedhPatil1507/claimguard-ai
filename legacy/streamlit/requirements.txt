@@ -6,6 +6,7 @@ numpy>=1.23.0,<2.0.0
 pydantic>=2.0.0,<3.0.0
 networkx>=2.8
 scikit-learn>=1.2.0
-xgboost>=1.7.0
-lightgbm>=3.3.0
-shap>=0.41.0
+
+# Optional model accelerators (XGBoost, LightGBM, SHAP) are deliberately
+# omitted: the scoring engines fall back to scikit-learn and model-free
+# explanations when these packages are unavailable.

@@ -1,0 +1,76 @@
+# ClaimGuard AI — Backend & Worker Dependencies (Python 3.11+)
+
+# ── Core (always required) ───────────────────────────────────────────────────
+fastapi>=0.111.0
+uvicorn[standard]>=0.29.0
+sse-starlette>=2.0.0,<3.0.0
+pandas>=1.5.0
+numpy>=1.23.0,<2.0.0
+python-dotenv>=0.21.0
+pydantic>=2.0.0,<3.0.0
+pydantic-settings>=2.0.0
+
+# ── ML layer (graceful sklearn/rule fallback if missing) ─────────────────────
+scikit-learn>=1.2.0
+xgboost>=1.7.0
+lightgbm>=3.3.0
+optuna>=3.0.0
+
+# ── Graph (NetworkX / Neo4j) ─────────────────────────────────────────────────
+networkx>=2.8
+neo4j>=5.20.0
+
+# ── LangChain / LangGraph (graceful linear fallback if missing) ──────────────
+langchain-core>=0.1.0
+langgraph>=0.0.40
+langchain-groq>=0.0.1
+
+# ── Security helpers & JWT ──────────────────────────────────────────────────
+cryptography>=39.0.0
+python-jose[cryptography]>=3.3.0
+
+# ── Observability ────────────────────────────────────────────────────────────
+prometheus-client>=0.16.0
+
+# ── SHAP (graceful empty-list fallback if missing) ───────────────────────────
+shap>=0.41.0
+
+# ── GNN collusion detection (optional — heavy, CPU-only wheels shown) ────────
+# torch>=2.1.0
+# torch_geometric>=2.4.0
+
+# ── MLflow — experiment tracking, model registry, artifact logging ────────────
+mlflow>=2.12.0,<3.0.0
+
+# ── Evidently AI — data drift + concept drift detection ──────────────────────
+evidently>=0.4.30,<0.5.0
+scipy>=1.10.0
+
+# ── matplotlib — feature-importance plots logged to MLflow ───────────────────
+matplotlib>=3.7.0
+
+# ── pyarrow — required by Parquet baseline storage (data/baselines/) ─────────
+pyarrow>=14.0.0
+
+# ── Async task queue ─────────────────────────────────────────────────────────
+celery[redis]>=5.3.0,<6.0.0
+redis>=5.0.0,<6.0.0
+
+# ── Vector store — hybrid search (Qdrant + BM25 + cross-encoder) ─────────────
+qdrant-client>=1.9.0
+rank-bm25>=0.2.2
+sentence-transformers>=2.7.0
+
+# ── Database & Storage ───────────────────────────────────────────────────────
+asyncpg>=0.29.0
+supabase>=2.4.0
+
+# ── Guardrails AI for output validation ─────────────────────────────────────
+guardrails-ai>=0.4.0
+
+# ── OpenTelemetry instrumentation ───────────────────────────────────────────
+opentelemetry-sdk>=1.22.0
+opentelemetry-instrumentation-fastapi>=0.43b0
+opentelemetry-instrumentation>=0.43b0
+opentelemetry-exporter-otlp>=1.22.0
+opentelemetry-api>=1.22.0

@@ -18,7 +18,7 @@ Open <http://localhost:8501>. The root `streamlit_app.py` launches `legacy/strea
 
 ## Dependencies
 
-The dashboard-specific packages are listed in [`requirements.txt`](requirements.txt). They include Streamlit, Plotly, pandas, scikit-learn, XGBoost, LightGBM, and SHAP. They are sufficient for the standalone dashboard; root `requirements.txt` and `requirements-full.txt` are for the API/workers and optional monitoring stack.
+The dashboard-specific packages are listed in [`requirements.txt`](requirements.txt). They include Streamlit, Plotly, pandas, scikit-learn, and NetworkX. The root `requirements.txt` points to this dashboard set for Streamlit Community Cloud. Backend/API and worker dependencies are kept separately in `requirements-backend.txt`.
 
 ## PyArrow / CMake installation error
 

@@ -115,7 +115,7 @@ Guardrails AI validates Policy Copilot outputs against IRDAI compliance requirem
 
 ### Installation
 
-The package is already included in `requirements.txt`:
+The package is included in `requirements-backend.txt`:
 ```
 guardrails-ai>=0.4.0
 ```

@@ -3,9 +3,9 @@ FROM python:3.11-slim AS builder
 
 WORKDIR /build
 
-COPY requirements.txt .
+COPY requirements-backend.txt .
 
-RUN pip install --no-cache-dir --user -r requirements.txt
+RUN pip install --no-cache-dir --user -r requirements-backend.txt
 
 # ── Stage 2: runtime image ────────────────────────────────────────────────────
 FROM python:3.11-slim
