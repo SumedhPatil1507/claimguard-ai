@@ -1462,6 +1462,26 @@ with tabs[7]:
 
                 st.markdown("#### 📊 Detailed Validation Results")
 
+                validation_details = result.get("validation_result") or {}
+                raw_confidence = validation_details.get("confidence_score")
+                try:
+                    confidence_score = (
+                        float(raw_confidence) if raw_confidence is not None else None
+                    )
+                    if confidence_score is not None and not np.isfinite(confidence_score):
+                        confidence_score = None
+                except (TypeError, ValueError):
+                    confidence_score = None
+
+                if confidence_score is None:
+                    confidence_status = "Not evaluated"
+                    confidence_details = "No confidence score returned"
+                else:
+                    confidence_status = (
+                        "Pass" if confidence_score >= _HITL_CONFIDENCE_THRESHOLD else "Fail"
+                    )
+                    confidence_details = f"Score: {confidence_score:.2f}"
+
                 # Create validation metrics table
                 val_metrics = {
                     "Check": [
@@ -1478,7 +1498,7 @@ with tabs[7]:
                         "✅" if result["validation_result"].get("references_regulation") else "❌",
                         "✅" if result["validation_result"].get("has_chunk_citations") else "❌",
                         "✅" if limit_check["within_limits"] else "❌",
-                        "✅" if result["validation_result"].get("confidence_score", 1.0) >= _HITL_CONFIDENCE_THRESHOLD else "❌"
+                        confidence_status
                     ],
                     "Details": [
                         "Mandatory human review statement present" if result["validation_result"].get("requires_human_review") else "Missing human review statement",
@@ -1486,7 +1506,7 @@ with tabs[7]:
                         "Regulatory citations present" if result["validation_result"].get("references_regulation") else "Missing regulatory citations",
                         "Chunk ID citations present" if result["validation_result"].get("has_chunk_citations") else "Missing chunk ID citations",
                         f"Within ₹{limit_check['max_allowed']:,.0f} limit" if limit_check["within_limits"] else f"Exceeds limit by ₹{limit_check['excess_amount']:,.0f}",
-                        f"Score: {result['validation_result'].get('confidence_score', 0.0):.2f}" if "confidence_score" in result["validation_result"] else "Not evaluated"
+                        confidence_details
                     ]
                 }
                 val_df = pd.DataFrame(val_metrics)
