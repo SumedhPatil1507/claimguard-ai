@@ -216,8 +216,7 @@ npm run dev
 ClaimGuard AI includes a full-featured Streamlit platform with rich interactive Plotly gauges, tabular analyzers, and graph visualizers:
 
 ```bash
-# Install dependencies
-pip install -r requirements.txt
+# Install only the dashboard dependencies for a standalone Streamlit run
 pip install -r legacy/streamlit/requirements.txt
 
 # Run directly from root:
@@ -234,12 +233,11 @@ Open **Terminal → New Terminal** in VS Code at the repository root and run the
 py -3.11 -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
-pip install -r requirements.txt
 pip install -r legacy/streamlit/requirements.txt
 streamlit run streamlit_app.py --server.port 8501
 ```
 
-Then open [http://localhost:8501](http://localhost:8501). If `py -3.11` is unavailable, install Python 3.11 and select `.venv` with **Ctrl+Shift+P → Python: Select Interpreter** in VS Code. To use the newer production dashboard, start the API and Next.js services instead; the Streamlit interface is kept as a standalone interactive dashboard.
+Then open [http://localhost:8501](http://localhost:8501). If `py -3.11` reports that no Python is installed, install Python 3.11, enable the Python launcher / PATH option, restart VS Code, then select `.venv` with **Ctrl+Shift+P → Python: Select Interpreter**. The Streamlit dashboard has its own dependency set; the backend `requirements.txt` is only needed when running the API and workers too.
 
 ---
 

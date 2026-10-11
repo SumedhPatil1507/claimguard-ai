@@ -1,9 +1,10 @@
-"""
-streamlit_app.py — Streamlit Community Cloud entry point for ClaimGuard AI.
+"""Optional Streamlit entry point for the legacy dashboard.
 
-Streamlit Cloud requires the main file to be named streamlit_app.py at the
-repo root. This file adds the repo root to sys.path and then runs app/app.py
-via runpy so __file__ is set correctly and all relative imports resolve.
+Run from the repository root with:
+    streamlit run legacy/streamlit/streamlit_app.py
+
+The launcher adds the repository root for ``src.*`` imports and runs the
+dashboard from its own directory so sample-data paths resolve consistently.
 """
 from __future__ import annotations
 
@@ -11,10 +12,12 @@ import runpy
 import sys
 from pathlib import Path
 
-# Repo root (where this file lives) must be on sys.path so src.* resolves
-_ROOT = Path(__file__).resolve().parent
+# This entry point lives at legacy/streamlit/streamlit_app.py; src.* modules
+# and the app's sample data are rooted at the repository top level.
+_ROOT = Path(__file__).resolve().parents[2]
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
-# Run the actual app
-runpy.run_path(str(_ROOT / "app.py"), run_name="__main__")
+# Run the actual app from its legacy dashboard directory.
+_APP_PATH = _ROOT / "legacy" / "streamlit" / "app.py"
+runpy.run_path(str(_APP_PATH), run_name="__main__")

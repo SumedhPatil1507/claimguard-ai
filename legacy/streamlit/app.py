@@ -12,8 +12,9 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-# Ensure repo root is on sys.path so src.* imports work from any working directory
-_ROOT = Path(__file__).resolve().parent.parent
+# Resolve the repository root (app.py is two directories below it) so both
+# ``src.*`` imports and sample-data paths work from any launch directory.
+_ROOT = Path(__file__).resolve().parents[2]
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
