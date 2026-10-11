@@ -51,7 +51,12 @@ except ImportError:
 # ---------------------------------------------------------------------------
 try:
     from src.underwriting import UnderwritingEngine, UnderwritingFeatures
-    _uw_engine = UnderwritingEngine()
+
+    @st.cache_resource(show_spinner="Loading underwriting risk model...")
+    def _get_underwriting_engine():
+        return UnderwritingEngine()
+
+    _uw_engine = _get_underwriting_engine()
     HAS_UW = True
 except Exception:
     HAS_UW = False
@@ -60,7 +65,12 @@ except Exception:
 
 try:
     from src.claims_fraud import ClaimFeatures, FraudDetectionEngine
-    _fraud_engine = FraudDetectionEngine()
+
+    @st.cache_resource(show_spinner="Loading claims fraud model...")
+    def _get_fraud_engine():
+        return FraudDetectionEngine()
+
+    _fraud_engine = _get_fraud_engine()
     HAS_FRAUD = True
 except Exception:
     HAS_FRAUD = False
