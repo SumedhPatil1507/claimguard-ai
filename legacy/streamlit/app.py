@@ -1373,7 +1373,9 @@ with tabs[7]:
             for claim_type, config in _IRDAI_STATUTORY_LIMITS.items():
                 limit_data.append({
                     "Claim Type": claim_type.title(),
-                    "Max Payout (₹)": config["max_allowed_payout"],
+                    # guardrails_config stores this as ``max_payout``; the
+                    # validation helper exposes ``max_allowed`` in results.
+                    "Max Payout (₹)": config["max_payout"],
                     "Regulation": config["regulation"]
                 })
             limits_df = pd.DataFrame(limit_data)
