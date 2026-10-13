@@ -94,6 +94,20 @@ ALL_EXTENSIONS = CSV_EXTENSIONS | PDF_EXTENSIONS | IMAGE_EXTENSIONS | MARKDOWN_E
 MAX_FILE_BYTES = 25 * 1024 * 1024   # 25 MB hard cap per upload
 MAX_CSV_ROWS = 10_000               # rows per CSV batch
 
+# Defense in depth for document ingestion. Structured claim data should use the
+# ZKP flow; these patterns prevent common identifiers leaking through OCR/text.
+_PII_PATTERNS = (
+    re.compile(r"\b[A-Z]{5}[0-9]{4}[A-Z]\b", re.IGNORECASE),  # Indian PAN
+    re.compile(r"\b\d{3}-?\d{2}-?\d{4}\b"),                 # US SSN
+)
+
+
+def redact_pii(text: str) -> str:
+    """Remove common high-risk identifiers before embedding or prompting."""
+    for pattern in _PII_PATTERNS:
+        text = pattern.sub("[REDACTED_PII]", text)
+    return text
+
 # Column signatures used to classify an uploaded CSV.
 _CLAIMS_REQUIRED = {"claim_id", "claim_amount"}
 _POLICIES_REQUIRED = {"policy_id", "sum_insured"}
@@ -344,6 +358,14 @@ def upsert_chunks(chunks: List[Dict[str, str]]) -> int:
     """
     if not chunks:
         return 0
+
+    # Sanitize at the final vector-store boundary as well as upstream. Never
+    # allow callers to bypass redaction by invoking upsert_chunks directly.
+    chunks = [
+        {key: (redact_pii(value) if isinstance(value, str) else value)
+         for key, value in chunk.items()}
+        for chunk in chunks
+    ]
 
     def _do_upsert(span: Any) -> int:
         try:

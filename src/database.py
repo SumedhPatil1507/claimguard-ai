@@ -39,11 +39,13 @@ import json
 import logging
 import os
 import socket
+import random
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Awaitable, Callable, Dict, List, Optional, TypeVar
 from urllib.parse import urlparse
 
 logger = logging.getLogger(__name__)
+_T = TypeVar("_T")
 
 # ---------------------------------------------------------------------------
 # Data directory
@@ -231,25 +233,88 @@ class DatabaseManager:
 
     def __init__(self) -> None:
         self._database_url: Optional[str] = os.environ.get("DATABASE_URL")
+        # Read replicas are ordered by operator preference. DATABASE_URL is
+        # always retained as the final read candidate and sole write target.
+        self._read_replica_urls = [
+            value.strip() for value in os.environ.get("DATABASE_READ_REPLICA_URLS", "").split(";")
+            if value.strip()
+        ]
         self._supabase_url: Optional[str] = os.environ.get("SUPABASE_URL")
         self._supabase_key: Optional[str] = os.environ.get("SUPABASE_KEY")
 
     # ── asyncpg helpers ──────────────────────────────────────────────────────
 
+    async def _asyncpg_connect(self, *, read_only: bool = False):
+        """Connect with ordered endpoint failover; asyncpg also accepts host lists in DSNs."""
+        if not HAS_ASYNCPG:
+            raise InfrastructureError("asyncpg is not installed.")
+        candidates = ([*self._read_replica_urls, self._database_url] if read_only else [self._database_url])
+        errors = []
+        for dsn in candidates:
+            if not dsn:
+                continue
+            try:
+                return await asyncpg.connect(dsn)
+            except Exception as exc:
+                errors.append(exc)
+                logger.warning("Database endpoint unavailable; trying configured failover endpoint (%s).", type(exc).__name__)
+        if errors:
+            raise InfrastructureError(f"All configured database endpoints failed: {errors[-1]}") from errors[-1]
+        raise InfrastructureError("No database endpoint is configured.")
+
     async def _asyncpg_fetch(self, query: str, *args: Any) -> List[Dict]:
-        conn = await asyncpg.connect(self._database_url)
-        try:
-            rows = await conn.fetch(query, *args)
-            return [dict(row) for row in rows]
-        finally:
-            await conn.close()
+        candidates = [*self._read_replica_urls, self._database_url]
+        errors = []
+        for dsn in candidates:
+            if not dsn:
+                continue
+            conn = None
+            try:
+                conn = await asyncpg.connect(dsn)
+                rows = await conn.fetch(query, *args)
+                return [dict(row) for row in rows]
+            except Exception as exc:
+                errors.append(exc)
+                logger.warning("Database read endpoint failed; trying next configured endpoint (%s).", type(exc).__name__)
+            finally:
+                if conn is not None:
+                    await conn.close()
+        if errors:
+            raise InfrastructureError(f"All configured read endpoints failed: {errors[-1]}") from errors[-1]
+        raise InfrastructureError("No database endpoint is configured.")
 
     async def _asyncpg_execute(self, query: str, *args: Any) -> None:
-        conn = await asyncpg.connect(self._database_url)
+        conn = await self._asyncpg_connect()
         try:
             await conn.execute(query, *args)
         finally:
             await conn.close()
+
+    async def _run_serializable_transaction(
+        self, operation: Callable[[Any], Awaitable[_T]], *, max_attempts: int = 5,
+        base_delay_seconds: float = 0.05, max_delay_seconds: float = 1.0,
+    ) -> _T:
+        """Retry CockroachDB/PostgreSQL serialization conflicts (SQLSTATE 40001).
+
+        The callback must contain only database work and must be safe to rerun;
+        do not perform external side effects inside it. Writes always connect to
+        DATABASE_URL, never to a read replica.
+        """
+        if max_attempts < 1:
+            raise ValueError("max_attempts must be at least one")
+        for attempt in range(max_attempts):
+            conn = await self._asyncpg_connect()
+            try:
+                async with conn.transaction(isolation="serializable"):
+                    return await operation(conn)
+            except Exception as exc:
+                if getattr(exc, "sqlstate", None) != "40001" or attempt + 1 >= max_attempts:
+                    raise
+                delay = min(max_delay_seconds, base_delay_seconds * (2 ** attempt))
+                await asyncio.sleep(delay * random.uniform(0.75, 1.25))
+            finally:
+                await conn.close()
+        raise RuntimeError("Serializable transaction retry loop exhausted")
 
     # ── supabase helper ──────────────────────────────────────────────────────
 
@@ -356,6 +421,22 @@ class ProductionDatabaseManager(DatabaseManager):
         """
         assert_postgres_reachable(self._database_url)
 
+    async def save_zk_verification(self, claimant_ref: str, zk_proof_hash: str) -> None:
+        """Persist only a pseudonymous reference and verified proof digest."""
+        import re
+        if not re.fullmatch(r"[0-9a-f]{64}", zk_proof_hash or ""):
+            raise ValueError("zk_proof_hash must be a lowercase SHA-256 hex digest")
+        if not claimant_ref or len(claimant_ref) > 128:
+            raise ValueError("claimant_ref must be a non-PII opaque reference")
+        if not self._database_url or not HAS_ASYNCPG:
+            raise InfrastructureError("PostgreSQL/asyncpg is required for ZKP audit persistence.")
+        await self._asyncpg_execute(
+            "INSERT INTO claimant_zk_verifications (claimant_ref, zk_proof_hash) "
+            "VALUES ($1, $2) ON CONFLICT (claimant_ref) DO UPDATE SET "
+            "zk_proof_hash = EXCLUDED.zk_proof_hash, verified_at = now()",
+            claimant_ref, zk_proof_hash,
+        )
+
     # ── Override: no CSV fallback ────────────────────────────────────────────
 
     async def get_claims(self, filters: Optional[Dict] = None) -> List[Dict]:
@@ -453,10 +534,13 @@ class ProductionDatabaseManager(DatabaseManager):
             try:
                 columns = ", ".join(decision.keys())
                 placeholders = ", ".join(f"${i + 1}" for i in range(len(decision)))
-                await self._asyncpg_execute(
-                    f"INSERT INTO decisions ({columns}) VALUES ({placeholders})",
-                    *decision.values(),
-                )
+                query = f"INSERT INTO decisions ({columns}) VALUES ({placeholders})"
+                values = tuple(decision.values())
+
+                async def _insert(conn: Any) -> None:
+                    await conn.execute(query, *values)
+
+                await self._run_serializable_transaction(_insert)
                 return
             except InfrastructureError:
                 raise

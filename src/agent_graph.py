@@ -442,6 +442,10 @@ def writer_node(state: CopilotState) -> dict:
                     span.set_attribute("guardrails_hitl_required", validation_result.get("hitl_required", False))
 
                     if not validation_result["is_valid"]:
+                        # Any validation failure is a mandatory human-review
+                        # hold, even if a validator implementation returns an
+                        # inconsistent hitl_required flag.
+                        state["requires_human_review"] = True
                         logger.warning(
                             "writer_node: IRDAI compliance validation failed for draft. "
                             "Validation result: %s",
@@ -539,6 +543,7 @@ def writer_node(state: CopilotState) -> dict:
                 )
 
                 if not validation_result["is_valid"]:
+                    state["requires_human_review"] = True
                     logger.warning(
                         "writer_node: IRDAI compliance validation failed for draft. "
                         "Validation result: %s",

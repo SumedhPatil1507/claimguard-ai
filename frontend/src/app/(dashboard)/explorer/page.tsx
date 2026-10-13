@@ -25,6 +25,10 @@ export default function ExplorerPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch]   = useState("");
   const [page, setPage]       = useState(0);
+  const [selectedType, setSelectedType] = useState<string | null>(null);
+  const [selectedSeverity, setSelectedSeverity] = useState<string | null>(null);
+  const [selectedFraud, setSelectedFraud] = useState<number | null>(null);
+  const [selectedClaimId, setSelectedClaimId] = useState<string | null>(null);
   const PAGE_SIZE = 10;
 
   useEffect(() => {
@@ -67,17 +71,31 @@ export default function ExplorerPage() {
       y: c.claim_amount,
       z: c.fraud_label ? 8 : 5,
       fraud: c.fraud_label,
+      claim_id: c.claim_id,
     })), [claims]);
 
   // ── Table ─────────────────────────────────────────────────────────────────
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
     return claims.filter((c) =>
-      !q || c.claim_id.toLowerCase().includes(q) || c.claimant_id.toLowerCase().includes(q) || c.claim_type.toLowerCase().includes(q),
+      (!q || c.claim_id.toLowerCase().includes(q) || c.claimant_id.toLowerCase().includes(q) || c.claim_type.toLowerCase().includes(q)) &&
+      (!selectedType || c.claim_type === selectedType) &&
+      (!selectedSeverity || c.claim_severity === selectedSeverity) &&
+      (selectedFraud === null || c.fraud_label === selectedFraud),
     );
-  }, [claims, search]);
+  }, [claims, search, selectedType, selectedSeverity, selectedFraud]);
   const paged     = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+  const selectedClaim = selectedClaimId ? claims.find((claim) => claim.claim_id === selectedClaimId) : null;
+  const hasChartFilter = selectedType !== null || selectedSeverity !== null || selectedFraud !== null;
+
+  function clearChartFilters() {
+    setSelectedType(null);
+    setSelectedSeverity(null);
+    setSelectedFraud(null);
+    setSelectedClaimId(null);
+    setPage(0);
+  }
 
   if (loading) {
     return (
@@ -102,6 +120,17 @@ export default function ExplorerPage() {
         </p>
       </div>
 
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-primary/15 bg-gradient-to-r from-primary/10 via-card to-emerald-500/5 px-4 py-3">
+        <div className="flex flex-wrap items-center gap-2 text-xs">
+          <span className="font-semibold text-foreground">Interactive explorer</span>
+          <span className="text-muted-foreground">Hover for details · click a plot to filter records</span>
+          {selectedType && <Badge>Type: {selectedType}</Badge>}
+          {selectedSeverity && <Badge>Severity: {selectedSeverity}</Badge>}
+          {selectedFraud !== null && <Badge>{selectedFraud ? "Fraud" : "Legitimate"}</Badge>}
+        </div>
+        {hasChartFilter && <button onClick={clearChartFilters} className="rounded-lg border border-border px-3 py-1.5 text-xs font-medium hover:bg-secondary/70 transition">Clear chart filters</button>}
+      </div>
+
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard label="Total Claims"   value={stats.total.toLocaleString()}       icon={FileText}    />
@@ -122,8 +151,8 @@ export default function ExplorerPage() {
               <YAxis tick={{ fill: "hsl(215 20% 65%)", fontSize: 11 }} axisLine={false} tickLine={false} />
               <Tooltip contentStyle={CHART_STYLE} />
               <Legend wrapperStyle={{ fontSize: 12 }} />
-              <Bar dataKey="legitimate" name="Legitimate" fill={COLORS.legitimate} radius={[3, 3, 0, 0]} />
-              <Bar dataKey="fraud"      name="Fraud"      fill={COLORS.fraud}      radius={[3, 3, 0, 0]} />
+              <Bar dataKey="legitimate" name="Legitimate" fill={COLORS.legitimate} radius={[3, 3, 0, 0]} onClick={(entry: any) => { setSelectedType(String(entry?.payload?.name ?? "")); setSelectedFraud(0); setPage(0); }} cursor="pointer" />
+              <Bar dataKey="fraud"      name="Fraud"      fill={COLORS.fraud}      radius={[3, 3, 0, 0]} onClick={(entry: any) => { setSelectedType(String(entry?.payload?.name ?? "")); setSelectedFraud(1); setPage(0); }} cursor="pointer" />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -133,8 +162,8 @@ export default function ExplorerPage() {
           <h3 className="text-sm font-semibold mb-4">Fraud Distribution</h3>
           <ResponsiveContainer width="100%" height={220}>
             <PieChart>
-              <Pie data={pieData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={3} dataKey="value">
-                {pieData.map((d, i) => <Cell key={i} fill={d.color} />)}
+              <Pie data={pieData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={3} dataKey="value" onClick={(entry: any) => { setSelectedFraud((entry?.name ?? entry?.payload?.name) === "Fraud" ? 1 : 0); setPage(0); }}>
+                {pieData.map((d, i) => <Cell key={i} fill={d.color} cursor="pointer" />)}
               </Pie>
               <Tooltip contentStyle={CHART_STYLE} formatter={(v: number) => [v.toLocaleString(), ""]} />
               <Legend wrapperStyle={{ fontSize: 12 }} />
@@ -154,7 +183,7 @@ export default function ExplorerPage() {
               <XAxis dataKey="name" tick={{ fill: "hsl(215 20% 65%)", fontSize: 11 }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fill: "hsl(215 20% 65%)", fontSize: 11 }} axisLine={false} tickLine={false} />
               <Tooltip contentStyle={CHART_STYLE} />
-              <Bar dataKey="count" fill="#14b8a6" radius={[3, 3, 0, 0]} />
+              <Bar dataKey="count" fill="#14b8a6" radius={[3, 3, 0, 0]} onClick={(entry: any) => { setSelectedSeverity(String(entry?.payload?.name ?? "")); setPage(0); }} cursor="pointer" />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -174,17 +203,29 @@ export default function ExplorerPage() {
                 fill={COLORS.legitimate}
                 fillOpacity={0.6}
                 name="Legitimate"
+                onClick={(entry: any) => setSelectedClaimId(String(entry?.claim_id ?? entry?.payload?.claim_id ?? ""))}
               />
               <Scatter
                 data={scatterData.filter((d) => d.fraud === 1)}
                 fill={COLORS.fraud}
                 fillOpacity={0.7}
                 name="Fraud"
+                onClick={(entry: any) => setSelectedClaimId(String(entry?.claim_id ?? entry?.payload?.claim_id ?? ""))}
               />
             </ScatterChart>
           </ResponsiveContainer>
         </div>
       </div>
+
+      {selectedClaim && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-primary/25 bg-primary/5 px-4 py-3 text-sm animate-fade-in">
+          <div>
+            <p className="font-semibold">Selected claim <span className="font-mono text-primary">{selectedClaim.claim_id}</span></p>
+            <p className="mt-1 text-xs capitalize text-muted-foreground">{selectedClaim.claim_type} · {selectedClaim.claim_severity} severity · {selectedClaim.num_prior_claims} prior claims · {formatCurrency(selectedClaim.claim_amount)}</p>
+          </div>
+          <button onClick={() => setSelectedClaimId(null)} className="rounded-lg border border-border px-3 py-1.5 text-xs hover:bg-secondary/70 transition">Dismiss</button>
+        </div>
+      )}
 
       {/* Table */}
       <div className="bg-card border border-border rounded-xl overflow-hidden">
@@ -209,7 +250,7 @@ export default function ExplorerPage() {
             </thead>
             <tbody>
               {paged.map((c, i) => (
-                <tr key={c.claim_id} className={`border-b border-border/50 hover:bg-secondary/20 transition ${i % 2 === 0 ? "" : "bg-secondary/5"}`}>
+                <tr key={c.claim_id} onClick={() => setSelectedClaimId(c.claim_id)} className={`cursor-pointer border-b border-border/50 hover:bg-primary/10 transition ${selectedClaimId === c.claim_id ? "bg-primary/10" : i % 2 === 0 ? "" : "bg-secondary/5"}`}>
                   <td className="px-4 py-2.5 font-mono text-xs text-muted-foreground">{c.claim_id}</td>
                   <td className="px-4 py-2.5 text-xs">{c.claimant_id}</td>
                   <td className="px-4 py-2.5 font-medium">{formatCurrency(c.claim_amount)}</td>

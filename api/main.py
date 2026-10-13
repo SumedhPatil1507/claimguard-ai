@@ -1207,29 +1207,28 @@ async def copilot_decide(
                     model_version="1.0.0"
                 )
 
-                processing_time = (time.monotonic() - t0) * 1000
-
-                return CopilotDecisionResponse(
-                    decision=decision,
-                    validation_passed=True,
-                    validation_errors=[],
-                    processing_time_ms=processing_time
+                from src.decision_json import build_copilot_decision
+                explainable = build_copilot_decision(
+                    {**decision.model_dump(), "model_result": model_result},
+                    retrieved_docs,
                 )
+                return explainable.model_dump()
 
             except Exception as schema_exc:
-                logger.warning("copilot/decide: schema validation failed, returning raw state: %s", schema_exc)
-                # Fallback to raw state if schema validation fails
-                return state
+                logger.warning("copilot/decide: structured decision conversion failed: %s", schema_exc)
+                # Keep the public contract stable even if the richer schema
+                # conversion fails; default to an explicit human-review result.
+                from src.decision_json import build_copilot_decision
+                safe_result = dict(state.get("model_result") or {})
+                safe_result.update({"requires_human_review": True, "coverage_status": "requires_review"})
+                return build_copilot_decision(safe_result, state.get("retrieved_docs", [])).model_dump()
 
-        # Fallback: return raw state if schema enforcement is not available
-        processing_time = (time.monotonic() - t0) * 1000
-        return {
-            **state,
-            "_meta": {
-                "schema_enforced": False,
-                "processing_time_ms": processing_time
-            }
-        }
+        # The decision response remains stable when optional schema packages
+        # are unavailable; route uncertain cases to an analyst.
+        from src.decision_json import build_copilot_decision
+        safe_result = dict(state.get("model_result") or {})
+        safe_result.update({"requires_human_review": True, "coverage_status": "requires_review"})
+        return build_copilot_decision(safe_result, state.get("retrieved_docs", [])).model_dump()
 
     except Exception as exc:
         logger.warning("copilot/decide: pipeline error — %s", exc)

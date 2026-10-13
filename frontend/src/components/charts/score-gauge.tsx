@@ -1,6 +1,6 @@
 "use client";
 
-import { RadialBarChart, RadialBar, ResponsiveContainer, PolarAngleAxis } from "recharts";
+import { RadialBarChart, RadialBar, ResponsiveContainer, PolarAngleAxis, Tooltip } from "recharts";
 import { getRiskColor } from "@/lib/utils";
 
 interface ScoreGaugeProps {
@@ -30,11 +30,16 @@ export function ScoreGauge({ score, label, tier, size = 180 }: ScoreGaugeProps) 
             endAngle={0}
           >
             <PolarAngleAxis type="number" domain={[0, 100]} angleAxisId={0} tick={false} />
+            <Tooltip
+              formatter={(value: number) => [`${value}%`, label]}
+              contentStyle={{ background: "hsl(222 47% 10%)", border: "1px solid hsl(217 32% 17%)", borderRadius: 8, fontSize: 12 }}
+            />
             <RadialBar
               background={{ fill: "hsl(217 32% 17%)" }}
               dataKey="value"
               angleAxisId={0}
               cornerRadius={8}
+              cursor="pointer"
             />
           </RadialBarChart>
         </ResponsiveContainer>

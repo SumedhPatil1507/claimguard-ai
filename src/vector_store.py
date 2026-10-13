@@ -334,6 +334,10 @@ class PolicyVectorStore:
                         payload["section"] = meta["section"]
                     if "chunk_id" in meta:
                         payload["chunk_id"] = meta["chunk_id"]
+                    # This is a digest of the proof and public signals only;
+                    # never persist a proof witness or raw identity attributes.
+                    if "zk_proof_hash" in meta:
+                        payload["zk_proof_hash"] = meta["zk_proof_hash"]
                     points.append(
                         PointStruct(id=offset + i, vector=emb, payload=payload)
                     )

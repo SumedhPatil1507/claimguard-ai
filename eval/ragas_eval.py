@@ -6,7 +6,6 @@ Evaluates RAG retrieval quality across **50 test scenarios** covering IRDAI
 regulations, policy wording clauses, claim procedures, and exclusions:
 
     * Context Precision — are retrieved chunks relevant to the answer?
-    * Context Recall    — did retrieval cover the ground-truth evidence?
     * Faithfulness      — is the answer grounded in retrieved context?
     * Answer Relevancy  — does the answer address the question?
 
@@ -30,6 +29,7 @@ Output
 from __future__ import annotations
 
 import json
+import math
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -385,7 +385,6 @@ try:
     from ragas.metrics import (  # type: ignore
         answer_relevancy,
         context_precision,
-        context_recall,
         faithfulness,
     )
 
@@ -419,18 +418,25 @@ def _collect_copilot_answers(triples: list[dict]) -> list[dict]:
             contexts = [
                 doc.get("content", "") for doc in result.get("retrieved_docs", [])
             ]
-            # Fall back to ground-truth contexts if retriever returned nothing
-            if not contexts:
-                contexts = triple["ground_truth_contexts"]
+            chunk_ids = [
+                str(doc.get("chunk_id")) for doc in result.get("retrieved_docs", [])
+                if doc.get("chunk_id")
+            ]
         except Exception as exc:
-            answer = f"[Copilot error: {exc}]"
-            contexts = triple["ground_truth_contexts"]
+            answer = ""
+            contexts = []
+            chunk_ids = []
+            row_error = str(exc)
+        else:
+            row_error = None
 
         rows.append(
             {
                 "question": triple["question"],
                 "answer": answer,
                 "contexts": contexts,
+                "retrieved_chunk_ids": chunk_ids,
+                "error": row_error,
                 "ground_truths": [triple["ground_truth_answer"]],
             }
         )
@@ -463,10 +469,9 @@ def _ratio(numerator: int | float, denominator: int | float) -> float:
 
 def _score_scenario(scenario: dict, answer: str, contexts: list[str]) -> dict:
     """
-    Compute the four RAG metrics per scenario using lexical overlap proxies.
+    Compute lexical-overlap proxy metrics per scenario (not RAGAS scores).
 
     * context_precision — |contexts ∩ ground_truth| / |contexts|
-    * context_recall    — |ground_truth ∩ contexts| / |ground_truth|
     * faithfulness      — |answer ∩ contexts| / |answer|
     * answer_relevancy  — |answer ∩ question| / |question|
     """
@@ -479,7 +484,6 @@ def _score_scenario(scenario: dict, answer: str, contexts: list[str]) -> dict:
 
     return {
         "context_precision": round(_ratio(len(ctx & gt), len(ctx)), 4),
-        "context_recall": round(_ratio(len(gt & ctx), len(gt)), 4),
         "faithfulness": round(_ratio(len(ans & ctx), len(ans)), 4),
         "answer_relevancy": round(_ratio(len(ans & q), len(q)), 4),
     }
@@ -507,7 +511,7 @@ def _run_ragas(triples: list[dict]) -> tuple[dict, list[dict]]:
     dataset = Dataset.from_list(rows)
     result = evaluate(
         dataset,
-        metrics=[context_precision, context_recall, faithfulness, answer_relevancy],
+        metrics=[context_precision, faithfulness, answer_relevancy],
     )
     as_dict = result.to_dict()
     per_scenario = []
@@ -515,22 +519,25 @@ def _run_ragas(triples: list[dict]) -> tuple[dict, list[dict]]:
         per_scenario.append({
             "id": scenario.get("id", f"scenario_{i + 1:02d}"),
             "question": scenario["question"],
-            "scores": {
-                k: round(float(as_dict[k][i]), 4)
-                for k in ("context_precision", "context_recall",
-                          "faithfulness", "answer_relevancy")
-                if k in as_dict and as_dict[k][i] is not None
-            },
+            "answer": rows[i]["answer"],
+            "retrieved_chunk_ids": rows[i]["retrieved_chunk_ids"],
+            "error": rows[i]["error"],
+            "scores": {},
         })
+        for key in ("context_precision", "faithfulness", "answer_relevancy"):
+            if key in as_dict and as_dict[key][i] is not None:
+                score = float(as_dict[key][i])
+                if math.isfinite(score):
+                    per_scenario[-1]["scores"][key] = round(score, 4)
     metrics = _mean([p["scores"] for p in per_scenario])
     return metrics, per_scenario
 
 
 def _run_lexical_proxy(triples: list[dict]) -> tuple[dict, list[dict]]:
     """
-    Deterministic fallback: score ground-truth answers/contexts with the
-    lexical-overlap proxies.  When the copilot is available its answers are
-    scored instead, so faithfulness/relevancy reflect live retrieval output.
+    Explicitly labeled lexical proxy for environments without RAGAS. It scores
+    only live copilot output and retrieved contexts, never the gold answers as
+    though they were system output.
     """
     live_rows: list[dict] | None = None
     if HAS_COPILOT:
@@ -541,15 +548,19 @@ def _run_lexical_proxy(triples: list[dict]) -> tuple[dict, list[dict]]:
 
     per_scenario = []
     for i, scenario in enumerate(triples):
-        contexts = scenario["ground_truth_contexts"]
-        answer = scenario["ground_truth_answer"]
+        # Never score against gold material as if it had been retrieved or
+        # generated. Empty copilot output should score as empty evidence.
+        contexts: list[str] = []
+        answer = ""
         if live_rows is not None:
-            contexts = live_rows[i].get("contexts") or contexts
-            answer = live_rows[i].get("answer") or answer
+            contexts = live_rows[i].get("contexts") or []
+            answer = live_rows[i].get("answer") or ""
         scores = _score_scenario(scenario, answer, contexts)
         per_scenario.append({
             "id": scenario["id"],
             "question": scenario["question"],
+            "answer": answer,
+            "retrieved_chunk_ids": live_rows[i]["retrieved_chunk_ids"] if live_rows else [],
             "scores": scores,
         })
     return _mean([p["scores"] for p in per_scenario]), per_scenario
@@ -564,7 +575,7 @@ def save_report(report: dict) -> Path:
     """Persist the JSON report under eval/reports/."""
     REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
     REPORT_PATH.write_text(
-        json.dumps(report, indent=2, ensure_ascii=False),
+        json.dumps(report, indent=2, ensure_ascii=False, allow_nan=False),
         encoding="utf-8",
     )
     return REPORT_PATH
@@ -579,7 +590,6 @@ def _print_results_table(report: dict) -> None:
     print("=" * 56)
     for label, key in [
         ("Context Precision", "context_precision"),
-        ("Context Recall", "context_recall"),
         ("Faithfulness", "faithfulness"),
         ("Answer Relevancy", "answer_relevancy"),
     ]:
@@ -626,7 +636,6 @@ def main() -> int:
         "metrics": metrics,
         "metric_definitions": {
             "context_precision": "relevance of retrieved chunks to ground truth",
-            "context_recall": "coverage of ground-truth evidence by retrieved chunks",
             "faithfulness": "degree to which answers are grounded in retrieved context",
             "answer_relevancy": "degree to which answers address the question",
         },

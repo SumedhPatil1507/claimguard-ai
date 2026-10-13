@@ -22,7 +22,7 @@
 
 <br/>
 
-[🚀 Quick Start](#-quick-start) · [🏗️ Architecture](#️-architecture) · [📡 SSE Streaming & API Reference](#-real-time-sse-streaming--api-reference) · [🖥️ Next.js 14 Frontend](#️-nextjs-14-production-frontend) · [🎈 Streamlit Interactive Platform](#-interactive-streamlit-platform) · [⚙️ Configuration](#️-configuration) · [🧪 Testing](#-testing)
+[🚀 Quick Start](#-quick-start) · [🏗️ Architecture](#️-architecture) · [🔐 Privacy & Resilience](#-privacy--resilience) · [📡 API](#-real-time-sse-streaming--api-reference) · [🖥️ Interactive Dashboard](#️-nextjs-14-production-frontend) · [⚙️ Configuration](#️-configuration) · [🧪 Testing](#-testing)
 
 </div>
 
@@ -32,6 +32,7 @@
 
 | Version | Highlights |
 |---------|-----------|
+| **v1.9** | 🔐 **Privacy & Resilience** — fail-closed snarkjs Groth16 verification boundary, PII redaction before vector upsert, proof-hash audit persistence, asyncpg read-endpoint failover, and serializable transaction retries. |
 | **v1.7** | ⚡ **Real-Time SSE Streaming** — Server-Sent Events with Redis Pub/Sub (`GET /underwrite/stream/{task_id}`, `GET /claims/stream/{task_id}`); custom `useTaskStream` hook with animated live progress indicators. Dual-interface support (Next.js 14 primary + Streamlit runner). |
 | **v1.6** | 🖥️ **Next.js 14 Production Dashboard** — Next.js 14 App Router, Tailwind CSS, Shadcn UI, React Flow collusion canvas, JWT auth, and interactive analytics. |
 | **v1.5** | 📊 **MLflow + Evidently AI** — Experiment tracking (ROC-AUC, F1, artifacts) + data/concept drift detection exposed via Prometheus. |
@@ -401,43 +402,17 @@ curl -X POST http://localhost:8000/copilot/decide \
   }'
 ```
 
-**Response with Guardrails Validation (v1.8)**:
+**Explainable Decision response**:
 ```json
 {
-  "decision": {
-    "decision_type": "recommendation",
-    "coverage_status": "requires_review",
-    "recommended_payout": 0.0,
-    "confidence_score": 0.72,
-    "requires_human_review": true,
-    "citations": {
-      "policy_clauses": [
-        {
-          "clause_id": "policy_section_4_2_chunk_1",
-          "section": "Section 4.2",
-          "title": "Non-Disclosure of Material Facts",
-          "excerpt": "Any deliberate concealment of material facts...",
-          "relevance_score": 0.89
-        }
-      ],
-      "regulatory_references": []
-    },
-    "statutory_limits": {
-      "max_allowed_payout": 10000000.0,
-      "within_limits": true,
-      "limit_source": "IRDAI Motor Own Damage Guidelines 2023"
-    },
-    "compliance_checks": {
-      "hallucination_check_passed": true,
-      "citation_check_passed": true,
-      "limit_check_passed": true,
-      "language_check_passed": true
-    },
-    "hitl_routing_reason": "Confidence score 0.72 below threshold 0.85"
-  },
-  "validation_passed": true,
-  "validation_errors": [],
-  "processing_time_ms": 245.3
+  "verdict": "ESCALATE — HITL REQUIRED",
+  "reasoning": "Cryptographic ZKP proof verification: no verified proof attached. TreeSHAP drivers: unavailable. Qdrant hybrid similarity scores: not attached.",
+  "recommendation": "HITL Review",
+  "next_steps": [
+    "Step 1: Analyst must validate every coverage assertion against the cited policy chunk IDs before communicating the decision",
+    "Step 2: Request any outstanding documents required by the cited policy clauses",
+    "Step 3: Statutory limit audit check — validate the requested amount against IRDAI guidelines before settlement"
+  ]
 }
 ```
 </details>
@@ -483,6 +458,10 @@ frontend/src/
 
 ---
 
+### Interactive plot controls
+
+The Data Explorer charts are linked to the claims table: click a claim-type bar, fraud/legitimate slice, or severity bar to filter the records; click a scatter point to inspect its claim. Click a SHAP bar to pin that driver's value and risk direction. Hover any chart for the underlying values, and use **Clear chart filters** to restore the full table.
+
 ## 🎈 Interactive Streamlit Platform
 
 To run the standalone Streamlit analytics platform:
@@ -503,6 +482,38 @@ streamlit run streamlit_app.py
 
 ---
 
+## 🔐 Privacy & Resilience
+
+### ZKP verification boundary
+
+`src/security/zkp_validator.py` verifies a Groth16 proof with `snarkjs` and a deployment-managed verification key. The application receives a proof and its public signals; it must never receive the claimant's private witness (PAN, SSN, or income). The circuit and public-signal layout are deployment artifacts and must bind the identity commitment and eligibility predicates to the proof. Verification fails closed when the verifier or key is missing. Only the SHA-256 proof digest belongs in PostgreSQL and Qdrant metadata.
+
+Configure the verifier:
+
+```bash
+ZKP_VERIFICATION_KEY=/run/secrets/claimant_verification_key.json
+SNARKJS_BIN=snarkjs
+```
+
+`migrations/001_claimant_zk_verifications.sql` creates a hash-only audit table. `claimant_ref` must be opaque and non-PII. Document ingestion also redacts common PAN and SSN patterns before content reaches embeddings or Qdrant; this is defense in depth and does not replace structured PII handling.
+
+### Multi-region database endpoints
+
+Use a CockroachDB/PostgreSQL multi-host DSN for driver-level host failover. Reads can also try operator-ordered replica DSNs before `DATABASE_URL`; separate them with semicolons. Writes always target `DATABASE_URL`. Serializable transaction callbacks retry SQLSTATE `40001` with capped exponential backoff and jitter. Keep callbacks limited to repeatable database operations because the callback may run more than once.
+
+```dotenv
+DATABASE_URL=postgresql://user:password@crdb-a:26257,crdb-b:26257,crdb-c:26257/claimguard?sslmode=verify-full
+DATABASE_READ_REPLICA_URLS=postgresql://reader@region-b.example/claimguard;postgresql://reader@region-c.example/claimguard
+```
+
+The database cluster must be configured for replication and multi-region placement independently; application connection fallback does not create replication.
+
+### Explainable decisions and evaluation
+
+Decision payloads use the exact four keys `verdict`, `reasoning`, `recommendation`, and `next_steps`. The inline `/copilot/decide` route returns this shape directly; async scoring task results preserve their task envelope and include the same object under `decision`. Reasoning reports ZKP verification only when a verified result and valid proof digest are present.
+
+Run the 50-scenario evaluation suite with `python eval/ragas_eval.py`. It records Faithfulness, Context Precision, and Answer Relevancy plus per-scenario answers and retrieved chunk IDs in `eval/reports/ragas_report.json`. If RAGAS dependencies are unavailable, the report identifies the lexical-proxy engine; proxy values are not RAGAS scores.
+
 ## ⚙️ Configuration
 
 | Variable | Required | Default | Description |
@@ -510,6 +521,9 @@ streamlit run streamlit_app.py
 | `JWT_SECRET_KEY` | Yes (Production) | Auto-generated | Secret key for JWT signing (`openssl rand -hex 32`) |
 | `REDIS_URL` | Yes | `redis://localhost:6379/0` | Redis broker and Pub/Sub connection string |
 | `DATABASE_URL` | Yes (Production) | `postgresql://claimguard:claimguard_pass@localhost:5432/claimguard` | PostgreSQL asyncpg DSN |
+| `DATABASE_READ_REPLICA_URLS` | No | — | Semicolon-separated asyncpg read replica DSNs, tried before the primary on reads |
+| `ZKP_VERIFICATION_KEY` | For ZKP | — | Trusted snarkjs Groth16 verification key path |
+| `SNARKJS_BIN` | No | `snarkjs` on PATH | snarkjs executable path |
 | `NEO4J_URI` | No | `bolt://localhost:7687` | Neo4j Bolt URI for graph collusion queries |
 | `NEO4J_USER` | No | `neo4j` | Neo4j database username |
 | `NEO4J_PASSWORD` | No | `neo4jpass` | Neo4j database password |

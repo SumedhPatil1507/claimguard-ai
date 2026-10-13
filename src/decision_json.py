@@ -157,6 +157,15 @@ def _format_shap_drivers(drivers: Any, top_n: int = 5) -> str:
     return "TreeSHAP feature drivers: " + "; ".join(parts) + "."
 
 
+def _format_zkp_verification(result: Dict[str, Any]) -> str:
+    """Describe only cryptographic proofs marked verified with a valid digest."""
+    import re
+    proof_hash = str(result.get("zk_proof_hash", ""))
+    if result.get("verified") is True and re.fullmatch(r"[0-9a-f]{64}", proof_hash):
+        return f"Cryptographic ZKP proof verified (SHA-256 {proof_hash})."
+    return "Cryptographic ZKP proof verification: no verified proof attached."
+
+
 def _format_similarity_scores(scores: Any) -> str:
     """Render Qdrant hybrid-search similarity scores for the reasoning field."""
     if not scores or not isinstance(scores, list):
@@ -289,7 +298,8 @@ def build_underwriting_decision(
 
     reasoning = (
         f"Underwriting risk_tier={tier}, risk_score={risk_score:.4f}, "
-        f"premium_adjustment={premium:.3f}. {drivers} {similarity}"
+        f"premium_adjustment={premium:.3f}. {_format_zkp_verification(result)} "
+        f"{drivers} {similarity}"
     )
     return _decision(
         verdict=verdict,
@@ -379,7 +389,8 @@ def build_fraud_decision(
 
     reasoning = (
         f"Fraud score={fraud_score:.4f}, fraud_flag={str(flag).lower()}, "
-        f"confidence_tier={confidence}. {drivers} {similarity}"
+        f"confidence_tier={confidence}. {_format_zkp_verification(result)} "
+        f"{drivers} {similarity}"
     )
     return _decision(
         verdict=verdict,
@@ -484,11 +495,14 @@ def build_copilot_decision(
     except (TypeError, ValueError):
         payout_f = 0.0
 
+    model_result = decision.get("model_result", decision)
+    drivers = _format_shap_drivers(model_result.get("shap_drivers"))
+    zkp = _format_zkp_verification(model_result)
     reasoning = (
         f"coverage_status={coverage}, confidence_score={confidence:.4f}, "
         f"recommended_payout=₹{payout_f:,.2f}, "
-        f"requires_human_review={str(requires_hitl).lower()}. "
-        f"{_format_similarity_scores(scores)}"
+        f"requires_human_review={str(requires_hitl).lower()}. {zkp} "
+        f"{drivers} {_format_similarity_scores(scores)}"
     )
     return _decision(
         verdict=verdict,
